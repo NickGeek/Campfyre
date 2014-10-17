@@ -1,0 +1,101 @@
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#fa6900">
+
+    <!--
+    Your layouts here. Do not put anything below the FAB layout
+    -->
+    
+    <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#e5e5e5"
+    android:layout_marginTop="4dp"
+			android:layout_marginBottom="4dp" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+             >
+
+            <ImageView
+                android:id="@+id/robohash"
+                android:layout_width="60dp"
+                android:layout_marginLeft="16dp"
+                android:layout_height="60dp"
+                android:src="@drawable/ic_action_refresh" />
+            
+            <TextView
+        	android:id="@+id/postTextView"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text="@string/text_loadingPost"
+        	android:textAppearance="?android:attr/textAppearanceLarge"
+        	android:maxLines = "5"
+        	android:scrollbars = "vertical"
+        	android:linksClickable = "true"
+        	android:layout_marginLeft="5dp"
+			android:layout_marginRight="16dp"
+			android:textColorLink="@android:color/black" />
+
+        </LinearLayout>
+        
+        <TextView
+                    android:id="@+id/postTime2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+		android:layout_marginRight="16dp"
+		android:layout_marginTop="4dp"
+		android:layout_marginBottom="4dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/btnStoke"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:text="Stoke" />
+
+            <Button
+                android:id="@+id/btnViewAttachment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="16dp"
+                android:text="View Attachment"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+    <ListView
+        android:id="@+id/commentsListView"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:dividerHeight="0dp"
+		android:divider="@null"
+        android:paddingLeft="16dp"
+		android:paddingRight="16dp"
+		android:layout_marginTop="4dp"
+		android:layout_marginBottom="4dp" />
+
+</LinearLayout>
+    
+
+   <com.faizmalkani.floatingactionbutton.Fab
+        android:id="@+id/submitCommentButton"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="16dp"
+        android:layout_marginRight="16dp"
+        android:onClick="submitComment" />
+
+</FrameLayout>
