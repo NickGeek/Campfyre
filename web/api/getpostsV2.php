@@ -66,7 +66,7 @@ function getLatest($con) {
 	//Array the data is in
 	$data = array();
 
-	//Dipslay ordered posts
+	/*/Dipslay ordered posts
 	$tag = "#bonfyre";
 	$posts = $con->query("SELECT * FROM posts WHERE `post` NOT LIKE '%$tag%' ORDER BY id DESC LIMIT 0, 9");
 
@@ -91,11 +91,11 @@ function getLatest($con) {
 		$postArr['commentNum'] = mysqli_num_rows($comments)." comments";
 		$postArr['time'] = relativeTime($item['time']);
 		$data[] = $postArr;
-	}
+	}*/
 
 	//Display the other posts
 	$tag = "#bonfyre";
-	$query = $con->query("SELECT * FROM posts WHERE `post` NOT LIKE '%$tag%' ORDER BY id DESC LIMIT 10, 49");
+	$query = $con->query("SELECT * FROM posts WHERE `post` NOT LIKE '%$tag%' ORDER BY id DESC LIMIT 50");
 
 	foreach ($query as $item) {
 		if ($item['nsfw'] == 0) { $post =  $item['post']; } else { $post = "Post hidden: this post is possibly offensive"; }
@@ -118,7 +118,7 @@ function getSearchResults($con) {
 	$data = array();
 	$tag = mysqli_real_escape_string($con, $_GET['tag']);
 
-	//Display ordered posts
+	/*/Display ordered posts
 	$posts = $con->query("SELECT * FROM posts WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% $tag %' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% $tag' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '$tag %' or REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) = '$tag' ORDER BY id DESC LIMIT 0, 9");
 	$orderedPosts = array();
 	foreach ($posts as $post) {
@@ -141,10 +141,10 @@ function getSearchResults($con) {
 		$postArr['commentNum'] = mysqli_num_rows($comments)." comments";
 		$postArr['time'] = relativeTime($item['time']);
 		$data[] = $postArr;
-	}
+	}*/
 
 	//Display normal posts
-	$query = $con->query("SELECT * FROM posts WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% $tag %' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% $tag' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '$tag %' or REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) = '$tag' ORDER BY id DESC LIMIT 10, 99");
+	$query = $con->query("SELECT * FROM posts WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% $tag %' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% $tag' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '$tag %' or REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) = '$tag' ORDER BY id DESC LIMIT 50");
 
 	foreach ($query as $item) {
 		if ($item['nsfw'] == 0) { $post =  $item['post']; } else { $post = "Post hidden: this post is possibly offensive"; }

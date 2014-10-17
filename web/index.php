@@ -456,7 +456,7 @@ function attachmentDisplay($url, $nsfw) {
 
 		<!-- Posts -->
 		<?php
-		//Dipslay ordered posts
+		/*/Dipslay ordered posts
 		$tag = "#bonfyre";
 		if (!isset($_GET['show'])) {
 			$posts = $con->query("SELECT * FROM posts WHERE `post` NOT LIKE '%$tag%' ORDER BY id DESC LIMIT 0, 9");
@@ -517,12 +517,12 @@ function attachmentDisplay($url, $nsfw) {
 					</div>
 				</section>
 			<?php }
-		}
+		}*/
 
 		//Get 40 posts from the database
 		$tag = "#bonfyre";
 		if (!isset($_GET['show'])) {
-			$posts = $con->query("SELECT * FROM posts WHERE `post` NOT LIKE '%$tag%' ORDER BY id DESC LIMIT 10, 49");
+			$posts = $con->query("SELECT * FROM posts WHERE `post` NOT LIKE '%$tag%' ORDER BY id DESC LIMIT 50");
 		}
 		elseif (isset($_GET['show']) && $_GET['show'] == "1") {
 			$posts = $con->query("SELECT * FROM posts WHERE `post` NOT LIKE '%$tag%' ORDER BY id DESC");
