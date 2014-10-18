@@ -123,7 +123,6 @@ function attachmentDisplay($url, $nsfw) {
 			}
 			#centre {
 				text-align: center;
-				margin-top: 10%;
 			}
 			h1 {
 				font-family: 'Lato', serif;
