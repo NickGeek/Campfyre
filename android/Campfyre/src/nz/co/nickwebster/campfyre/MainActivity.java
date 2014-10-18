@@ -358,7 +358,7 @@ public class MainActivity extends Activity {
 			builder.setView(input);
 
 			// Set up the buttons
-			builder.setPositiveButton("Set", new DialogInterface.OnClickListener() { 
+			builder.setPositiveButton("Search", new DialogInterface.OnClickListener() { 
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					//Load search activity
