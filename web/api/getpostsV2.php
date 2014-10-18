@@ -86,7 +86,7 @@ function getPosts($con) {
 		$postArr['commentNum'] = mysqli_num_rows($comments)." comments";
 		$postArr['time'] = relativeTime($item['time']);
 		$postArr['nsfw'] = $item['nsfw'];
-		$postArr['attachement'] = $item['attachment'];
+		$postArr['attachment'] = $item['attachment'];
 		$data[] = $postArr;
 	}
 	$output = json_encode($data);
