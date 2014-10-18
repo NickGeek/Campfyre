@@ -6,7 +6,7 @@ $dbname = "etherals_campfyre";
 //Connect to the database
 $con=mysqli_connect("localhost", $MYSQL_USERNAME, $MYSQL_PASSWORD, $dbname);
 
-$id = mysql_real_escape_string($_GET['id'], $oldcon);
+$id = mysqli_real_escape_string($con, $_GET['id']);
 
 function getRelativeTime($secs) {
 	$second = 1;
@@ -45,13 +45,11 @@ function relativeTime($timeOfPost) {
 
 function getPic($id) {
 	//Details to login connect to the database
-	$dbusername = "etherals";
-	$dbpassword = "SuperXL1`";
+	include("/home1/etherals/mysqlDetails.php");
 	$dbname = "etherals_campfyre";
 
 	//Connect to the database
-	$con=mysqli_connect("localhost", $dbusername, $dbpassword, $dbname);
-	$oldcon = mysql_connect("localhost", $dbusername, $dbpassword);
+	$con=mysqli_connect("localhost", $MYSQL_USERNAME, $MYSQL_PASSWORD, $dbname);
 
 	$size = $_GET['size'];
 

@@ -3,6 +3,7 @@ require_once "Mail.php";
 
 //Details to login connect to the database
 include("/home1/etherals/mysqlDetails.php");
+include("/home1/etherals/passwords.php");
 $dbname = "etherals_campfyre";
 
 //Connect to the database
@@ -105,11 +106,11 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 				'Content-type' => 'text/html'
 			);
 			$smtp = Mail::factory('smtp', array(
-				'host' => 'ssl://box710.bluehost.com',
+				'host' => 'ssl://box710.bluehost.com', //Change these details to your email server for testing, or just comment this section out
 				'port' => '465',
 				'auth' => true,
 				'username' => 'notify@campfyre.org',
-				'password' => 'Er8=[a2xrm*P]9;1*$'
+				'password' => $CAMPFYRE_NOTIFY_EMAIL
 			));
 			$mail = $smtp->send($to, $headers, $body);
 		}
@@ -127,10 +128,10 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 		header("Location: ./?m=spamming");
 	}
 	else {
-		echo "Error";
+		header("Location: ./?m=tooLong");
 	}
 }
 else {
-	echo "Error";
+	header("Location: ./?m=noPost");
 }
 ?>

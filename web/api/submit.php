@@ -3,6 +3,7 @@ require_once "Mail.php";
 
 //Details to login connect to the database
 include("/home1/etherals/mysqlDetails.php");
+include("/home1/etherals/passwords.php");
 $dbname = "etherals_campfyre";
 
 //Connect to the database
@@ -107,14 +108,14 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 				'Content-type' => 'text/html'
 			);
 			$smtp = Mail::factory('smtp', array(
-				'host' => 'ssl://box710.bluehost.com',
+				'host' => 'ssl://box710.bluehost.com', //Change these details to your email server for testing, or just comment this section out
 				'port' => '465',
 				'auth' => true,
 				'username' => 'notify@campfyre.org',
-				'password' => 'Er8=[a2xrm*P]9;1*$'
+				'password' => $CAMPFYRE_NOTIFY_EMAIL
 			));
 			$mail = $smtp->send($to, $headers, $body);
-		}
+			}
 
 		if (!empty($email)) {
 			$email = mysqli_real_escape_string($con, $email);
@@ -129,10 +130,10 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 		echo "Post not submitted: Woah there! Give someone else a turn to say something.";
 	}
 	else {
-		echo "There was an error submitting your post";
+		echo "Post not submitted: Your post/comment is longer than 256 characters.";
 	}
 }
 else {
-	echo "There was an error submitting your post";
+	echo "Post not submitted: No text was sent to be posted.";
 }
 ?>

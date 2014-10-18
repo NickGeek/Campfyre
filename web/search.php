@@ -123,7 +123,6 @@ function attachmentDisplay($url, $nsfw) {
 			}
 			#centre {
 				text-align: center;
-				margin-top: 10%;
 			}
 			h1 {
 				font-family: 'Lato', serif;
@@ -260,7 +259,7 @@ function attachmentDisplay($url, $nsfw) {
 			function linkHashtags(text) {
 				return text.replace(
 					hashtag_regexp,
-					'<a href="http://campfyre.org/search.php?tag=%23$1">#$1</a>'
+					'<a href="search.php?tag=%23$1">#$1</a>'
 				);
 			}
 
@@ -276,7 +275,7 @@ function attachmentDisplay($url, $nsfw) {
 			function linkTildetags(text) {
 				return text.replace(
 					tildetag_regexp,
-					'<a href="http://campfyre.org/search.php?tag=%7E$1">~$1</a>'
+					'<a href="search.php?tag=%7E$1">~$1</a>'
 				);
 			}
 
@@ -328,10 +327,10 @@ function attachmentDisplay($url, $nsfw) {
 					$comments = $con->query("SELECT * FROM comments WHERE parent = '$id' ORDER BY id ASC");
 				}?>
 				<section id="<?php echo $post['id']; ?>" class="card">
-					<p><i id="ip"><?php echo "<img src='http://robohash.org/".md5($post['ip']).".png?set=set3&size=64x64' /> says...<br />"; ?></i><a href="http://campfyre.org/?show=1#<?php echo $post['id']; ?>">Permalink</a> | <?php echo relativeTime($post['time']); if ($post['ip'] == "admin") { echo " [admin]"; } if ($post['nsfw'] == 1) { echo " [nsfw]"; } ?> <?php if ($post['ip'] == "117.18.80.21") { echo " [Wellington College]"; } ?></p>
-					<h3 style="text-align: left;"><?php if ($post['nsfw'] == 1 && !isset($_GET['nsfw']) && !isset($_GET['show'])) { echo "<i>This post is possibly offensive. <a href='http://campfyre.org/search.php?tag=".urlencode($tag)."&nsfw=1#".$post['id']."'>Click here</a> to view possibly offensive posts.</i>"; } elseif($post['nsfw'] == 1 && !isset($_GET['nsfw']) && isset($_GET['show'])) { echo "<i>This post is possibly offensive. <a href='http://campfyre.org/search.php?tag=".urlencode($tag)."&show=1&nsfw=1#".$post['id']."'>Click here</a> to view possibly offensive posts.</i>"; } else { echo "<h3 class='postText'>".str_replace("\n", "<br />", $post['post'])."</h3>"; } ?></h3>
+					<p><i id="ip"><?php echo "<img src='http://robohash.org/".md5($post['ip']).".png?set=set3&size=64x64' /> says...<br />"; ?></i><a href="?show=1#<?php echo $post['id']; ?>">Permalink</a> | <?php echo relativeTime($post['time']); if ($post['ip'] == "admin") { echo " [admin]"; } if ($post['nsfw'] == 1) { echo " [nsfw]"; } ?> <?php if ($post['ip'] == "117.18.80.21") { echo " [Wellington College]"; } ?></p>
+					<h3 style="text-align: left;"><?php if ($post['nsfw'] == 1 && !isset($_GET['nsfw']) && !isset($_GET['show'])) { echo "<i>This post is possibly offensive. <a href='search.php?tag=".urlencode($tag)."&nsfw=1#".$post['id']."'>Click here</a> to view possibly offensive posts.</i>"; } elseif($post['nsfw'] == 1 && !isset($_GET['nsfw']) && isset($_GET['show'])) { echo "<i>This post is possibly offensive. <a href='search.php?tag=".urlencode($tag)."&show=1&nsfw=1#".$post['id']."'>Click here</a> to view possibly offensive posts.</i>"; } else { echo "<h3 class='postText'>".str_replace("\n", "<br />", $post['post'])."</h3>"; } ?></h3>
 					<?php echo attachmentDisplay($post['attachment'], $post['nsfw']); ?><?php if ($post['attachment'] != "n/a") { ?><br /><br /><?php } ?>
-					<a class="btn" href="http://campfyre.org/api/stoke.php?type=post&id=<?php echo $post['id']; ?>">Stoke (<?php echo $post['score']; ?>)</a>
+					<a class="btn" href="api/stoke.php?type=post&id=<?php echo $post['id']; ?>">Stoke (<?php echo $post['score']; ?>)</a>
 					<a id="showCommentButton<?php echo $post['id']; ?>" class="btn" href="javascript:void(0)" onclick="showCommentForm(<?php echo $post['id']; ?>)">Load comments (<?php echo mysqli_num_rows($comments); ?>)</a>
 					<a style="display: none;" id="hideCommentButton<?php echo $post['id']; ?>" class="btn" href="javascript:void(0)" onclick="hideCommentForm(<?php echo $post['id']; ?>)">Hide comments</a>
 					<div style="display: none;" id="commentForm<?php echo $post['id']; ?>">
@@ -385,10 +384,10 @@ function attachmentDisplay($url, $nsfw) {
 				$comments = $con->query("SELECT * FROM comments WHERE parent = '$id' ORDER BY id ASC");
 			}?>
 			<section id="<?php echo $post['id']; ?>" class="card">
-				<p><i id="ip"><?php echo "<img src='http://robohash.org/".md5($post['ip']).".png?set=set3&size=64x64' /> says...<br />"; ?></i><a href="http://campfyre.org/?show=1#<?php echo $post['id']; ?>">Permalink</a> | <?php echo relativeTime($post['time']); if ($post['ip'] == "admin") { echo " [admin]"; } if ($post['nsfw'] == 1) { echo " [nsfw]"; } ?> <?php if ($post['ip'] == "117.18.80.21") { echo " [Wellington College]"; } ?></p>
-				<h3 style="text-align: left;"><?php if ($post['nsfw'] == 1 && !isset($_GET['nsfw']) && !isset($_GET['show'])) { echo "<i>This post is possibly offensive. <a href='http://campfyre.org/search.php?tag=".urlencode($tag)."&nsfw=1#".$post['id']."'>Click here</a> to view possibly offensive posts.</i>"; } elseif($post['nsfw'] == 1 && !isset($_GET['nsfw']) && isset($_GET['show'])) { echo "<i>This post is possibly offensive. <a href='http://campfyre.org/search.php?tag=".urlencode($tag)."&show=1&nsfw=1#".$post['id']."'>Click here</a> to view possibly offensive posts.</i>"; } else { echo "<h3 class='postText'>".str_replace("\n", "<br />", $post['post'])."</h3>"; } ?></h3>
+				<p><i id="ip"><?php echo "<img src='http://robohash.org/".md5($post['ip']).".png?set=set3&size=64x64' /> says...<br />"; ?></i><a href="?show=1#<?php echo $post['id']; ?>">Permalink</a> | <?php echo relativeTime($post['time']); if ($post['ip'] == "admin") { echo " [admin]"; } if ($post['nsfw'] == 1) { echo " [nsfw]"; } ?> <?php if ($post['ip'] == "117.18.80.21") { echo " [Wellington College]"; } ?></p>
+				<h3 style="text-align: left;"><?php if ($post['nsfw'] == 1 && !isset($_GET['nsfw']) && !isset($_GET['show'])) { echo "<i>This post is possibly offensive. <a href='search.php?tag=".urlencode($tag)."&nsfw=1#".$post['id']."'>Click here</a> to view possibly offensive posts.</i>"; } elseif($post['nsfw'] == 1 && !isset($_GET['nsfw']) && isset($_GET['show'])) { echo "<i>This post is possibly offensive. <a href='search.php?tag=".urlencode($tag)."&show=1&nsfw=1#".$post['id']."'>Click here</a> to view possibly offensive posts.</i>"; } else { echo "<h3 class='postText'>".str_replace("\n", "<br />", $post['post'])."</h3>"; } ?></h3>
 				<?php echo attachmentDisplay($post['attachment'], $post['nsfw']); ?><?php if ($post['attachment'] != "n/a") { ?><br /><br /><?php } ?>
-				<a class="btn" href="http://campfyre.org/api/stoke.php?type=post&id=<?php echo $post['id']; ?>">Stoke (<?php echo $post['score']; ?>)</a>
+				<a class="btn" href="api/stoke.php?type=post&id=<?php echo $post['id']; ?>">Stoke (<?php echo $post['score']; ?>)</a>
 				<a id="showCommentButton<?php echo $post['id']; ?>" class="btn" href="javascript:void(0)" onclick="showCommentForm(<?php echo $post['id']; ?>)">Load comments (<?php echo mysqli_num_rows($comments); ?>)</a>
 				<a style="display: none;" id="hideCommentButton<?php echo $post['id']; ?>" class="btn" href="javascript:void(0)" onclick="hideCommentForm(<?php echo $post['id']; ?>)">Hide comments</a>
 				<div style="display: none;" id="commentForm<?php echo $post['id']; ?>">
@@ -422,7 +421,7 @@ function attachmentDisplay($url, $nsfw) {
 		<?php } ?>
 		<?php
 		if (!isset($_GET['show'])) {
-			echo "<p style='text-align: right;'><a href='http://campfyre.org/search.php?tag=".urlencode($tag)."&show=1'>Show all posts and comments</a></p>";
+			echo "<p style='text-align: right;'><a href='search.php?tag=".urlencode($tag)."&show=1'>Show all posts and comments</a></p>";
 		}
 		?>
 		<p style='text-align: right;'>Written and run by <a href="http://nickwebster.co.nz">Nick Webster</a></p>
