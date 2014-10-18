@@ -156,7 +156,7 @@ function getPosts($con, $startingPost) {
 						attachCode = '<a target="_blank" href="'+url+'"><img style="max-height: 35%;" src="'+url+'" /></a>';
 						break;
 					default:
-						attachCode = 'Attached URL: <a target="_blank" href="'+url+'">'+url+'</a><br><br>';
+						attachCode = 'Attached URL: <a target="_blank" href="'+url+'">'+url+'</a>';
 						break;
 				}
 
@@ -430,12 +430,28 @@ function getPosts($con, $startingPost) {
 
 						//Attachments
 						if (postJSON[i]['attachment'] != "n/a") {
-							document.write(attach(postJSON[i]['attachment']));
+							document.write(attach(postJSON[i]['attachment'])+"<br><br>");
 						}
 
 						//Stokes and Comments
 						document.write('<a class="btn" href="api/stoke.php?type=post&id='+postJSON[i]['id']+'">Stoke ('+postJSON[i]['score']+')</a>')
-
+						document.write(' <a id="showCommentButton'+postJSON[i]['id']+'" class="btn" href="javascript:void(0)" onclick="showCommentForm('+postJSON[i]['id']+')">Load comments ('+postJSON[i]['commentNum'].split(" ")[0]+')</a>');
+						document.write(' <a style="display: none;" id="hideCommentButton'+postJSON[i]['id']+'" class="btn" href="javascript:void(0)" onclick="hideCommentForm('+postJSON[i]['id']+')">Hide comments</a>');
+						document.write('<div style="display: none;" id="commentForm'+postJSON[i]['id']+'">');
+							document.write('<br><br><form action="submitV2.php" method="post">');
+								document.write('<input type="hidden" name="type" value="comment">');
+								document.write('<input type="hidden" name="id" value="'+postJSON[i]['id']+'">');
+								document.write('<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, '+postJSON[i]['id']+')" onkeyup="countChar(this, '+postJSON[i]['id']+')" required></textarea>');
+								document.write('<div style="font-family: "Lato", serif;" id="counter'+postJSON[i]['id']+'">256/256</div><br />');
+								document.write('<b>Subscribe to comments:</b><br />');
+								document.write('<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />');
+								document.write('<input class="btn" type="submit" name="post" value="Post">');
+							document.write('</form>');
+							if (postJSON[i]['commentNum'].split(" ")[0] > 0) {
+								//Comments have been posted lets show them
+								//TODO: var commentJSON = <?php getComments($con); ?>
+							}
+						document.write('</div>');
 					document.write("</section>");
 				}
 			}
@@ -446,7 +462,7 @@ function getPosts($con, $startingPost) {
 
 		<?php
 		/*$tag = "#bonfyre";
-		if (!isset($_GET['show'])) {
+		if (!isset($_GET['hide'])) {
 			$posts = $con->query("SELECT * FROM posts WHERE `post` NOT LIKE '%$tag%' ORDER BY id DESC LIMIT 50");
 		}
 		elseif (isset($_GET['show']) && $_GET['show'] == "1") {
