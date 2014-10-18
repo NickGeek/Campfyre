@@ -41,15 +41,7 @@ function relativeTime($timeOfPost) {
 	return getRelativeTime($secsSincePost+1);
 }
 
-function getPic($id) {
-	//Details to login connect to the database
-	$dbusername = "etherals";
-	$dbpassword = "SuperXL1`";
-	$dbname = "etherals_campfyre";
-
-	//Connect to the database
-	$con=mysqli_connect("localhost", $dbusername, $dbpassword, $dbname);
-
+function getPic($id, $con) {
 	$size = $_GET['size'];
 
 	$query = $con->query("SELECT ip FROM posts WHERE id = ".$id);
@@ -62,40 +54,26 @@ function getPic($id) {
 	return $imgurl;
 }
 
-function getLatest($con) {
+function getPosts($con) {
 	//Array the data is in
 	$data = array();
-
-	/*/Dipslay ordered posts
-	$tag = "#bonfyre";
-	$posts = $con->query("SELECT * FROM posts WHERE `post` NOT LIKE '%$tag%' ORDER BY id DESC LIMIT 0, 9");
-
-	$orderedPosts = array();
-	foreach ($posts as $post) {
-		array_push($orderedPosts, $post);
-	}
-	//Order the array based on the score of each post
-	function sortByScore($x, $y) {
-		return $y['score'] - $x['score'];
-	}
-	usort($orderedPosts, 'sortByScore');
-
-	foreach ($orderedPosts as $item) {
-		if ($item['nsfw'] == 0) { $post =  $item['post']; } else { $post = "Post hidden: this post is possibly offensive"; }
-		$postArr = array();
-		$postArr['post'] = $post;
-		$postArr['id'] = $item['id'];
-		$postArr['score'] = $item['score'];
-		$postArr['pic'] = getPic($item['id']);
-		$comments = $con->query("SELECT * FROM comments WHERE parent = '".$item['id']."' ORDER BY id ASC");
-		$postArr['commentNum'] = mysqli_num_rows($comments)." comments";
-		$postArr['time'] = relativeTime($item['time']);
-		$data[] = $postArr;
-	}*/
 
 	//Display the other posts
-	$tag = "#bonfyre";
-	$query = $con->query("SELECT * FROM posts WHERE `post` NOT LIKE '%$tag%' ORDER BY id DESC LIMIT 50");
+	if (isset($_GET['startingPost'])) {
+		$startingPost = mysqli_real_escape_string($con, $_GET['startingPost']);
+	}
+	else {
+		$startingPost = 0;
+	}
+
+	//Would you like that with search?
+	if (!isset($_GET['search'])) {
+		$tag = "#bonfyre";
+		$query = $con->query("SELECT * FROM posts WHERE `post` NOT LIKE '%$tag%' ORDER BY id DESC LIMIT $startingPost, 50");
+	}
+	else {
+		$query = $con->query("SELECT * FROM posts WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% $tag %' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% $tag' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '$tag %' or REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) = '$tag' ORDER BY id DESC LIMIT $startingPost, 50");
+	}
 
 	foreach ($query as $item) {
 		if ($item['nsfw'] == 0) { $post =  $item['post']; } else { $post = "Post hidden: this post is possibly offensive"; }
@@ -103,69 +81,17 @@ function getLatest($con) {
 		$postArr['post'] = $post;
 		$postArr['id'] = $item['id'];
 		$postArr['score'] = $item['score'];
-		$postArr['pic'] = getPic($item['id']);
+		$postArr['pic'] = getPic($item['id'], $con);
 		$comments = $con->query("SELECT * FROM comments WHERE parent = '".$item['id']."' ORDER BY id ASC");
 		$postArr['commentNum'] = mysqli_num_rows($comments)." comments";
 		$postArr['time'] = relativeTime($item['time']);
+		$postArr['nsfw'] = $item['nsfw'];
+		$postArr['attachement'] = $item['attachment'];
 		$data[] = $postArr;
 	}
 	$output = json_encode($data);
 	return $output;
 }
 
-function getSearchResults($con) {
-	//Array the data is in
-	$data = array();
-	$tag = mysqli_real_escape_string($con, $_GET['tag']);
-
-	/*/Display ordered posts
-	$posts = $con->query("SELECT * FROM posts WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% $tag %' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% $tag' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '$tag %' or REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) = '$tag' ORDER BY id DESC LIMIT 0, 9");
-	$orderedPosts = array();
-	foreach ($posts as $post) {
-		array_push($orderedPosts, $post);
-	}
-	//Order the array based on the score of each post
-	function sortByScore($x, $y) {
-		return $y['score'] - $x['score'];
-	}
-	usort($orderedPosts, 'sortByScore');
-
-	foreach ($orderedPosts as $item) {
-		if ($item['nsfw'] == 0) { $post =  $item['post']; } else { $post = "Post hidden: this post is possibly offensive"; }
-		$postArr = array();
-		$postArr['post'] = $post;
-		$postArr['id'] = $item['id'];
-		$postArr['score'] = $item['score'];
-		$postArr['pic'] = getPic($item['id']);
-		$comments = $con->query("SELECT * FROM comments WHERE parent = '".$item['id']."' ORDER BY id ASC");
-		$postArr['commentNum'] = mysqli_num_rows($comments)." comments";
-		$postArr['time'] = relativeTime($item['time']);
-		$data[] = $postArr;
-	}*/
-
-	//Display normal posts
-	$query = $con->query("SELECT * FROM posts WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% $tag %' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% $tag' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '$tag %' or REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) = '$tag' ORDER BY id DESC LIMIT 50");
-
-	foreach ($query as $item) {
-		if ($item['nsfw'] == 0) { $post =  $item['post']; } else { $post = "Post hidden: this post is possibly offensive"; }
-		$postArr = array();
-		$postArr['post'] = $post;
-		$postArr['id'] = $item['id'];
-		$postArr['score'] = $item['score'];
-		$postArr['pic'] = getPic($item['id']);
-		$comments = $con->query("SELECT * FROM comments WHERE parent = '".$item['id']."' ORDER BY id ASC");
-		$postArr['commentNum'] = mysqli_num_rows($comments)." comments";
-		$postArr['time'] = relativeTime($item['time']);
-		$data[] = $postArr;
-	}
-	$output = json_encode($data);
-	return $output;
-}
-
-if (!isset($_GET['search'])) {
-	echo getLatest($con);
-}
-else {
-	echo getSearchResults($con);
-}
+echo getPosts($con);
 ?>
