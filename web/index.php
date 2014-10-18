@@ -433,6 +433,9 @@ function getPosts($con, $startingPost) {
 							document.write(attach(postJSON[i]['attachment']));
 						}
 
+						//Stokes and Comments
+						document.write('<a class="btn" href="api/stoke.php?type=post&id='+postJSON[i]['id']+'">Stoke ('+postJSON[i]['score']+')</a>')
+
 					document.write("</section>");
 				}
 			}
