@@ -1,11 +1,4 @@
 <?php
-//Details to login connect to the database
-include("/home1/etherals/mysqlDetails.php");
-$dbname = "etherals_campfyre";
-
-//Connect to the database
-$con=mysqli_connect("localhost", $MYSQL_USERNAME, $MYSQL_PASSWORD, $dbname);
-
 //Get posts + post data from the API
 function getPosts($con, $startingPost) {
 	$ch = curl_init();
@@ -14,53 +7,6 @@ function getPosts($con, $startingPost) {
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 	$result = curl_exec($ch);
 	print_r($result);
-}
-
-//Attachments
-function splitDomain($url) { 
- $host = "";
- $url = parse_url($url);
- if(isset($url['host'])) { 
-    $host = $url['host'];
- } else {
-    $host = $url['path'];
- }
- $host = str_replace('www.','',$host);
- $tmp = explode('.', $host);
- $name = $tmp[0];
- if ($name == "i") {
- 	$name = $tmp[1];
- }
-return array('name'=>$name);
-}
-
-function attach($url) {
-	$output = "";
-	if (splitDomain($url)['name'] == "youtube") {
-		//YouTube
-		preg_match(
-		        '/[\\?\\&]v=([^\\?\\&]+)/',
-		        $url,
-		        $matches
-		    );
-		$id = $matches[1];
-		 
-		$width = '95%';
-		$height = '420';
-		return '<br /><object width="' . $width . '" height="' . $height . '"><param name="movie" value="http://www.youtube.com/v/' . $id . '&amp;hl=en_US&amp;fs=1?rel=0"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/' . $id . '&amp;hl=en_US&amp;fs=1?rel=0" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="' . $width . '" height="' . $height . '"></embed></object>';
-	}
-	elseif (splitDomain($url)['name'] == "sharepic") {
-		return '<br /><a target="_blank" href="'.$url.'"><img style="max-height: 50%;" src="'.$url.'" /></a>';
-	}
-	elseif(splitDomain($url)['name'] == "imgur") {
-		$link = explode("/", $url);
-		return '<br /><a target="_blank" href="http://i.imgur.com/'.$link[count($link)-1].'"><img style="max-height: 50%;" src="http://i.imgur.com/'.$link[count($link)-1].'" /></a>';
-	}
-	elseif($url != "n/a") {
-		return '<br />Attached URL: <a target="_blank" href="'.$url.'">'.$url.'</a>';
-	}
-
-	return;
 }
 ?>
 
@@ -191,7 +137,14 @@ function attach($url) {
 				//Create attachement code depending on site
 				switch (sitename[0]) {
 					case "youtube":
-						attachCode = '<br>Attached URL: <a target="_blank" href="'+url+'">'+url+'</a><br><br>';
+						//Thanks to http://stackoverflow.com/questions/3452546/javascript-regex-how-to-get-youtube-video-id-from-url
+						var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+						var match = url.match(regExp);
+						var videoid = match[2];
+
+						var width = '95%';
+						var height = '420';
+						attachCode = '<br /><object width="'+width+'" height="'+height+'"><param name="movie" value="http://www.youtube.com/v/'+videoid+'&amp;hl=en_US&amp;fs=1?rel=0"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/'+videoid+'&amp;hl=en_US&amp;fs=1?rel=0" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="'+width+'" height="'+height+'"></embed></object>';
 						break;
 					case "imgur.com":
 						var imgid = url.split("/");
