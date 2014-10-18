@@ -317,9 +317,21 @@ function attachmentDisplay($url, $nsfw) {
 
 		<?php
 			if (isset($_GET['m'])) {
+				//Error messages
+				switch ($_GET['m']) {
+					case 'spamming':
+						$errorMsg = "Woah there! Give someone else a turn to say something.";
+						break;
+					case 'tooLong':
+						$errorMsg = "Your post/comment is longer than 256 characters.";
+						break;
+					case 'noPost':
+						$errorMsg = "No text was sent to be posted.";
+						break;
+				}
 		?>
 				<section id="message" class="card">
-				<i><h2>Post not submitted: Woah there! Give someone else a turn to say something.</h2></i>
+				<i><h2>Post not submitted: <?php echo $errorMsg; ?></h2></i>
 				</section>
 		<?php } ?>
 
