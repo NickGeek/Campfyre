@@ -128,10 +128,10 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 		header("Location: ./?m=spamming");
 	}
 	else {
-		echo "Error";
+		header("Location: ./?m=tooLong");
 	}
 }
 else {
-	echo "Error";
+	header("Location: ./?m=noPost");
 }
 ?>
