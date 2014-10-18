@@ -132,7 +132,6 @@ function getPosts($con, $startingPost) {
 				//Get hostname
 				var hostname = URLbits.hostname;
 				var sitename = hostname.match(/(youtube|imgur.com|sharepic.tk)/i);
-				console.log(sitename[0]);
 				
 				//Create attachement code depending on site
 				switch (sitename[0]) {
@@ -154,7 +153,7 @@ function getPosts($con, $startingPost) {
 						attachCode = '<a target="_blank" href="http://i.imgur.com/'+imgid+'.png"><img style="max-height: 35%;" src="http://i.imgur.com/'+imgid+'.png" /></a>';
 						break;
 					case "sharepic.tk":
-						attachCode = '<br>Attached URL: <a target="_blank" href="'+url+'">'+url+'</a><br><br>';
+						attachCode = '<a target="_blank" href="'+url+'"><img style="max-height: 35%;" src="'+url+'" /></a>';
 						break;
 					default:
 						attachCode = 'Attached URL: <a target="_blank" href="'+url+'">'+url+'</a><br><br>';
