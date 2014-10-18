@@ -207,7 +207,7 @@ function getPosts($con, $startingPost) {
 			}
 
 			$(document).ready(function(){
-				$('.postText').each(function() {
+				$('h3').each(function() {
 					$(this).html(linkURLs($(this).html()));
 				});
 			});
