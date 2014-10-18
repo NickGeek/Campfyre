@@ -6,39 +6,14 @@ $dbname = "etherals_campfyre";
 //Connect to the database
 $con=mysqli_connect("localhost", $MYSQL_USERNAME, $MYSQL_PASSWORD, $dbname);
 
-function getRelativeTime($secs) {
-	$second = 1;
-	$minute = 60;
-	$hour = 60*60;
-	$day = 60*60*24;
-	$week = 60*60*24*7;
-	$month = 60*60*24*7*30;
-	$year = 60*60*24*7*30*365;
-
-	if ($secs <= 0) { $output = "now";
-	}elseif ($secs > $second && $secs < $minute) { $output = round($secs/$second)." second";
-	}elseif ($secs >= $minute && $secs < $hour) { $output = round($secs/$minute)." minute";
-	}elseif ($secs >= $hour && $secs < $day) { $output = round($secs/$hour)." hour";
-	}elseif ($secs >= $day && $secs < $week) { $output = round($secs/$day)." day";
-	}elseif ($secs >= $week && $secs < $month) { $output = round($secs/$week)." week";
-	}elseif ($secs >= $month && $secs < $year) { $output = round($secs/$month)." month";
-	}elseif ($secs >= $year && $secs < $year*10) { $output = round($secs/$year)." year";
-	}else{ $output = "now"; }
-
-	if ($output <> "now"){
-		$output = (substr($output,0,2)<>"1 ") ? $output."s" : $output;
-	}
-	if ($output != "now") {
-		return $output." ago";
-	}
-	else {
-		return $output;
-	}
-}
-
-function relativeTime($timeOfPost) {
-	$secsSincePost = time() - $timeOfPost;
-	return getRelativeTime($secsSincePost+1);
+//Get posts + post data from the API
+function getPosts($con, $startingPost) {
+	$ch = curl_init();
+	$url = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]/api/getpostsV2.php?size=64x64&startingPost=$startingPost";
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+	$result = curl_exec($ch);
+	print_r($result);
 }
 
 //Attachments
@@ -85,21 +60,7 @@ function attach($url) {
 		return '<br />Attached URL: <a target="_blank" href="'.$url.'">'.$url.'</a>';
 	}
 
-	return "";
-}
-
-function attachmentDisplay($url, $nsfw) {
-	if ($nsfw == 1) {
-		if (isset($_GET['nsfw'])) {
-			return attach($url);
-		}
-		else {
-			return "";
-		}
-	}
-	else {
-		return attach($url);
-	}
+	return;
 }
 ?>
 
@@ -216,6 +177,40 @@ function attachmentDisplay($url, $nsfw) {
 
 		<script src="http://code.jquery.com/jquery-1.5.js"></script>
 		<script>
+			//Attachments
+			function attach(url) {
+				var attachCode = '';
+				var URLbits = document.createElement('a');
+				URLbits.href = url;
+
+				//Get hostname
+				var hostname = URLbits.hostname;
+				var sitename = hostname.match(/(youtube|imgur.com|sharepic.tk)/i);
+				console.log(sitename[0]);
+				
+				//Create attachement code depending on site
+				switch (sitename[0]) {
+					case "youtube":
+						attachCode = '<br>Attached URL: <a target="_blank" href="'+url+'">'+url+'</a><br><br>';
+						break;
+					case "imgur.com":
+						var imgid = url.split("/");
+						imgid = imgid[imgid.length-1];
+						imgid = imgid.split(".");
+						imgid = imgid[0];
+						attachCode = '<a target="_blank" href="http://i.imgur.com/'+imgid+'.png"><img style="max-height: 35%;" src="http://i.imgur.com/'+imgid+'.png" /></a>';
+						break;
+					case "sharepic.tk":
+						attachCode = '<br>Attached URL: <a target="_blank" href="'+url+'">'+url+'</a><br><br>';
+						break;
+					default:
+						attachCode = 'Attached URL: <a target="_blank" href="'+url+'">'+url+'</a><br><br>';
+						break;
+				}
+
+				return attachCode;
+			}
+
 			//Character counter
 			function countChar(val, id) {
 				var counterDiv = "#counter"+id
@@ -365,12 +360,6 @@ function attachmentDisplay($url, $nsfw) {
 			</script>
 		</div></div><br />
 
-		<!-- Sticky post
-		<section class="card">
-			<h2>Sticky Post</h2>
-			<h3 style="text-align: center;"></h3>
-		</section>-->
-
 		<!-- Submit -->
 		<section id="submit" class="card">
 			<h2 style="text-align: left;">Write a post</h2>
@@ -466,72 +455,42 @@ function attachmentDisplay($url, $nsfw) {
 		<hr />
 
 		<!-- Posts -->
-		<?php
-		/*/Dipslay ordered posts
-		$tag = "#bonfyre";
-		if (!isset($_GET['show'])) {
-			$posts = $con->query("SELECT * FROM posts WHERE `post` NOT LIKE '%$tag%' ORDER BY id DESC LIMIT 0, 9");
-			
-			$orderedPosts = array();
-			foreach ($posts as $post) {
-				array_push($orderedPosts, $post);
-			}
-			//Order the array based on the score of each post
-			function sortByScore($x, $y) {
-				return $y['score'] - $x['score'];
-			}
-			usort($orderedPosts, 'sortByScore');
+		<script>
+			function displayPosts(postJSON) {
+				for (var i = 0; i < postJSON.length; ++i) {
+					document.write("<section id="+postJSON[i]['id']+" class='card'>");
+						document.write("<p><i id='ip'><img src='"+postJSON[i]['pic']+"' /> says...<br></i><a href='?show=1#"+postJSON[i]['id']+"'>Permalink</a> | "+postJSON[i]['time']);
+							
+							//Tags
+							switch (postJSON[i]['pic']) {
+								case "http://robohash.org/21232f297a57a5a743894a0e4a801fc3.png?set=set3&size=64x64":
+									document.write(" [admin]");
+									break;
+								case "http://robohash.org/5c1055237c524ca98c243b81ba3f9e93.png?set=set3&size=64x64":
+									document.write(" [Wellington College]");
+									break;
+							}
+							if (postJSON[i]['nsfw'] == 1) {
+								document.write(" [nsfw]");
+							}
+						document.write("</p>");
+						document.write('<h3 style="text-align: left;">'+postJSON[i]['post']+'</h3>');
 
-			foreach ($orderedPosts as $post) {
-				//Get the comments for this post from the database
-				$id = $post['id'];
-				if (!isset($_GET['show'])) {
-					$comments = $con->query("SELECT * FROM comments WHERE parent = '$id' ORDER BY id ASC LIMIT 50");
+						//Attachments
+						if (postJSON[i]['attachment'] != "n/a") {
+							document.write(attach(postJSON[i]['attachment']));
+						}
+
+					document.write("</section>");
 				}
-				elseif (isset($_GET['show']) && $_GET['show'] == "1") {
-					$comments = $con->query("SELECT * FROM comments WHERE parent = '$id' ORDER BY id ASC");
-				}?>
-				<section id="<?php echo $post['id']; ?>" class="card">
-					<p><i id="ip"><?php echo "<img src='http://robohash.org/".md5($post['ip']).".png?set=set3&size=64x64' /> says...<br />"; ?></i><a href="?show=1#<?php echo $post['id']; ?>">Permalink</a> | <?php echo relativeTime($post['time']); if ($post['ip'] == "admin") { echo " [admin]"; } if ($post['nsfw'] == 1) { echo " [nsfw]"; } ?> <?php if ($post['ip'] == "210.55.213.210") { echo " [Wellington College]"; } ?></p>
-					<h3 style="text-align: left;"><?php if ($post['nsfw'] == 1 && !isset($_GET['nsfw']) && !isset($_GET['show'])) { echo "<i>This post is possibly offensive. <a href='?nsfw=1#".$post['id']."'>Click here</a> to view possibly offensive posts.</i>"; } elseif($post['nsfw'] == 1 && !isset($_GET['nsfw']) && isset($_GET['show'])) { echo "<i>This post is possibly offensive. <a href='?show=1&nsfw=1#".$post['id']."'>Click here</a> to view possibly offensive posts.</i>"; } else { echo "<h3 class='postText'>".str_replace("\n", "<br />", $post['post'])."</h3>"; } ?></h3>
-					<?php echo attachmentDisplay($post['attachment'], $post['nsfw']); ?><?php if ($post['attachment'] != "n/a") { ?><br /><br /><?php } ?>
-					<a class="btn" href="api/stoke.php?type=post&id=<?php echo $post['id']; ?>">Stoke (<?php echo $post['score']; ?>)</a>
-					<a id="showCommentButton<?php echo $post['id']; ?>" class="btn" href="javascript:void(0)" onclick="showCommentForm(<?php echo $post['id']; ?>)">Load comments (<?php echo mysqli_num_rows($comments); ?>)</a>
-					<a style="display: none;" id="hideCommentButton<?php echo $post['id']; ?>" class="btn" href="javascript:void(0)" onclick="hideCommentForm(<?php echo $post['id']; ?>)">Hide comments</a>
-					<div style="display: none;" id="commentForm<?php echo $post['id']; ?>">
-						<br /><br />
-						<form action="submitV2.php" method="post">
-							<input type="hidden" name="type" value="comment">
-							<input type="hidden" name="id" value="<?php echo $post['id']; ?>">
-							<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, <?php echo $post['id']; ?>)" onkeyup="countChar(this, <?php echo $post['id']; ?>)" required></textarea>
-							<div style="font-family: 'Lato', serif;" id="counter<?php echo $post['id']; ?>">256/256</div><br />
-							<b>Subscribe to comments:</b><br />
-							<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />
-							<input class="btn" type="submit" name="post" value="Post">
-						</form>
+			}
 
-					<?php
-					//Comments
-					if (mysqli_num_rows($comments) > 0) { ?>
-						<hr />
-						<?php
-						$loop = 0;
-						foreach ($comments as $comment) { 
-							$loop += 1; ?>
-							<p><i id="ip"><?php echo "<img src='http://robohash.org/".md5($comment['ip']).".png?set=set3&size=64x64' /> says...<br />"; ?></i><?php echo relativeTime($comment['time']); ?></p>
-							<h4 id="commentText"><?php echo str_replace("\n", "<br />", $comment['comment']); ?></h4>
-							<?php if ($loop != mysqli_num_rows($comments)) { ?>
-								<hr />
-							<?php } ?>
-						<?php } ?>
-					<?php } ?>
-					</div>
-				</section>
-			<?php }
-		}*/
+			//Display the posts
+			displayPosts(<?php getPosts($con, 0); ?>);
+		</script>
 
-		//Get 40 posts from the database
-		$tag = "#bonfyre";
+		<?php
+		/*$tag = "#bonfyre";
 		if (!isset($_GET['show'])) {
 			$posts = $con->query("SELECT * FROM posts WHERE `post` NOT LIKE '%$tag%' ORDER BY id DESC LIMIT 50");
 		}
@@ -586,7 +545,7 @@ function attachmentDisplay($url, $nsfw) {
 				<?php } ?>
 				</div>
 			</section>
-		<?php } ?>
+		<?php }*/ ?>
 		<?php
 		if (!isset($_GET['show'])) {
 			echo "<p style='text-align: right;'><a href='?show=1'>Show all posts and comments</a></p>";
