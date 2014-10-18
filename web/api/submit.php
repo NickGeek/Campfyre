@@ -130,10 +130,10 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 		echo "Post not submitted: Woah there! Give someone else a turn to say something.";
 	}
 	else {
-		echo "There was an error submitting your post";
+		echo "Post not submitted: Your post/comment is longer than 256 characters.";
 	}
 }
 else {
-	echo "There was an error submitting your post";
+	echo "Post not submitted: No text was sent to be posted.";
 }
 ?>
