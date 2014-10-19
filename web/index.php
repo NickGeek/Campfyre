@@ -455,7 +455,7 @@ function getPosts($startingPost) {
 						}
 
 						//Stokes and Comments
-						newHTML = newHTML + '<a class="btn" href="api/stoke.php?type=post&id='+postJSON[i]['id']+'">Stoke ('+postJSON[i]['score']+')</a>"';
+						newHTML = newHTML + '<a class="btn" href="api/stoke.php?type=post&id='+postJSON[i]['id']+'">Stoke ('+postJSON[i]['score']+')</a>';
 						newHTML = newHTML + ' <a id="showCommentButton'+postJSON[i]['id']+'" class="btn" href="javascript:void(0)" onclick="showCommentForm('+postJSON[i]['id']+')">Load comments ('+postJSON[i]['commentNum'].split(" ")[0]+')</a>';
 						newHTML = newHTML + ' <a style="display: none;" id="hideCommentButton'+postJSON[i]['id']+'" class="btn" href="javascript:void(0)" onclick="hideCommentForm('+postJSON[i]['id']+')">Hide comments</a>';
 						newHTML = newHTML + '<div style="display: none;" id="commentForm'+postJSON[i]['id']+'">';
