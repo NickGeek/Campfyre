@@ -66,6 +66,15 @@ function getPosts($con) {
 		$startingPost = 0;
 	}
 
+	//Are we showing NSFW posts or not?
+	if (isset($_GET['nsfw'])) {
+		$nsfw = mysqli_real_escape_string($con, $_GET['nsfw']);
+	}
+	else {
+		$nsfw = 2; //Legacy support, include the post but not the text
+	}
+
+
 	//Would you like that with search?
 	if (!isset($_GET['search'])) {
 		$tag = "#bonfyre";
@@ -76,7 +85,25 @@ function getPosts($con) {
 	}
 
 	foreach ($query as $item) {
-		if ($item['nsfw'] == 0) { $post =  $item['post']; } else { $post = "Post hidden: this post is possibly offensive"; }
+		if ($item['nsfw'] == 0) { 
+			$post =  $item['post']; 
+		}
+		else {
+			//Handle NSFW content. If we are willing to see content (1) show it, if we aren't (0) skip this iteration, and if we are legacy (3) show a warning.
+			if ($nsfw != 0) {
+				switch ($nsfw) {
+					case 1:
+						$post =  $item['post'];
+						break;
+					case 2:
+						$post = "Post hidden: this post is possibly offensive";
+						break;
+				}
+			}
+			elseif ($nsfw == 0) {
+				continue;
+			}
+		}
 		$postArr = array();
 		$postArr['post'] = $post;
 		$postArr['id'] = $item['id'];
