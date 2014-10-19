@@ -116,6 +116,14 @@
 				width: 100px;
 				height: 100px;
 			}
+			#loadingComments {
+				text-align: center;
+				display: block;
+				margin-left: auto;
+				margin-right: auto;
+				width: 100px;
+				height: 100px;
+			}
 		</style>
 
 		<script src="http://code.jquery.com/jquery.min.js"></script>
@@ -184,6 +192,35 @@
 				//Hide the show button
 				document.getElementById("showCommentButton"+id).style.display = "none";
 				document.getElementById("hideCommentButton"+id).style.display = "";
+
+				//Load the comments
+				var crequest = new XMLHttpRequest();
+				crequest.onreadystatechange = function () {
+					if (crequest.readyState == 4 && crequest.status == 200) {
+						var commentJSON = JSON.parse(crequest.responseText);
+						crequest = null;
+
+						//Display comments
+						var newHTML = '';
+
+						//Display the data
+						for (var i = 0; i < commentJSON.length; ++i) {
+							newHTML = newHTML + '<hr />';
+							newHTML = newHTML + "<p><i id='ip'><img src='"+commentJSON[i]['pic']+"' /> says...<br></i>"+commentJSON[i]['time'];
+							newHTML = newHTML + '<h4 id="commentText">'+commentJSON[i]['comment'].replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
+						}
+
+						//Push the new HTML to the page
+						document.getElementById('comments'+id).innerHTML = newHTML;
+					}
+					else if (crequest.readyState < 4) {
+						document.getElementById('comments'+id).innerHTML = '<img id="loadingMessage" src="img/loading.gif" alt="loading..." />';					
+					}
+				}
+
+				//Send the request
+				crequest.open("GET", "api/getcommentsV2.php?size=64x64&id="+id+"&cache="+Math.random(), true);
+				crequest.send();
 			}
 
 			//Hide the comments
@@ -309,9 +346,11 @@
 									newHTML = newHTML + '</form>';
 									if (postJSON[i]['commentNum'].split(" ")[0] > 0) {
 										//Comments have been posted lets show them
-										newHTML = newHTML + '<hr />';
+										newHTML = newHTML + '<div id="comments'+postJSON[i]['id']+'">';
+										newHTML = newHTML + '</div>';
+										/*newHTML = newHTML + '<hr />';
 										newHTML = newHTML + "<p><i id='ip'><img src='"+postJSON[i]['pic']+"' /> says...<br></i>"+"time";
-										newHTML = newHTML + '<h4 id="commentText">'+'Comment text'.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
+										newHTML = newHTML + '<h4 id="commentText">'+'Comment text'.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';*/
 									}
 								newHTML = newHTML + '</div>';
 							newHTML = newHTML + "</section>";
