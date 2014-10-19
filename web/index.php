@@ -1,6 +1,6 @@
 <?php
 //Get posts + post data from the API
-function getPosts($con, $startingPost) {
+function getPosts($startingPost) {
 	$ch = curl_init();
 	$url = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]/api/getpostsV2.php?size=64x64&startingPost=$startingPost";
 	curl_setopt($ch, CURLOPT_URL, $url);
@@ -119,10 +119,24 @@ function getPosts($con, $startingPost) {
 				margin-left: 15px;
 				margin-top: 15px;
 			}
+			.loadingMessage {
+				text-align: center;
+				display: none;
+			}
 		</style>
 
-		<script src="http://code.jquery.com/jquery-1.5.js"></script>
+		<script src="http://code.jquery.com/jquery.min.js"></script>
 		<script>
+			//Loading animation
+			$(document).on({
+				ajaxStart: function() {
+					$("body").addClass("loadingMessage");
+				},
+				ajaxStop: function() {
+					$("body").removeClass("loadingMessage");
+				}
+			});
+
 			//Attachments
 			function attach(url) {
 				var attachCode = '';
@@ -407,59 +421,69 @@ function getPosts($con, $startingPost) {
 		<hr />
 
 		<!-- Posts -->
+		<div id="posts">
+		</div>
+
 		<script>
-			function displayPosts(postJSON) {
+			function loadPosts(postJSON) {
+				var posts = document.getElementById('posts');
+				var newHTML = posts.innerHTML;
+
+				//Display the data
 				for (var i = 0; i < postJSON.length; ++i) {
-					document.write("<section id="+postJSON[i]['id']+" class='card'>");
-						document.write("<p><i id='ip'><img src='"+postJSON[i]['pic']+"' /> says...<br></i><a href='?show=1#"+postJSON[i]['id']+"'>Permalink</a> | "+postJSON[i]['time']);
+					newHTML = newHTML + "<section id="+postJSON[i]['id']+" class='card'>";
+						newHTML = newHTML + "<p><i id='ip'><img src='"+postJSON[i]['pic']+"' /> says...<br></i><a href='?show=1#"+postJSON[i]['id']+"'>Permalink</a> | "+postJSON[i]['time'];
 							
 							//Tags
 							switch (postJSON[i]['pic']) {
 								case "http://robohash.org/21232f297a57a5a743894a0e4a801fc3.png?set=set3&size=64x64":
-									document.write(" [admin]");
+									newHTML = newHTML + " [admin]";
 									break;
 								case "http://robohash.org/5c1055237c524ca98c243b81ba3f9e93.png?set=set3&size=64x64":
-									document.write(" [Wellington College]");
+									newHTML = newHTML + " [Wellington College]";
 									break;
 							}
 							if (postJSON[i]['nsfw'] == 1) {
-								document.write(" [nsfw]");
+								newHTML = newHTML + " [nsfw]";
 							}
-						document.write("</p>");
-						document.write('<h3 style="text-align: left;">'+postJSON[i]['post'].replace(new RegExp('\r?\n','g'), '<br />')+'</h3>');
+						newHTML = newHTML + "</p>";
+						newHTML = newHTML + '<h3 style="text-align: left;">'+postJSON[i]['post'].replace(new RegExp('\r?\n','g'), '<br />')+'</h3>';
 
 						//Attachments
 						if (postJSON[i]['attachment'] != "n/a") {
-							document.write(attach(postJSON[i]['attachment'])+"<br><br>");
+							newHTML = newHTML + attach(postJSON[i]['attachment'])+"<br><br>";
 						}
 
 						//Stokes and Comments
-						document.write('<a class="btn" href="api/stoke.php?type=post&id='+postJSON[i]['id']+'">Stoke ('+postJSON[i]['score']+')</a>')
-						document.write(' <a id="showCommentButton'+postJSON[i]['id']+'" class="btn" href="javascript:void(0)" onclick="showCommentForm('+postJSON[i]['id']+')">Load comments ('+postJSON[i]['commentNum'].split(" ")[0]+')</a>');
-						document.write(' <a style="display: none;" id="hideCommentButton'+postJSON[i]['id']+'" class="btn" href="javascript:void(0)" onclick="hideCommentForm('+postJSON[i]['id']+')">Hide comments</a>');
-						document.write('<div style="display: none;" id="commentForm'+postJSON[i]['id']+'">');
-							document.write('<br><br><form action="submitV2.php" method="post">');
-								document.write('<input type="hidden" name="type" value="comment">');
-								document.write('<input type="hidden" name="id" value="'+postJSON[i]['id']+'">');
-								document.write('<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, '+postJSON[i]['id']+')" onkeyup="countChar(this, '+postJSON[i]['id']+')" required></textarea>');
-								document.write('<div style="font-family: "Lato", serif;" id="counter'+postJSON[i]['id']+'">256/256</div><br />');
-								document.write('<b>Subscribe to comments:</b><br />');
-								document.write('<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />');
-								document.write('<input class="btn" type="submit" name="post" value="Post">');
-							document.write('</form>');
+						newHTML = newHTML + '<a class="btn" href="api/stoke.php?type=post&id='+postJSON[i]['id']+'">Stoke ('+postJSON[i]['score']+')</a>"';
+						newHTML = newHTML + ' <a id="showCommentButton'+postJSON[i]['id']+'" class="btn" href="javascript:void(0)" onclick="showCommentForm('+postJSON[i]['id']+')">Load comments ('+postJSON[i]['commentNum'].split(" ")[0]+')</a>';
+						newHTML = newHTML + ' <a style="display: none;" id="hideCommentButton'+postJSON[i]['id']+'" class="btn" href="javascript:void(0)" onclick="hideCommentForm('+postJSON[i]['id']+')">Hide comments</a>';
+						newHTML = newHTML + '<div style="display: none;" id="commentForm'+postJSON[i]['id']+'">';
+							newHTML = newHTML + '<br><br><form action="submitV2.php" method="post">';
+								newHTML = newHTML + '<input type="hidden" name="type" value="comment">';
+								newHTML = newHTML + '<input type="hidden" name="id" value="'+postJSON[i]['id']+'">';
+								newHTML = newHTML + '<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, '+postJSON[i]['id']+')" onkeyup="countChar(this, '+postJSON[i]['id']+')" required></textarea>';
+								newHTML = newHTML + '<div style="font-family: "Lato", serif;" id="counter'+postJSON[i]['id']+'">256/256</div><br />';
+								newHTML = newHTML + '<b>Subscribe to comments:</b><br />';
+								newHTML = newHTML + '<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />';
+								newHTML = newHTML + '<input class="btn" type="submit" name="post" value="Post">';
+							newHTML = newHTML + '</form>';
 							if (postJSON[i]['commentNum'].split(" ")[0] > 0) {
 								//Comments have been posted lets show them
-								document.write('<hr />');
-								document.write("<p><i id='ip'><img src='"+postJSON[i]['pic']+"' /> says...<br></i>"+"time");
-								document.write('<h4 id="commentText">'+'Comment text'.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>')
+								newHTML = newHTML + '<hr />';
+								newHTML = newHTML + "<p><i id='ip'><img src='"+postJSON[i]['pic']+"' /> says...<br></i>"+"time";
+								newHTML = newHTML + '<h4 id="commentText">'+'Comment text'.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
 							}
-						document.write('</div>');
-					document.write("</section>");
+						newHTML = newHTML + '</div>';
+					newHTML = newHTML + "</section>";
 				}
+
+				//Push the new HTML to the page
+				posts.innerHTML = newHTML;
 			}
 
 			//Display the posts
-			displayPosts(<?php getPosts($con, 0); ?>);
+			loadPosts(<?php getPosts(0); ?>);
 		</script>
 
 		<!-- Loading GIF (with a hard G) -->
