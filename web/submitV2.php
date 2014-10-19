@@ -46,6 +46,9 @@ foreach ($query as $post) {
 if (count(array_unique($latestIPs)) === 1 && $latestIPs[0] === $ip && $ip != "210.55.213.210") { //210.55.213.210 is Wellington College, many people use this connection
 	$spamming = True;
 }
+elseif ($_POST['catcher'] != "") {
+	$spamming = True;
+}
 else {
 	$spamming = False;
 }
@@ -80,7 +83,7 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 			}
 		}
 
-		header("Location: ./?m=posted");
+		echo "Post submitted";
 	}
 	elseif ($type == "comment" && mb_strlen($originaltext, "UTF-8") <= 256) {
 		//Submit a comment
@@ -122,16 +125,16 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 				WHERE `id` = '$parent'");
 		}
 
-		header("Location: ./?m=commented");
+		echo "Comment submitted";
 	}
 	elseif ($spamming) {
-		header("Location: ./?m=spamming");
+		echo "You've posted too much recently";
 	}
 	else {
-		header("Location: ./?m=tooLong");
+		echo "Your post is too long";
 	}
 }
 else {
-	header("Location: ./?m=noPost");
+	echo "No data was received";
 }
 ?>
