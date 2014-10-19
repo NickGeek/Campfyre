@@ -80,7 +80,7 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 			}
 		}
 
-		header("Location: ./");
+		header("Location: ./?m=posted");
 	}
 	elseif ($type == "comment" && mb_strlen($originaltext, "UTF-8") <= 256) {
 		//Submit a comment
@@ -122,7 +122,7 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 				WHERE `id` = '$parent'");
 		}
 
-		header("Location: ./?show=1#".$parent);
+		header("Location: ./?m=commented");
 	}
 	elseif ($spamming) {
 		header("Location: ./?m=spamming");
