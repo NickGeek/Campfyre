@@ -426,7 +426,7 @@ function getPosts($con, $startingPost) {
 								document.write(" [nsfw]");
 							}
 						document.write("</p>");
-						document.write('<h3 style="text-align: left;">'+postJSON[i]['post']+'</h3>');
+						document.write('<h3 style="text-align: left;">'+postJSON[i]['post'].replace(new RegExp('\r?\n','g'), '<br />')+'</h3>');
 
 						//Attachments
 						if (postJSON[i]['attachment'] != "n/a") {
@@ -449,7 +449,9 @@ function getPosts($con, $startingPost) {
 							document.write('</form>');
 							if (postJSON[i]['commentNum'].split(" ")[0] > 0) {
 								//Comments have been posted lets show them
-								//TODO: var commentJSON = <?php getComments($con); ?>
+								document.write('<hr />');
+								document.write("<p><i id='ip'><img src='"+postJSON[i]['pic']+"' /> says...<br></i>"+"time");
+								document.write('<h4 id="commentText">'+'Comment text'.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>')
 							}
 						document.write('</div>');
 					document.write("</section>");
@@ -460,63 +462,11 @@ function getPosts($con, $startingPost) {
 			displayPosts(<?php getPosts($con, 0); ?>);
 		</script>
 
-		<?php
-		/*$tag = "#bonfyre";
-		if (!isset($_GET['hide'])) {
-			$posts = $con->query("SELECT * FROM posts WHERE `post` NOT LIKE '%$tag%' ORDER BY id DESC LIMIT 50");
-		}
-		elseif (isset($_GET['show']) && $_GET['show'] == "1") {
-			$posts = $con->query("SELECT * FROM posts WHERE `post` NOT LIKE '%$tag%' ORDER BY id DESC");
-		}
+		<!-- Loading GIF (with a hard G) -->
+		<div class="loadingMessage">
+			<img src="img/loading.gif" alt="loading..." />
+		</div>
 
-		$postloop = 0;
-		foreach ($posts as $post) {
-			$postloop += 1;
-			//Get the comments for this post from the database
-			$id = $post['id'];
-			if (!isset($_GET['show'])) {
-				$comments = $con->query("SELECT * FROM comments WHERE parent = '$id' ORDER BY id ASC LIMIT 50");
-			}
-			elseif (isset($_GET['show']) && $_GET['show'] == "1") {
-				$comments = $con->query("SELECT * FROM comments WHERE parent = '$id' ORDER BY id ASC");
-			}?>
-			<section id="<?php echo $post['id']; ?>" class="card">
-				<p><i id="ip"><?php echo "<img src='http://robohash.org/".md5($post['ip']).".png?set=set3&size=64x64' /> says...<br />"; ?></i><a href="?show=1#<?php echo $post['id']; ?>">Permalink</a> | <?php echo relativeTime($post['time']); if ($post['ip'] == "admin") { echo " [admin]"; } if ($post['nsfw'] == 1) { echo " [nsfw]"; } ?> <?php if ($post['ip'] == "210.55.213.210") { echo " [Wellington College]"; } ?></p>
-				<h3 style="text-align: left;"><?php if ($post['nsfw'] == 1 && !isset($_GET['nsfw']) && !isset($_GET['show'])) { echo "<i>This post is possibly offensive. <a href='?nsfw=1#".$post['id']."'>Click here</a> to view possibly offensive posts.</i>"; } elseif($post['nsfw'] == 1 && !isset($_GET['nsfw']) && isset($_GET['show'])) { echo "<i>This post is possibly offensive. <a href='?show=1&nsfw=1#".$post['id']."'>Click here</a> to view possibly offensive posts.</i>"; } else { echo "<h3 class='postText'>".str_replace("\n", "<br />", $post['post'])."</h3>"; } ?></h3>
-				<?php echo attachmentDisplay($post['attachment'], $post['nsfw']); ?><?php if ($post['attachment'] != "n/a") { ?><br /><br /><?php } ?>
-				<a class="btn" href="api/stoke.php?type=post&id=<?php echo $post['id']; ?>">Stoke (<?php echo $post['score']; ?>)</a>
-				<a id="showCommentButton<?php echo $post['id']; ?>" class="btn" href="javascript:void(0)" onclick="showCommentForm(<?php echo $post['id']; ?>)">Load comments (<?php echo mysqli_num_rows($comments); ?>)</a>
-				<a style="display: none;" id="hideCommentButton<?php echo $post['id']; ?>" class="btn" href="javascript:void(0)" onclick="hideCommentForm(<?php echo $post['id']; ?>)">Hide comments</a>
-				<div style="display: none;" id="commentForm<?php echo $post['id']; ?>">
-					<br /><br />
-					<form action="submitV2.php" method="post">
-						<input type="hidden" name="type" value="comment">
-						<input type="hidden" name="id" value="<?php echo $post['id']; ?>">
-						<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, <?php echo $post['id']; ?>)" onkeyup="countChar(this, <?php echo $post['id']; ?>)" required></textarea>
-						<div style="font-family: 'Lato', serif;" id="counter<?php echo $post['id']; ?>">256/256</div><br />
-						<b>Subscribe to comments:</b><br />
-						<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />
-						<input class="btn" type="submit" name="post" value="Post">
-					</form>
-
-				<?php
-				//Comments
-				if (mysqli_num_rows($comments) > 0) { ?>
-					<hr />
-					<?php
-					$loop = 0;
-					foreach ($comments as $comment) { 
-						$loop += 1; ?>
-						<p><i id="ip"><?php echo "<img src='http://robohash.org/".md5($comment['ip']).".png?set=set3&size=64x64' /> says...<br />"; ?></i><?php echo relativeTime($comment['time']); ?></p>
-						<h4 id="commentText"><?php echo str_replace("\n", "<br />", $comment['comment']); ?></h4>
-						<?php if ($loop != mysqli_num_rows($comments)) { ?>
-							<hr />
-						<?php } ?>
-					<?php } ?>
-				<?php } ?>
-				</div>
-			</section>
-		<?php }*/ ?>
 		<?php
 		if (!isset($_GET['show'])) {
 			echo "<p style='text-align: right;'><a href='?show=1'>Show all posts and comments</a></p>";
