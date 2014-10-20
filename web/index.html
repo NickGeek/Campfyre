@@ -142,30 +142,35 @@
 				var sitename = hostname.match(/(youtube|imgur.com|sharepic.tk)/i);
 				
 				//Create attachement code depending on site
-				switch (sitename[0]) {
-					case "youtube":
-						//Thanks to http://stackoverflow.com/questions/3452546/javascript-regex-how-to-get-youtube-video-id-from-url
-						var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-						var match = url.match(regExp);
-						var videoid = match[2];
+				if (sitename != null) {
+					switch (sitename[0]) {
+						case "youtube":
+							//Thanks to http://stackoverflow.com/questions/3452546/javascript-regex-how-to-get-youtube-video-id-from-url
+							var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+							var match = url.match(regExp);
+							var videoid = match[2];
 
-						var width = '95%';
-						var height = '420';
-						attachCode = '<br /><object width="'+width+'" height="'+height+'"><param name="movie" value="http://www.youtube.com/v/'+videoid+'&amp;hl=en_US&amp;fs=1?rel=0"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/'+videoid+'&amp;hl=en_US&amp;fs=1?rel=0" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="'+width+'" height="'+height+'"></embed></object>';
-						break;
-					case "imgur.com":
-						var imgid = url.split("/");
-						imgid = imgid[imgid.length-1];
-						imgid = imgid.split(".");
-						imgid = imgid[0];
-						attachCode = '<a target="_blank" href="http://i.imgur.com/'+imgid+'.png"><img style="max-height: 35%;" src="http://i.imgur.com/'+imgid+'.png" /></a>';
-						break;
-					case "sharepic.tk":
-						attachCode = '<a target="_blank" href="'+url+'"><img style="max-height: 35%;" src="'+url+'" /></a>';
-						break;
-					default:
+							var width = '95%';
+							var height = '420';
+							attachCode = '<br /><object width="'+width+'" height="'+height+'"><param name="movie" value="http://www.youtube.com/v/'+videoid+'&amp;hl=en_US&amp;fs=1?rel=0"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/'+videoid+'&amp;hl=en_US&amp;fs=1?rel=0" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="'+width+'" height="'+height+'"></embed></object>';
+							break;
+						case "imgur.com":
+							var imgid = url.split("/");
+							imgid = imgid[imgid.length-1];
+							imgid = imgid.split(".");
+							imgid = imgid[0];
+							attachCode = '<a target="_blank" href="http://i.imgur.com/'+imgid+'.png"><img style="max-height: 35%;" src="http://i.imgur.com/'+imgid+'.png" /></a>';
+							break;
+						case "sharepic.tk":
+							attachCode = '<a target="_blank" href="'+url+'"><img style="max-height: 35%;" src="'+url+'" /></a>';
+							break;
+						default:
+							attachCode = 'Attached URL: <a target="_blank" href="'+url+'">'+url+'</a>';
+							break;
+					}
+					else {
 						attachCode = 'Attached URL: <a target="_blank" href="'+url+'">'+url+'</a>';
-						break;
+					}
 				}
 
 				return attachCode;
@@ -341,6 +346,7 @@
 										newHTML = newHTML + '<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, '+postJSON[i]['id']+')" onkeyup="countChar(this, '+postJSON[i]['id']+')" required></textarea>';
 										newHTML = newHTML + '<div style="font-family: "Lato", serif;" id="counter'+postJSON[i]['id']+'">256/256</div><br />';
 										newHTML = newHTML + '<b>Subscribe to comments:</b><br />';
+										newHTML = newHTML + '<input type="text" name="catcher" style="display: none;">';
 										newHTML = newHTML + '<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />';
 										newHTML = newHTML + '<input class="btn" type="submit" name="post" value="Post">';
 									newHTML = newHTML + '</form>';
