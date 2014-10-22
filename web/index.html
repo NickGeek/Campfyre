@@ -15,7 +15,7 @@
 			body {
 				background-image: url(img/bg.png);
 			}
-			#centre {
+			.centre {
 				text-align: center;
 			}
 			h1 {
@@ -130,6 +130,7 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 		<script>
 			var showNSFW = 0;
+			var tag = "";
 
 			//Attachments
 			function attach(url) {
@@ -265,7 +266,7 @@
 			function linkHashtags(text) {
 				return text.replace(
 					hashtag_regexp,
-					'<a href="search.php?tag=%23$1">#$1</a>'
+					'<a href="javascript:void(0)" onclick="loadPosts(0, '+showNSFW+', true, \'#$1\')">#$1</a>'
 				);
 			}
 
@@ -291,7 +292,7 @@
 				});
 			});*/
 
-			function loadPosts(startingPost, nsfw, overwrite) {
+			function loadPosts(startingPost, nsfw, overwrite, search) {
 				//Get the posts from the server
 				var request = new XMLHttpRequest();
 				request.onreadystatechange = function () {
@@ -350,11 +351,9 @@
 										newHTML = newHTML + '<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />';
 										newHTML = newHTML + '<input class="btn" type="submit" name="post" value="Post">';
 									newHTML = newHTML + '</form>';
-									if (postJSON[i]['commentNum'].split(" ")[0] > 0) {
-										//Comments have been posted lets show them
-										newHTML = newHTML + '<div id="comments'+postJSON[i]['id']+'">';
-										newHTML = newHTML + '</div>';
-									}
+									//Comments have been posted lets show them
+									newHTML = newHTML + '<div id="comments'+postJSON[i]['id']+'">';
+									newHTML = newHTML + '</div>';
 								newHTML = newHTML + '</div>';
 							newHTML = newHTML + "</section>";
 						}
@@ -374,8 +373,28 @@
 				}
 
 			//Send the request
-			request.open("GET", "api/getpostsV2.php?size=64x64&startingPost="+startingPost+"&nsfw="+nsfw+"&cache="+Math.random(), true);
+			if (search != "") {
+				var requestURL = "api/getpostsV2.php?size=64x64&search=1&tag="+encodeURIComponent(search)+"&startingPost="+startingPost+"&nsfw="+nsfw+"&cache="+Math.random();
+
+				//Re-arange the site
+				tag = search;
+				$('#submit').hide();
+				$('#searchTitle').html('<h2>Results for: '+tag+'</h2>');
+				$('#goBack').show();
+			}
+			else {
+				var requestURL = "api/getpostsV2.php?size=64x64&startingPost="+startingPost+"&nsfw="+nsfw+"&cache="+Math.random();
+			}
+			request.open("GET", requestURL, true);
 			request.send();
+			}
+
+			function exitSearch(nsfw) {
+				tag = '';
+				$('#submit').show();
+				$('#searchTitle').html('');
+				$('#goBack').hide();
+				loadPosts(0, nsfw, true, tag);
 			}
 		</script>
 		<script>
@@ -390,13 +409,26 @@
 	</head>
 	<body>
 		<div id="search" class="input-append">
-			<form action="search.php" method="get">
+			<form id="searchForm">
 				<input name="tag" type="text" class="rounded" placeholder="#hashtag" required />
 				<input class="btn" type="submit" name="search" value="Search">
 			</form>
+			<script>
+				$('#searchForm').submit(function(event) {
+					event.preventDefault();
+					var searchQuery = $('#searchForm').find('input[name="tag"]').val();
+					//Clear the form
+					$('#searchForm')[0].reset();
+					var page = 1;
+					tag = searchQuery;
+					loadPosts(page*50-50, showNSFW, true, tag);
+
+					return false;
+				});
+			</script>
 		</div>
 
-		<div id="centre">
+		<div class="centre">
 			<h1>Campfyre</h1>
 			<h2>256 characters.</h2>
 			<h2>No login required.</h2>
@@ -448,24 +480,32 @@
 		<div style="text-align: center;" id="options">
 			<script>
 				function refresh(nsfw) {
-					showNSFW = nsfw
+					showNSFW = showNSFW;
 					var page = 1;
-					loadPosts(page*50-50, showNSFW, true);
+					loadPosts(page*50-50, showNSFW, true, tag);
 				}
 			</script>
-			<p><a href="javascript:void(0);" onclick="refresh(0)">Refresh</a> | <a href="javascript:void(0)" onclick="refresh(1)">Show Offensive/NSFW posts</a><br><a href="https://github.com/NickGeek/Campfyre">Fork Campfyre on GitHub</a> | Written and run by <a href="http://nickwebster.co.nz">Nick Webster</a></p>
+			<p>
+			<script>
+				document.write('<div style="display: inline;" id="goBack"><a href="javascript:void()" onclick="exitSearch()"><< Go Back</a> | </div>');
+				$('#goBack').hide();
+			</script>
+			<a href="javascript:void(0);" onclick="refresh(0)">Refresh</a> | <a href="javascript:void(0)" onclick="refresh(1)">Show Offensive/NSFW posts</a><br><a href="https://github.com/NickGeek/Campfyre">Fork Campfyre on GitHub</a> | Written and run by <a href="http://nickwebster.co.nz">Nick Webster</a></p>
 		</div>
 
 		<hr />
 
 		<!-- Posts -->
+		<div id="searchTitle" class="centre">
+		</div>
+
 		<div id="posts">
 		</div>
 
 		<script>
 			//Display the posts
 			var page = 1;
-			loadPosts(page*50-50, showNSFW, true);
+			loadPosts(page*50-50, showNSFW, true, "");
 		</script>
 
 		<script>
@@ -493,7 +533,7 @@
 							toastr.warning(message, title);
 						}
 						var page = 1;
-						loadPosts(page*50-50, showNSFW, true);
+						loadPosts(page*50-50, showNSFW, true, "");
 					}
 				}
 
