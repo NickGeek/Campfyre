@@ -131,6 +131,7 @@
 		<script>
 			var showNSFW = 0;
 			var tag = "";
+			var loaded = false;
 
 			//Attachments
 			function attach(url) {
@@ -363,11 +364,13 @@
 
 						//Highlight links
 						highlighter();
+						loaded = true;
 					}
 					else if (request.readyState < 4) {
 						if (overwrite) {
 							document.getElementById('posts').innerHTML = "";
 						}
+						loaded = false;
 						$('#loadingMessage').show();
 					}
 				}
@@ -396,6 +399,14 @@
 				$('#goBack').hide();
 				loadPosts(0, nsfw, true, tag);
 			}
+
+			//Load more posts one on the bottom
+			$(window).scroll(function() {
+				if($(window).scrollTop() + $(window).height() == $(document).height() & loaded & page != ) {
+					page += 1;
+					loadPosts(page*50-50, showNSFW, false, tag);
+				}
+			});
 		</script>
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
