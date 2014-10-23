@@ -402,7 +402,7 @@
 
 			//Load more posts one on the bottom
 			$(window).scroll(function() {
-				if($(window).scrollTop() + $(window).height() == $(document).height() & loaded & page != ) {
+				if($(window).scrollTop() + $(window).height() == $(document).height() & loaded) {
 					page += 1;
 					loadPosts(page*50-50, showNSFW, false, tag);
 				}
