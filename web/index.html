@@ -342,7 +342,7 @@
 								newHTML = newHTML + ' <a id="showCommentButton'+postJSON[i]['id']+'" class="btn" href="javascript:void(0)" onclick="showCommentForm('+postJSON[i]['id']+')">Load comments ('+postJSON[i]['commentNum'].split(" ")[0]+')</a>';
 								newHTML = newHTML + ' <a style="display: none;" id="hideCommentButton'+postJSON[i]['id']+'" class="btn" href="javascript:void(0)" onclick="hideCommentForm('+postJSON[i]['id']+')">Hide comments</a>';
 								newHTML = newHTML + '<div style="display: none;" id="commentForm'+postJSON[i]['id']+'">';
-									newHTML = newHTML + '<br><br><form id="postForm" action="submitV2.php" method="post">';
+									newHTML = newHTML + '<br><br><form id="postForm" action="api/submit.php" method="post">';
 										newHTML = newHTML + '<input type="hidden" name="type" value="comment">';
 										newHTML = newHTML + '<input type="hidden" name="id" value="'+postJSON[i]['id']+'">';
 										newHTML = newHTML + '<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, '+postJSON[i]['id']+')" onkeyup="countChar(this, '+postJSON[i]['id']+')" required></textarea>';
@@ -523,7 +523,7 @@
 			$('#postForm').submit(function(event) {
 				var request = new XMLHttpRequest();
 				var parameters = $('#postForm').serialize();
-				request.open("POST", "submitV2.php", true);
+				request.open("POST", "api/submit.php", true);
 				request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
 				request.onreadystatechange = function () {
