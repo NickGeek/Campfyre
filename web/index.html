@@ -250,16 +250,19 @@
 				);
 			}
 
-			function highlighter(id) {
-				//findLinks(id);
-				findHashtags(id);
-			}
-
 			function findLinks(id) {
 				$('h3').each(function() {
-					$(this).html(linkURLs($(this).html()));
+					var postID = $(this).closest("section").attr("id");
+					if (postID < id) {
+						$(this).html(linkURLs($(this).html()));
+					}
 				});
 			};
+
+			function highlighter(id) {
+				findLinks(id);
+				findHashtags(id);
+			}
 
 			//#YOLOSWAG - thanks to http://stackoverflow.com/questions/4913555/find-twitter-hashtags-using-jquery-and-apply-a-link
 			hashtag_regexp = /#([a-zA-Z]+)/g;
@@ -272,7 +275,6 @@
 			}
 
 			function findHashtags(id) {
-				// console.log(id);
 				$('h3').each(function() {
 					var postID = $(this).closest("section").attr("id");
 					if (postID < id) {
