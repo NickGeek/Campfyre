@@ -250,12 +250,12 @@
 				);
 			}
 
-			function highlighter() {
-				findLinks();
-				findHashtags();
+			function highlighter(id) {
+				//findLinks(id);
+				findHashtags(id);
 			}
 
-			function findLinks() {
+			function findLinks(id) {
 				$('h3').each(function() {
 					$(this).html(linkURLs($(this).html()));
 				});
@@ -271,9 +271,13 @@
 				);
 			}
 
-			function findHashtags() {
+			function findHashtags(id) {
+				// console.log(id);
 				$('h3').each(function() {
-					$(this).html(linkHashtags($(this).html()));
+					var postID = $(this).closest("section").attr("id");
+					if (postID < id) {
+						$(this).html(linkHashtags($(this).html()));
+					}
 				});
 			};
 
@@ -302,6 +306,7 @@
 						//Hide the loading gif
 						$('#loadingMessage').hide();
 						request = null;
+						var pageID = 0;
 
 						//Display posts
 						var posts = document.getElementById('posts');
@@ -361,9 +366,11 @@
 
 						//Push the new HTML to the page
 						posts.innerHTML = newHTML;
-
+						
 						//Highlight links
-						//highlighter();
+						pageID = postJSON[0]['id']+1;
+						highlighter(pageID);
+
 						loaded = true;
 					}
 					else if (request.readyState < 4) {
