@@ -124,8 +124,12 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 				SET `emails` = IFNULL(CONCAT(`emails`, ',$email'), '$email')
 				WHERE `id` = '$parent'");
 		}
-
-		echo "Comment submitted";
+		if (!isset($tempFix)) {
+			echo "Comment submitted";
+		}
+		else {
+			header("./#".$parent);
+		}
 	}
 	elseif ($spamming) {
 		echo "You've posted too much recently";

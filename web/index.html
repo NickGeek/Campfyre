@@ -503,6 +503,7 @@
 					showNSFW = nsfw;
 					var page = 1;
 					loadPosts(page*50-50, showNSFW, true, tag);
+					nsfwToggle();
 				}
 			</script>
 			<p>
@@ -510,7 +511,23 @@
 				document.write('<div style="display: inline;" id="goBack"><a href="javascript:void()" onclick="exitSearch()"><< Go Back</a> | </div>');
 				$('#goBack').hide();
 			</script>
-			<a href="javascript:void(0);" onclick="refresh(0)">Refresh</a> | <a href="javascript:void(0)" onclick="refresh(1)">Show Offensive/NSFW posts</a><br><a href="https://github.com/NickGeek/Campfyre">Fork Campfyre on GitHub</a> | Written and run by <a href="http://nickwebster.co.nz">Nick Webster</a></p>
+			<a href="javascript:void(0);" onclick="refresh(0)">Refresh</a> | 
+			<span id="nsfwOption"></span><br><a href="https://github.com/NickGeek/Campfyre">Fork Campfyre on GitHub</a> | Written and run by <a href="http://nickwebster.co.nz">Nick Webster</a></p>
+			<script>
+				function nsfwToggle() {
+					var verb = "";
+					var newOption = 0;
+					if (showNSFW == 0) {
+						verb = "Show ";
+						newOption = 1;
+					}
+					else {
+						verb = "Hide ";
+					}
+					$('#nsfwOption').html('<a href="javascript:void(0)" onclick="refresh('+newOption+')">'+verb+'Offensive/NSFW posts</a>');
+				}
+				nsfwToggle();
+			</script>
 		</div>
 
 		<hr />
