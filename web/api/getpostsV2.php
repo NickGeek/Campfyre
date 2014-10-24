@@ -121,5 +121,34 @@ function getPosts($con) {
 	return $output;
 }
 
-echo getPosts($con);
+function getPost($con) {
+	//Array the data is in
+	$data = array();
+
+	$id = mysqli_real_escape_string($con, $_GET['id']);
+	$query = $con->query("SELECT * FROM posts WHERE `id` = '$id'");
+
+	foreach ($query as $item) {
+		$postArr = array();
+		$postArr['post'] = $item['post'];
+		$postArr['id'] = $item['id'];
+		$postArr['score'] = $item['score'];
+		$postArr['pic'] = getPic($item['id'], $con);
+		$comments = $con->query("SELECT * FROM comments WHERE parent = '".$item['id']."' ORDER BY id ASC");
+		$postArr['commentNum'] = mysqli_num_rows($comments)." comments";
+		$postArr['time'] = relativeTime($item['time']);
+		$postArr['nsfw'] = $item['nsfw'];
+		$postArr['attachment'] = $item['attachment'];
+		$data[] = $postArr;
+	}
+	$output = json_encode($data);
+	return $output;
+}
+
+if (!isset($_GET['single'])) {
+	echo getPosts($con);
+}
+else {
+	echo getPost($con);
+}
 ?>
