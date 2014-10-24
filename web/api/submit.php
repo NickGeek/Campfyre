@@ -8,7 +8,10 @@ $dbname = "etherals_campfyre";
 
 //Connect to the database
 $con=mysqli_connect("localhost", $MYSQL_USERNAME, $MYSQL_PASSWORD, $dbname);
-$email = $_POST['email'];
+
+if (isset($_POST['email'])) {
+	$email = $_POST['email'];
+}
 
 $time = time();
 
@@ -30,7 +33,10 @@ else {
 
 $type = $_POST['type'];
 $ip = $_SERVER["REMOTE_ADDR"];
-$nsfw = $_POST['nsfw'];
+
+if (isset($_POST['nsfw'])) {
+	$nsfw = $_POST['nsfw'];
+}
 
 if (!isset($nsfw)) {
 	$nsfw = 0;
@@ -124,11 +130,11 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 				SET `emails` = IFNULL(CONCAT(`emails`, ',$email'), '$email')
 				WHERE `id` = '$parent'");
 		}
-		if (!isset($tempFix)) {
+		if (!isset($_POST['tempFix'])) {
 			echo "Comment submitted";
 		}
 		else {
-			header("./#".$parent);
+			header("Location: ../#".$parent);
 		}
 	}
 	elseif ($spamming) {
