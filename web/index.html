@@ -323,7 +323,7 @@
 						//Display the data
 						for (var i = 0; i < postJSON.length; ++i) {
 							newHTML = newHTML + "<section id="+postJSON[i]['id']+" class='card'>";
-								newHTML = newHTML + "<p><i id='ip'><img src='"+postJSON[i]['pic']+"' /> says...<br></i><a href='?show=1#"+postJSON[i]['id']+"'>Permalink</a> | "+postJSON[i]['time'];
+								newHTML = newHTML + "<p><i id='ip'><img src='"+postJSON[i]['pic']+"' /> says...<br></i><a href='permalink.html?id="+postJSON[i]['id']+"'>Permalink</a> | "+postJSON[i]['time'];
 									
 									//Tags
 									switch (postJSON[i]['pic']) {

@@ -134,7 +134,7 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 			echo "Comment submitted";
 		}
 		else {
-			header("Location: ../#".$parent);
+			header("Location: ../permalink.html?id=".$parent);
 		}
 	}
 	elseif ($spamming) {
