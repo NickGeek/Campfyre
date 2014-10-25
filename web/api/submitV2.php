@@ -1,6 +1,4 @@
 <?php
-//This script is for legacy support. Don't update this
-
 require_once "Mail.php";
 
 //Details to login connect to the database
@@ -11,13 +9,14 @@ $dbname = "etherals_campfyre";
 //Connect to the database
 $con=mysqli_connect("localhost", $MYSQL_USERNAME, $MYSQL_PASSWORD, $dbname);
 
-if (isset($_GET['email'])) {
-	$email = $_GET['email'];
+if (isset($_POST['email'])) {
+	$email = $_POST['email'];
 }
 
 $time = time();
 
-$text = $_GET['postText'];
+$text = $_POST['postText'];
+$text = html_entity_decode($text);
 $originaltext = $text;
 //Strip all the HTML from the post so no one goes around adding js or weird stylings to the page
 $text = strip_tags($text);
@@ -25,22 +24,25 @@ $text = strip_tags($text);
 //Escape the date to make it safe (should be updated to mysqli sometimg eventually)
 $text = mysqli_real_escape_string($con, $text);
 
-if (!isset($_GET['attachment'])) {
+if (!isset($_POST['attachment']) || $_POST['attachment'] == "n/a" || $_POST['attachment'] == "") {
 	$attachment = "n/a";
 }
 else {
-	$attachment = mysqli_real_escape_string($con, $_GET['attachment']);
+	$attachment = mysqli_real_escape_string($con, $_POST['attachment']);
 }
 
-$type = $_GET['type'];
+$type = $_POST['type'];
 $ip = $_SERVER["REMOTE_ADDR"];
-$nsfw = $_GET['nsfw'];
+
+if (isset($_POST['nsfw'])) {
+	$nsfw = $_POST['nsfw'];
+}
 
 if (!isset($nsfw)) {
 	$nsfw = 0;
 }
 
-//Are ya'll a spamma?
+//Are y'all a spamma?
 $query = $con->query("SELECT * FROM posts ORDER BY id DESC LIMIT 3");
 $latestIPs = array();
 foreach ($query as $post) {
@@ -50,13 +52,16 @@ foreach ($query as $post) {
 if (count(array_unique($latestIPs)) === 1 && $latestIPs[0] === $ip && $ip != "210.55.213.210") { //210.55.213.210 is Wellington College, many people use this connection
 	$spamming = True;
 }
+elseif ($_POST['catcher'] != "") {
+	$spamming = True;
+}
 else {
 	$spamming = False;
 }
 
 //Post
 if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
-	if ($type == "post" && strlen($originaltext) <= 256 && !$spamming) {
+	if ($type == "post" && mb_strlen($originaltext, "UTF-8") <= 256 && !$spamming) {
 		//Auto moderator
 		$profanity = '/(\S*fuck\S*|bitch\S*|cum|jizz|pussy|penis|vagina|cock|dick|cunt|porn|p0rn|tits|tities|boob\S*|sex|ballsack|twat\S*|shit\S*)+([^a-z])*/im';
 		if (preg_match_all($profanity, $text) || $nsfw == 1) {
@@ -84,11 +89,11 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 			}
 		}
 
-		echo "Post Submitted";
+		echo "Post submitted";
 	}
-	elseif ($type == "comment" && strlen($originaltext) <= 256) {
+	elseif ($type == "comment" && mb_strlen($originaltext, "UTF-8") <= 256) {
 		//Submit a comment
-		$parent = $_GET['id'];
+		$parent = $_POST['id'];
 		$parent = mysqli_real_escape_string($con, $parent);
 		mysqli_query($con,"INSERT INTO comments (comment, ip, parent, time)
 			VALUES ('$text', '$ip', '$parent', '$time')");
@@ -117,7 +122,7 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 				'password' => $CAMPFYRE_NOTIFY_EMAIL
 			));
 			$mail = $smtp->send($to, $headers, $body);
-			}
+		}
 
 		if (!empty($email)) {
 			$email = mysqli_real_escape_string($con, $email);
@@ -125,17 +130,21 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 				SET `emails` = IFNULL(CONCAT(`emails`, ',$email'), '$email')
 				WHERE `id` = '$parent'");
 		}
-
-		echo "Comment Submitted";
+		if (!isset($_POST['tempFix'])) {
+			echo "Comment submitted";
+		}
+		else {
+			header("Location: ../permalink.html?id=".$parent);
+		}
 	}
 	elseif ($spamming) {
-		echo "Post not submitted: Woah there! Give someone else a turn to say something.";
+		echo "You've posted too much recently";
 	}
 	else {
-		echo "Post not submitted: Your post/comment is longer than 256 characters.";
+		echo "Your post is too long";
 	}
 }
 else {
-	echo "Post not submitted: No text was sent to be posted.";
+	echo "No data was received";
 }
 ?>

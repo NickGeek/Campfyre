@@ -7,7 +7,7 @@
     <EditText
         android:id="@+id/commentTextEdit"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:ems="10"
         android:hint="@string/hint_comment"
         android:inputType="textMultiLine|textCapSentences"
@@ -25,7 +25,8 @@
             android:id="@+id/counterTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/text_placeholderCounter" />
+            android:text="@string/text_placeholderCounter"
+            android:layout_marginLeft="5dp" />
 
         <TextView
             android:id="@+id/limitTextView"
