@@ -573,6 +573,13 @@
 						}
 						var page = 1;
 						loadPosts(page*50-50, showNSFW, true, "");
+
+						//Re-enable the post button
+						$('input[type="submit"]').removeAttr('disabled');
+					}
+					else if (request.readyState < 4) {
+						//Disable the post button
+						$('input[type="submit"]').attr('disabled', true);
 					}
 				}
 
