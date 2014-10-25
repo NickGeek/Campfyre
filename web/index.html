@@ -300,6 +300,36 @@
 				});
 			});*/
 
+			function stoke(id, score) {
+				var srequest = new XMLHttpRequest();
+				srequest.open("GET", "api/stoke.php?mobile=1&id="+id, true);
+
+				srequest.onreadystatechange = function () {
+					if (srequest.readyState == 4 && srequest.status == 200) {
+						//Response from the server
+						var title = '';
+						var message = '';
+						if (srequest.responseText == "Post stoked") {
+							title = srequest.responseText;
+							toastr.success(message, title);
+
+							//Update the stoke count on the post
+							var newScore = score + 1;
+							$('#stokeBtn'+id).html('<a id="stokeBtn'+id+'" class="btn" href="javascript:void();" onclick="stoke('+id+', '+newScore+')">Stoke ('+newScore+')</a>');
+						}
+						else {
+							title = 'Post not stoked'
+							message = srequest.responseText;
+							toastr.warning(message, title);
+						}
+					}
+					else if (srequest.readyState < 4) {
+					}
+				}
+
+				srequest.send();
+			}
+
 			function loadPosts(startingPost, nsfw, overwrite, search) {
 				//Get the posts from the server
 				var request = new XMLHttpRequest();
@@ -346,7 +376,7 @@
 								}
 
 								//Stokes and Comments
-								newHTML = newHTML + '<a class="btn" href="api/stoke.php?type=post&id='+postJSON[i]['id']+'">Stoke ('+postJSON[i]['score']+')</a>';
+								newHTML = newHTML + '<span id="stokeBtn'+postJSON[i]['id']+'"><a class="btn" href="javascript:void();" onclick="stoke('+postJSON[i]['id']+', '+postJSON[i]['score']+')">Stoke ('+postJSON[i]['score']+')</a></span>';
 								newHTML = newHTML + ' <a id="showCommentButton'+postJSON[i]['id']+'" class="btn" href="javascript:void(0)" onclick="showCommentForm('+postJSON[i]['id']+')">Load comments ('+postJSON[i]['commentNum'].split(" ")[0]+')</a>';
 								newHTML = newHTML + ' <a style="display: none;" id="hideCommentButton'+postJSON[i]['id']+'" class="btn" href="javascript:void(0)" onclick="hideCommentForm('+postJSON[i]['id']+')">Hide comments</a>';
 								newHTML = newHTML + '<div style="display: none;" id="commentForm'+postJSON[i]['id']+'">';
