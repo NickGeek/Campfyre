@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Campfyre</title>
+		<link rel="icon" type="image/x-icon" href="favicon.ico">
+		<meta name="description" content="256 characters. No login required. Have fun.">
+		<meta name="author" content="Etheral Studios">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<link rel="stylesheet" type="text/css" href="lato.css">
+		<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/2.3.2/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+
+		<style>
+			body {
+				background-image: url(img/bg.png);
+			}
+			.centre {
+				text-align: center;
+			}
+			h1 {
+				font-family: 'Lato', serif;
+				font-weight:900;
+				font-size: 4em;
+				color: #fa6900;
+				padding-right: 20px;
+			}
+			h2 {
+				text-align: center;
+				padding-right: 20px;
+				font-weight:100;
+				font-family: 'Lato', serif;
+				padding-left: 10px;
+			}
+			h3 {
+				padding-right: 20px;
+				font-weight:100;
+				font-family: 'Lato', serif;
+				padding-left: 10px;
+			}
+
+			h4 {
+				padding-right: 20px;
+				font-weight:100;
+				font-family: 'Lato', serif;
+				padding-left: 10px;
+			}
+
+			/* Mobile */
+			@media (max-width: 960px) {
+				.card {
+					padding:1rem;
+					box-shadow:0 1px 2px #aaa;
+					background:white;
+					margin:0 1rem 1rem;
+					border-radius:3px;
+					width: 80%;
+					margin-left:auto;
+					margin-right:auto;
+					word-wrap: break-word;
+				}
+			}
+			/* Widescreen */
+			@media (min-width: 960px) {
+				.card {
+					padding:1rem;
+					box-shadow:0 1px 2px #aaa;
+					background:white;
+					margin:0 1rem 1rem;
+					border-radius:3px;
+					width: 50%;
+					margin-left:auto;
+					margin-right:auto;
+					word-wrap: break-word;
+				}
+			}
+
+			#ip {
+				font-family: 'Lato', serif;
+			}
+			p {
+				font-family: 'Lato', serif;
+			}
+			a:link {
+				color: #5C5858;
+				text-decoration: none;
+			}
+			a:visited {
+				color: #5C5858;
+				text-decoration: none;
+			}
+			a:hover {
+				color: black;
+				text-decoration: underline;
+			}
+			a:active {
+				color: black;
+				text-decoration: underline;
+			}
+			#postText {
+				width: 95%;
+				height: auto;
+			}
+			.campaigns {
+				text-align: center;
+			}
+			#search {
+				margin-left: 15px;
+				margin-top: 15px;
+			}
+			#loadingMessage {
+				text-align: center;
+				display: block;
+				margin-left: auto;
+				margin-right: auto;
+				width: 100px;
+				height: 100px;
+			}
+			#loadingComments {
+				text-align: center;
+				display: block;
+				margin-left: auto;
+				margin-right: auto;
+				width: 100px;
+				height: 100px;
+			}
+		</style>
+
+		<script src="http://code.jquery.com/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+		<script>
+			var showNSFW = 0;
+			var tag = "";
+			var loaded = false;
+
+			//Attachments
+			function attach(url) {
+				var attachCode = '';
+				var URLbits = document.createElement('a');
+				URLbits.href = url;
+
+				//Get hostname
+				var hostname = URLbits.hostname;
+				var sitename = hostname.match(/(youtube|imgur.com|sharepic.tk)/i);
+				
+				//Create attachement code depending on site
+				if (sitename != null) {
+					switch (sitename[0]) {
+						case "youtube":
+							//Thanks to http://stackoverflow.com/questions/3452546/javascript-regex-how-to-get-youtube-video-id-from-url
+							var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+							var match = url.match(regExp);
+							var videoid = match[2];
+
+							var width = '95%';
+							var height = '420';
+							attachCode = '<br /><object width="'+width+'" height="'+height+'"><param name="movie" value="http://www.youtube.com/v/'+videoid+'&amp;hl=en_US&amp;fs=1?rel=0"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/'+videoid+'&amp;hl=en_US&amp;fs=1?rel=0" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="'+width+'" height="'+height+'"></embed></object>';
+							break;
+						case "imgur.com":
+							var imgid = url.split("/");
+							imgid = imgid[imgid.length-1];
+							imgid = imgid.split(".");
+							imgid = imgid[0];
+							attachCode = '<a target="_blank" href="http://i.imgur.com/'+imgid+'.png"><img style="max-height: 35%;" src="http://i.imgur.com/'+imgid+'.png" /></a>';
+							break;
+						case "sharepic.tk":
+							attachCode = '<a target="_blank" href="'+url+'"><img style="max-height: 35%;" src="'+url+'" /></a>';
+							break;
+						default:
+							attachCode = 'Attached URL: <a target="_blank" href="'+url+'">'+url+'</a>';
+							break;
+					}
+				}
+				else {
+					attachCode = 'Attached URL: <a target="_blank" href="'+url+'">'+url+'</a>';
+				}
+
+				return attachCode;
+			}
+
+			//Character counter
+			function countChar(val, id) {
+				var counterDiv = "#counter"+id
+				var len = val.value.length;
+				if (len >= 256) {
+					$(counterDiv).text("0/256");
+					val.value = val.value.substring(0, 256);
+				} else {
+					$(counterDiv).text(256 - len+"/256");
+				}
+			};
+
+			//Comment form
+			function showCommentForm(id) {
+				divToShow = "commentForm"+id;
+				//Show the comments div
+				document.getElementById(divToShow).style.display = 'inline';
+
+				//Hide the show button
+				document.getElementById("showCommentButton"+id).style.display = "none";
+				document.getElementById("hideCommentButton"+id).style.display = "";
+
+				//Load the comments
+				var crequest = new XMLHttpRequest();
+				crequest.onreadystatechange = function () {
+					if (crequest.readyState == 4 && crequest.status == 200) {
+						var commentJSON = JSON.parse(crequest.responseText);
+						crequest = null;
+
+						//Display comments
+						var newHTML = '';
+
+						//Display the data
+						for (var i = 0; i < commentJSON.length; ++i) {
+							newHTML = newHTML + '<hr />';
+							newHTML = newHTML + "<p><i id='ip'><img src='"+commentJSON[i]['pic']+"' /> says...<br></i>"+commentJSON[i]['time'];
+							newHTML = newHTML + '<h4 id="commentText">'+commentJSON[i]['comment'].replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
+						}
+
+						//Push the new HTML to the page
+						document.getElementById('comments'+id).innerHTML = newHTML;
+					}
+					else if (crequest.readyState < 4) {
+						document.getElementById('comments'+id).innerHTML = '<img id="loadingMessage" src="img/loading.gif" alt="loading..." />';					
+					}
+				}
+
+				//Send the request
+				crequest.open("GET", "api/getcommentsV2.php?size=64x64&id="+id+"&cache="+Math.random(), true);
+				crequest.send();
+			}
+
+			//Hide the comments
+			function hideCommentForm(id) {
+				divToHide = "commentForm"+id;
+				//Hide the comments div
+				document.getElementById(divToShow).style.display = 'none';
+
+				//Show the show button
+				document.getElementById("showCommentButton"+id).style.display = "";
+				document.getElementById("hideCommentButton"+id).style.display = "none";
+			}
+
+			//Auto links
+			var url_regex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
+			function linkURLs(text) {
+				return text.replace(
+					url_regex,
+					'<a href="$1">$1</a>'
+				);
+			}
+
+			function findLinks(id) {
+				$('h3').each(function() {
+					var postID = $(this).closest("section").attr("id");
+					if (postID < id) {
+						$('#postText'+postID+' a').contents().unwrap();
+						$(this).html(linkURLs($(this).html()));
+					}
+				});
+			};
+
+			function highlighter(id) {
+				findLinks(id);
+				findHashtags(id);
+			}
+
+			//#YOLOSWAG - thanks to http://stackoverflow.com/questions/4913555/find-twitter-hashtags-using-jquery-and-apply-a-link
+			hashtag_regexp = /#([a-zA-Z]+)/g;
+
+			function linkHashtags(text) {
+				return text.replace(
+					hashtag_regexp,
+					'<a href="javascript:void(0)" onclick="loadPosts(0, '+showNSFW+', true, \'#$1\')">#$1</a>'
+				);
+			}
+
+			function findHashtags(id) {
+				$('h3').each(function() {
+					var postID = $(this).closest("section").attr("id");
+					if (postID < id) {
+						$(this).html(linkHashtags($(this).html()));
+					}
+				});
+			};
+
+			/*/You can have your damn ~tags
+			tildetag_regexp = /~([a-zA-Z]+)/g;
+
+			function linkTildetags(text) {
+				return text.replace(
+					tildetag_regexp,
+					'<a href="search.php?tag=%7E$1">~$1</a>'
+				);
+			}
+
+			$(document).ready(function(){
+				$('h3').each(function() {
+					$(this).html(linkTildetags($(this).html()));
+				});
+			});*/
+
+			function stoke(id, score) {
+				var srequest = new XMLHttpRequest();
+				srequest.open("GET", "api/stoke.php?mobile=1&id="+id, true);
+
+				srequest.onreadystatechange = function () {
+					if (srequest.readyState == 4 && srequest.status == 200) {
+						//Response from the server
+						var title = '';
+						var message = '';
+						if (srequest.responseText == "Post stoked") {
+							title = srequest.responseText;
+							toastr.success(message, title);
+
+							//Update the stoke count on the post
+							var newScore = score + 1;
+							$('#stokeBtn'+id).html('<a id="stokeBtn'+id+'" class="btn" href="javascript:void();" onclick="stoke('+id+', '+newScore+')">Stoke ('+newScore+')</a>');
+						}
+						else {
+							title = 'Post not stoked'
+							message = srequest.responseText;
+							toastr.warning(message, title);
+						}
+					}
+					else if (srequest.readyState < 4) {
+					}
+				}
+
+				srequest.send();
+			}
+
+			function loadPosts(startingPost, nsfw, overwrite, search) {
+				//Get the posts from the server
+				var request = new XMLHttpRequest();
+				request.onreadystatechange = function () {
+					if (request.readyState == 4 && request.status == 200) {
+						var postJSON = JSON.parse(request.responseText);
+						//Hide the loading gif
+						$('#loadingMessage').hide();
+						request = null;
+						var pageID = 0;
+
+						//Display posts
+						var posts = document.getElementById('posts');
+						if (!overwrite) {
+							var newHTML = posts.innerHTML;
+						}
+						else {
+							var newHTML = '';
+						}
+
+						//Display the data
+						for (var i = 0; i < postJSON.length; ++i) {
+							newHTML = newHTML + "<section id="+postJSON[i]['id']+" class='card'>";
+								newHTML = newHTML + "<p><i id='ip'><img src='"+postJSON[i]['pic']+"' /> says...<br></i><a href='permalink.html?id="+postJSON[i]['id']+"'>Permalink</a> | "+postJSON[i]['time'];
+									
+									//Tags
+									switch (postJSON[i]['pic']) {
+										case "http://robohash.org/21232f297a57a5a743894a0e4a801fc3.png?set=set3&size=64x64":
+											newHTML = newHTML + " [admin]";
+											break;
+										case "http://robohash.org/5c1055237c524ca98c243b81ba3f9e93.png?set=set3&size=64x64":
+											newHTML = newHTML + " [Wellington College]";
+											break;
+									}
+									if (postJSON[i]['nsfw'] == 1) {
+										newHTML = newHTML + " [nsfw]";
+									}
+								newHTML = newHTML + "</p>";
+								newHTML = newHTML + '<h3 id="postText'+postJSON[i]['id']+'" style="text-align: left;">'+postJSON[i]['post'].replace(new RegExp('\r?\n','g'), '<br />')+'</h3>';
+
+								//Attachments
+								if (postJSON[i]['attachment'] != "n/a") {
+									newHTML = newHTML + attach(postJSON[i]['attachment'])+"<br><br>";
+								}
+
+								//Stokes and Comments
+								newHTML = newHTML + '<span id="stokeBtn'+postJSON[i]['id']+'"><a class="btn" href="javascript:void();" onclick="stoke('+postJSON[i]['id']+', '+postJSON[i]['score']+')">Stoke ('+postJSON[i]['score']+')</a></span>';
+								newHTML = newHTML + ' <a id="showCommentButton'+postJSON[i]['id']+'" class="btn" href="javascript:void(0)" onclick="showCommentForm('+postJSON[i]['id']+')">Load comments ('+postJSON[i]['commentNum'].split(" ")[0]+')</a>';
+								newHTML = newHTML + ' <a style="display: none;" id="hideCommentButton'+postJSON[i]['id']+'" class="btn" href="javascript:void(0)" onclick="hideCommentForm('+postJSON[i]['id']+')">Hide comments</a>';
+								newHTML = newHTML + '<div style="display: none;" id="commentForm'+postJSON[i]['id']+'">';
+									newHTML = newHTML + '<br><br><form id="postForm" action="api/submitV2.php" method="post">';
+										newHTML = newHTML + '<input type="hidden" name="type" value="comment">';
+										newHTML = newHTML + '<input type="hidden" name="id" value="'+postJSON[i]['id']+'">';
+										newHTML = newHTML + '<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, '+postJSON[i]['id']+')" onkeyup="countChar(this, '+postJSON[i]['id']+')" required></textarea>';
+										newHTML = newHTML + '<div style="font-family: "Lato", serif;" id="counter'+postJSON[i]['id']+'">256/256</div><br />';
+										newHTML = newHTML + '<b>Subscribe to comments:</b><br />';
+										newHTML = newHTML + '<input type="text" name="catcher" style="display: none;">';
+										newHTML = newHTML + '<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />';
+										newHTML = newHTML + '<input class="btn" type="submit" name="post" value="Post">';
+										newHTML = newHTML + '<input type="hidden" name="tempFix" value="1">';
+									newHTML = newHTML + '</form>';
+									//Comments have been posted lets show them
+									newHTML = newHTML + '<div id="comments'+postJSON[i]['id']+'">';
+									newHTML = newHTML + '</div>';
+								newHTML = newHTML + '</div>';
+							newHTML = newHTML + "</section>";
+						}
+
+						//Push the new HTML to the page
+						posts.innerHTML = newHTML;
+						
+						//Highlight links
+						pageID = postJSON[0]['id']+1;
+						highlighter(pageID);
+
+						loaded = true;
+					}
+					else if (request.readyState < 4) {
+						if (overwrite) {
+							document.getElementById('posts').innerHTML = "";
+						}
+						loaded = false;
+						$('#loadingMessage').show();
+					}
+				}
+
+			//Send the request
+			if (search != "") {
+				var requestURL = "api/getpostsV2.php?size=64x64&search=1&tag="+encodeURIComponent(search)+"&startingPost="+startingPost+"&nsfw="+nsfw+"&cache="+Math.random();
+
+				//Re-arange the site
+				tag = search;
+				$('#submit').hide();
+				$('#searchTitle').html('<h2>Results for: '+tag+'</h2>');
+				$('#goBack').show();
+			}
+			else {
+				var requestURL = "api/getpostsV2.php?size=64x64&startingPost="+startingPost+"&nsfw="+nsfw+"&cache="+Math.random();
+			}
+			request.open("GET", requestURL, true);
+			request.send();
+			}
+
+			function exitSearch(nsfw) {
+				tag = '';
+				$('#submit').show();
+				$('#searchTitle').html('');
+				$('#goBack').hide();
+				loadPosts(0, nsfw, true, tag);
+			}
+
+			//Load more posts one on the bottom
+			$(window).scroll(function() {
+				if($(window).scrollTop() + $(window).height() == $(document).height() & loaded) {
+					page += 1;
+					loadPosts(page*50-50, showNSFW, false, tag);
+				}
+			});
+		</script>
+		<script>
+		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+		  ga('create', 'UA-8931238-13', 'auto');
+		  ga('send', 'pageview');
+		</script>
+	</head>
+	<body>
+		<div id="search" class="input-append">
+			<form id="searchForm">
+				<input name="tag" type="text" class="rounded" placeholder="#hashtag" required />
+				<input class="btn" type="submit" name="search" value="Search">
+			</form>
+			<script>
+				$('#searchForm').submit(function(event) {
+					event.preventDefault();
+					var searchQuery = $('#searchForm').find('input[name="tag"]').val();
+					//Clear the form
+					$('#searchForm')[0].reset();
+					var page = 1;
+					tag = searchQuery;
+					loadPosts(page*50-50, showNSFW, true, tag);
+
+					return false;
+				});
+			</script>
+		</div>
+
+		<div class="centre">
+			<h1>Campfyre</h1>
+			<h2>256 characters.</h2>
+			<h2>No login required.</h2>
+			<h2>Have fun.</h2>
+		</div>
+
+		<div class="campaigns">
+		<a href="https://play.google.com/store/apps/details?id=nz.co.nickwebster.campfyre">
+		  <img style="height: 45px; width: auto;" alt="Android app on Google Play" src="http://developer.android.com/images/brand/en_app_rgb_wo_60.png" />
+		</a>
+
+		<br /><br /><div id="donate">
+			<script src="http://coinwidget.com/widget/coin.js"></script>
+			<script>
+			CoinWidgetCom.go({
+				wallet_address: "17F8D5ZjfPu94ndWQbjhLCgaxgtPWMk5Kb"
+				, currency: "bitcoin"
+				, counter: "count"
+				, alignment: "bl"
+				, qrcode: true
+				, auto_show: false
+				, lbl_button: "Donate"
+				, lbl_address: "Bitcoin Address:"
+				, lbl_count: "donations"
+				, lbl_amount: "Bitcoins"
+			});
+			</script>
+		</div></div><br />
+
+		<!-- Submit -->
+		<section id="submit" class="card">
+			<h2 style="text-align: left;">Write a post</h2>
+			<form id='postForm' method="post">
+				<input type="hidden" name="type" value="post">
+				<textarea id="postText" name="postText" placeholder="Post text" class="rounded" rows="5" onkeydown="countChar(this, -1)" onkeyup="countChar(this, -1)" required></textarea>
+				<div style="font-family: 'Lato', serif;" id="counter-1">256/256</div>
+				<input type="url" name="attachment" class="rounded" placeholder="Link to image/video (optional)">
+				<input type="text" name="catcher" style="display: none;">
+				<div class="checkbox">
+					<label>
+						<input name="nsfw" value="1" type="checkbox"> This post is Offensive/NSFW
+					</label>
+				  </div><br />
+				<b>Subscribe to comments:</b><br />
+				<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />
+				<input class="btn" type="submit" name="post" value="Post"> <a href="rules.html">Read the rules</a> | <a href="formatting.html">Formatting</a>
+			</form>
+		</section>
+		<div style="text-align: center;" id="options">
+			<script>
+				function refresh(nsfw) {
+					showNSFW = nsfw;
+					var page = 1;
+					loadPosts(page*50-50, showNSFW, true, tag);
+					nsfwToggle();
+				}
+			</script>
+			<p>
+			<script>
+				document.write('<div style="display: inline;" id="goBack"><a href="javascript:void()" onclick="exitSearch()"><< Go Back</a> | </div>');
+				$('#goBack').hide();
+			</script>
+			<a href="javascript:void(0);" onclick="refresh(0)">Refresh</a> | 
+			<span id="nsfwOption"></span><br><a href="https://github.com/NickGeek/Campfyre">Fork Campfyre on GitHub</a> | Written and run by <a href="http://nickwebster.co.nz">Nick Webster</a></p>
+			<script>
+				function nsfwToggle() {
+					var verb = "";
+					var newOption = 0;
+					if (showNSFW == 0) {
+						verb = "Show ";
+						newOption = 1;
+					}
+					else {
+						verb = "Hide ";
+					}
+					$('#nsfwOption').html('<a href="javascript:void(0)" onclick="refresh('+newOption+')">'+verb+'Offensive/NSFW posts</a>');
+				}
+				nsfwToggle();
+			</script>
+		</div>
+
+		<hr />
+
+		<!-- Posts -->
+		<div id="searchTitle" class="centre">
+		</div>
+
+		<div id="posts">
+		</div>
+
+		<script>
+			//Display the posts
+			var page = 1;
+			loadPosts(page*50-50, showNSFW, true, "");
+		</script>
+
+		<script>
+			$('#postForm').submit(function(event) {
+				var request = new XMLHttpRequest();
+				var parameters = $('#postForm').serialize();
+				request.open("POST", "api/submitV2.php", true);
+				request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+				request.onreadystatechange = function () {
+					if (request.readyState == 4 && request.status == 200) {
+						//Response from the server
+						var title = '';
+						var message = '';
+						if (request.responseText == "Post submitted" || request.responseText == "Comment submitted") {
+							title = request.responseText;
+							toastr.success(message, title);
+
+							//Clear the form
+							$('#postForm')[0].reset();
+						}
+						else {
+							title = 'Post not submitted'
+							message = request.responseText;
+							toastr.warning(message, title);
+						}
+						var page = 1;
+						loadPosts(page*50-50, showNSFW, true, "");
+
+						//Re-enable the post button
+						$('input[type="submit"]').removeAttr('disabled');
+					}
+					else if (request.readyState < 4) {
+						//Disable the post button
+						$('input[type="submit"]').attr('disabled', true);
+					}
+				}
+
+				request.send(parameters);
+				return false;
+			});
+		</script>
+
+		<!-- Loading GIF (with a hard G) -->
+		<img id="loadingMessage" src="img/loading.gif" alt="loading..." />
+	</body>
+</html>

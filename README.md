@@ -6,3 +6,5 @@ Campfyre is an online message board that allows anyone to post without having to
 You can use Campfyre at [http://campfyre.org](http://campfyre.org) or download [Campfyre on Google Play](https://play.google.com/store/apps/details?id=nz.co.nickwebster.campfyre)
 
 Developing? Have a look at [the wiki](https://github.com/NickGeek/Campfyre/wiki/Building-Campfyre).
+
+If you want to try whatever is on the current development branch (which is probably super unstable) go to [http://nick.geek.nz/devfyre](http://nick.geek.nz/devfyre).

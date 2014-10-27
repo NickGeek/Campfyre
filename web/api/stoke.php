@@ -7,7 +7,6 @@ $con=mysqli_connect("localhost", $MYSQL_USERNAME, $MYSQL_PASSWORD, $dbname);
 
 //Setup Variables
 $ip = $_SERVER['REMOTE_ADDR'];
-$type = $_GET['type'];
 $id = mysqli_real_escape_string($con, $_GET['id']);
 
 //Make sure the user hasn't already voted
@@ -28,7 +27,7 @@ else {
 		header("Location: ../#".$_GET['id']);
 	}
 	else {
-		echo "Stoked";
+		echo "Post stoked";
 	}
 }
 ?>

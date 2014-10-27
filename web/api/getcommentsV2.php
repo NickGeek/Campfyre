@@ -73,7 +73,7 @@ function getLatest($con, $id) {
 	$data = array();
 
 	//Get the data
-	$query = $con->query("SELECT * FROM comments WHERE parent = '".$id."' ORDER BY id ASC LIMIT 50");
+	$query = $con->query("SELECT * FROM comments WHERE parent = '".$id."' ORDER BY id ASC");
 
 	if (mysqli_num_rows($query) > 0) {
 		foreach ($query as $item) {

@@ -3,6 +3,7 @@
     <style name="AppBaseTheme" parent="android:Theme.Material.Light.DarkActionBar">
         <!-- API 14 theme customizations can go here. -->
         <item name="android:colorPrimary">#ff6900</item>
-        <item name="android:colorPrimaryDark">#e45f00</item>
+        <item name="android:colorPrimaryDark">#cc3600</item>
+        <item name="android:colorAccent">#ff6900</item>
     </style>
 </resources>
