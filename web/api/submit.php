@@ -102,7 +102,7 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 			$from = 'notify@campfyre.org';
 			$to = $address;
 			$subject = 'New comment on post - Campfyre';
-			$body = "<img src='http://robohash.org/".md5($ip).".png?set=set3&size=100x100' /> says:<br /><h3>".str_replace(array("\r\n","\r","\n"), "<br />", $originaltext)."</h3><a href='http://campfyre.org/#".$parent."'>View post on Campfyre.</a>";
+			$body = "<img src='http://robohash.org/".md5($ip).".png?set=set3&size=100x100' /> says:<br /><h3>".str_replace(array("\r\n","\r","\n"), "<br />", $originaltext)."</h3><a href='http://campfyre.org/permalink.html?id=".$parent."'>View post on Campfyre.</a>";
 			$headers = array(
 				'From' => $from,
 				'To' => $to,
