@@ -134,6 +134,8 @@
 			var tag = "";
 			var loaded = false;
 			var page = 1;
+			var postJSON = '';
+			var lastPost = 0;
 
 			//Attachments
 			function attach(url) {
@@ -332,12 +334,54 @@
 				srequest.send();
 			}
 
+			function updatePosts() {
+				//Update all the information in the last 50 posts (to save data) if they have loaded
+				if (loaded) {
+					var urequest = new XMLHttpRequest();
+
+					var requestURL = '';
+					startingPost = 0;
+					if (tag != "") {
+						var requestURL = "api/getpostsV2.php?size=64x64&search=1&tag="+encodeURIComponent(tag)+"&startingPost="+startingPost+"&nsfw="+showNSFW+"&cache="+Math.random();
+					}
+					else {
+						var requestURL = "api/getpostsV2.php?size=64x64&startingPost="+startingPost+"&nsfw="+showNSFW+"&cache="+Math.random();
+					}
+					urequest.open("GET", requestURL, true);
+
+					urequest.onreadystatechange = function () {
+						if (urequest.readyState == 4 && urequest.status == 200 && lastPost) {
+							var newJSON = JSON.parse(urequest.responseText);
+							for (var i = 0; i < newJSON.length; ++i) {
+								if (newJSON[i]['id'] <= postJSON[0]['id']) {
+									//Update the post
+									$('#stokeBtn'+newJSON[i]['id']).html('<a id="stokeBtn'+newJSON[i]['id']+'" class="btn" href="javascript:void();" onclick="stoke('+newJSON[i]['id']+', '+newJSON[i]['score']+')">Stoke ('+newJSON[i]['score']+')</a>');
+
+									$('#postTime'+newJSON[i]['id']).html(newJSON[i]['time']);
+
+									$('#showCommentButton'+newJSON[i]['id']).html('Load comments ('+newJSON[i]['commentNum'].split(" ")[0]+')');
+								}
+								else {
+									continue;
+								}
+							}
+						}
+						else if (urequest.readyState < 4) {
+						}
+					}
+
+					urequest.send();
+				}
+			}
+			//Run the above function every 3 seconds
+			setInterval(updatePosts, 3000);
+
 			function loadPosts(startingPost, nsfw, overwrite, search) {
 				//Get the posts from the server
 				var request = new XMLHttpRequest();
 				request.onreadystatechange = function () {
 					if (request.readyState == 4 && request.status == 200) {
-						var postJSON = JSON.parse(request.responseText);
+						postJSON = JSON.parse(request.responseText);
 						//Hide the loading gif
 						$('#loadingMessage').hide();
 						request = null;
@@ -358,7 +402,7 @@
 						//Display the data
 						for (var i = 0; i < postJSON.length; ++i) {
 							newHTML = newHTML + "<section id="+postJSON[i]['id']+" class='card'>";
-								newHTML = newHTML + "<p><i id='ip'><img src='"+postJSON[i]['pic']+"' /> says...<br></i><a href='permalink.html?id="+postJSON[i]['id']+"'>Permalink</a> | "+postJSON[i]['time'];
+								newHTML = newHTML + "<p><i id='ip'><img src='"+postJSON[i]['pic']+"' /> says...<br></i><a href='permalink.html?id="+postJSON[i]['id']+"'>Permalink</a> | <span id='postTime"+postJSON[i]['id']+"'>"+postJSON[i]['time']+"</span>";
 									
 									//Tags
 									switch (postJSON[i]['pic']) {
@@ -401,6 +445,8 @@
 									newHTML = newHTML + '</div>';
 								newHTML = newHTML + '</div>';
 							newHTML = newHTML + "</section>";
+
+							lastPost = postJSON[i]['id'];
 						}
 
 						//Push the new HTML to the page
