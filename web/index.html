@@ -129,9 +129,11 @@
 		<script src="http://code.jquery.com/jquery.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 		<script>
+			//Setting up variables
 			var showNSFW = 0;
 			var tag = "";
 			var loaded = false;
+			var page = 1;
 
 			//Attachments
 			function attach(url) {
@@ -348,6 +350,9 @@
 						}
 						else {
 							var newHTML = '';
+							//Making sure that we start on zero because I probably screwed up somewhere
+							page = 1;
+							startingPost = 0;
 						}
 
 						//Display the data
@@ -433,12 +438,13 @@
 			request.send();
 			}
 
-			function exitSearch(nsfw) {
+			function exitSearch() {
 				tag = '';
 				$('#submit').show();
 				$('#searchTitle').html('');
 				$('#goBack').hide();
-				loadPosts(0, nsfw, true, tag);
+				page = 1;
+				loadPosts(page*50-50, showNSFW, true, tag);
 			}
 
 			//Load more posts one on the bottom
@@ -471,7 +477,7 @@
 					var searchQuery = $('#searchForm').find('input[name="tag"]').val();
 					//Clear the form
 					$('#searchForm')[0].reset();
-					var page = 1;
+					page = 1;
 					tag = searchQuery;
 					loadPosts(page*50-50, showNSFW, true, tag);
 
@@ -532,8 +538,10 @@
 		<div style="text-align: center;" id="options">
 			<script>
 				function refresh(nsfw) {
-					showNSFW = nsfw;
-					var page = 1;
+					if (nsfw === 0 || nsfw === 1){
+						showNSFW = nsfw;
+					}
+					page = 1;
 					loadPosts(page*50-50, showNSFW, true, tag);
 					nsfwToggle();
 				}
@@ -543,13 +551,13 @@
 				document.write('<div style="display: inline;" id="goBack"><a href="javascript:void()" onclick="exitSearch()"><< Go Back</a> | </div>');
 				$('#goBack').hide();
 			</script>
-			<a href="javascript:void(0);" onclick="refresh(0)">Refresh</a> | 
+			<a href="javascript:void(0);" onclick="refresh()">Refresh</a> | 
 			<span id="nsfwOption"></span><br><a href="https://github.com/NickGeek/Campfyre">Fork Campfyre on GitHub</a> | Written and run by <a href="http://nickwebster.co.nz">Nick Webster</a></p>
 			<script>
 				function nsfwToggle() {
 					var verb = "";
 					var newOption = 0;
-					if (showNSFW == 0) {
+					if (showNSFW === 0) {
 						verb = "Show ";
 						newOption = 1;
 					}
@@ -573,7 +581,7 @@
 
 		<script>
 			//Display the posts
-			var page = 1;
+			page = 1;
 			loadPosts(page*50-50, showNSFW, true, "");
 		</script>
 
@@ -601,7 +609,7 @@
 							message = request.responseText;
 							toastr.warning(message, title);
 						}
-						var page = 1;
+						page = 1;
 						loadPosts(page*50-50, showNSFW, true, "");
 
 						//Re-enable the post button
