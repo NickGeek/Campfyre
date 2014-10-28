@@ -333,7 +333,6 @@
 			}
 
 			function loadPosts(startingPost, nsfw, overwrite, search) {
-				console.log(page);
 				//Get the posts from the server
 				var request = new XMLHttpRequest();
 				request.onreadystatechange = function () {
@@ -439,13 +438,13 @@
 			request.send();
 			}
 
-			function exitSearch(nsfw) {
+			function exitSearch() {
 				tag = '';
 				$('#submit').show();
 				$('#searchTitle').html('');
 				$('#goBack').hide();
 				page = 1;
-				loadPosts(page*50-50, nsfw, true, tag);
+				loadPosts(page*50-50, showNSFW, true, tag);
 			}
 
 			//Load more posts one on the bottom
@@ -539,7 +538,9 @@
 		<div style="text-align: center;" id="options">
 			<script>
 				function refresh(nsfw) {
-					showNSFW = nsfw;
+					if (nsfw === 0 || nsfw === 1){
+						showNSFW = nsfw;
+					}
 					page = 1;
 					loadPosts(page*50-50, showNSFW, true, tag);
 					nsfwToggle();
@@ -550,13 +551,13 @@
 				document.write('<div style="display: inline;" id="goBack"><a href="javascript:void()" onclick="exitSearch()"><< Go Back</a> | </div>');
 				$('#goBack').hide();
 			</script>
-			<a href="javascript:void(0);" onclick="refresh(0)">Refresh</a> | 
+			<a href="javascript:void(0);" onclick="refresh()">Refresh</a> | 
 			<span id="nsfwOption"></span><br><a href="https://github.com/NickGeek/Campfyre">Fork Campfyre on GitHub</a> | Written and run by <a href="http://nickwebster.co.nz">Nick Webster</a></p>
 			<script>
 				function nsfwToggle() {
 					var verb = "";
 					var newOption = 0;
-					if (showNSFW == 0) {
+					if (showNSFW === 0) {
 						verb = "Show ";
 						newOption = 1;
 					}
