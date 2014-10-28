@@ -129,9 +129,11 @@
 		<script src="http://code.jquery.com/jquery.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 		<script>
+			//Setting up variables
 			var showNSFW = 0;
 			var tag = "";
 			var loaded = false;
+			var page = 1;
 
 			//Attachments
 			function attach(url) {
@@ -331,6 +333,7 @@
 			}
 
 			function loadPosts(startingPost, nsfw, overwrite, search) {
+				console.log(page);
 				//Get the posts from the server
 				var request = new XMLHttpRequest();
 				request.onreadystatechange = function () {
@@ -348,6 +351,9 @@
 						}
 						else {
 							var newHTML = '';
+							//Making sure that we start on zero because I probably screwed up somewhere
+							page = 1;
+							startingPost = 0;
 						}
 
 						//Display the data
@@ -438,7 +444,8 @@
 				$('#submit').show();
 				$('#searchTitle').html('');
 				$('#goBack').hide();
-				loadPosts(0, nsfw, true, tag);
+				page = 1;
+				loadPosts(page*50-50, nsfw, true, tag);
 			}
 
 			//Load more posts one on the bottom
@@ -471,7 +478,7 @@
 					var searchQuery = $('#searchForm').find('input[name="tag"]').val();
 					//Clear the form
 					$('#searchForm')[0].reset();
-					var page = 1;
+					page = 1;
 					tag = searchQuery;
 					loadPosts(page*50-50, showNSFW, true, tag);
 
@@ -533,7 +540,7 @@
 			<script>
 				function refresh(nsfw) {
 					showNSFW = nsfw;
-					var page = 1;
+					page = 1;
 					loadPosts(page*50-50, showNSFW, true, tag);
 					nsfwToggle();
 				}
@@ -573,7 +580,7 @@
 
 		<script>
 			//Display the posts
-			var page = 1;
+			page = 1;
 			loadPosts(page*50-50, showNSFW, true, "");
 		</script>
 
@@ -601,7 +608,7 @@
 							message = request.responseText;
 							toastr.warning(message, title);
 						}
-						var page = 1;
+						page = 1;
 						loadPosts(page*50-50, showNSFW, true, "");
 
 						//Re-enable the post button
