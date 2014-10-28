@@ -332,6 +332,15 @@
 				srequest.send();
 			}
 
+			function updatePosts() {
+				//Update all the information in the posts if they have loaded
+				if (loaded) {
+					// console.log("test");
+				}
+			}
+			//Run the above function every 3 seconds
+			setInterval(updatePosts, 3000);
+
 			function loadPosts(startingPost, nsfw, overwrite, search) {
 				//Get the posts from the server
 				var request = new XMLHttpRequest();
