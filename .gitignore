@@ -153,3 +153,9 @@ docs/_build/
 
 # PyBuilder
 target/
+
+#Virtual env
+include/
+lib/
+local/
+bin/
