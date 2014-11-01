@@ -19,6 +19,7 @@
   "homepage": "https://github.com/NickGeek/Campfyre",
   "dependencies": {
     "express": "^4.10.1",
-    "socket.io": "^1.2.0"
+    "socket.io": "^1.2.0",
+    "mysql": "~2.5.2"
   }
 }

@@ -128,6 +128,7 @@
 
 		<script src="http://code.jquery.com/jquery.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+		<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
 		<script>
 			//Setting up variables
 			var showNSFW = 0;
@@ -136,6 +137,7 @@
 			var page = 1;
 			var postJSON = '';
 			var lastPost = 0;
+			var ws = io('http://localhost:3973');
 
 			//Attachments
 			function attach(url) {

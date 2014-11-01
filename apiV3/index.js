@@ -1,10 +1,29 @@
 var app = require('express')();
 var http = require('http').Server(app);
+var ws = require('socket.io')(http);
+var mysql = require('mysql');
+var sys = require('sys');
 
-app.get('/', function(req, res){
-	res.send('<h1>Hello world</h1>');
+//Connect to the database
+var con = mysql.createConnection({
+	host: 'localhost',
+	user: '',
+	password: ''
 });
 
-http.listen(process.env.PORT, function(){
-	console.log('listening on *:'+process.env.PORT);
+function getPosts(size, search, nsfw, startingPost) {
+
+}
+
+app.get('/', function(req, res){
+	//TODO: emulate old API
+	res.send('<p>Server running</p>');
+});
+
+ws.on('connection', function(socket) {
+	console.log('user connected');
+})
+
+http.listen(3973, function(){
+	console.log('listening on *:'+3973);
 });
