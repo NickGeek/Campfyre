@@ -1,6 +1,7 @@
 <?php
-include("/home1/etherals/mysqlDetails.php");
-$dbname = "etherals_campfyre";
+include("/home/nick/mysqlDetails.php");
+include("/home/nick/passwords.php");
+$dbname = "campfyre";
 
 //Connect to the database
 $con=mysqli_connect("localhost", $MYSQL_USERNAME, $MYSQL_PASSWORD, $dbname);

@@ -4,9 +4,9 @@
 require_once "Mail.php";
 
 //Details to login connect to the database
-include("/home1/etherals/mysqlDetails.php");
-include("/home1/etherals/passwords.php");
-$dbname = "etherals_campfyre";
+include("/home/nick/mysqlDetails.php");
+include("/home/nick/passwords.php");
+$dbname = "campfyre";
 
 //Connect to the database
 $con=mysqli_connect("localhost", $MYSQL_USERNAME, $MYSQL_PASSWORD, $dbname);
@@ -117,7 +117,7 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 				'password' => $CAMPFYRE_NOTIFY_EMAIL
 			));
 			$mail = $smtp->send($to, $headers, $body);
-			}
+		}
 
 		if (!empty($email)) {
 			$email = mysqli_real_escape_string($con, $email);

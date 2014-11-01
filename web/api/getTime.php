@@ -1,7 +1,8 @@
 <?php
 //Details to login connect to the database
-include("/home1/etherals/mysqlDetails.php");
-$dbname = "etherals_campfyre";
+include("/home/nick/mysqlDetails.php");
+include("/home/nick/passwords.php");
+$dbname = "campfyre";
 
 //Connect to the database
 $con=mysqli_connect("localhost", $MYSQL_USERNAME, $MYSQL_PASSWORD, $dbname);
@@ -42,11 +43,7 @@ function relativeTime($timeOfPost) {
 }
 
 function getLatest($con) {
-	$dbusername = "etherals";
-	$dbpassword = "SuperXL1`";
-	$dbname = "etherals_campfyre";
-	$oldcon = mysql_connect("localhost", $dbusername, $dbpassword);
-	$id = mysql_real_escape_string($_GET['id'], $oldcon);
+	$id = mysqli_real_escape_string($con, $_GET['id']);
 	//Array the data is in
 	$data = array();
 

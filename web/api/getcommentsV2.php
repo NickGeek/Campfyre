@@ -1,7 +1,8 @@
 <?php
 //Details to login connect to the database
-include("/home1/etherals/mysqlDetails.php");
-$dbname = "etherals_campfyre";
+include("/home/nick/mysqlDetails.php");
+include("/home/nick/passwords.php");
+$dbname = "campfyre";
 
 //Connect to the database
 $con=mysqli_connect("localhost", $MYSQL_USERNAME, $MYSQL_PASSWORD, $dbname);
@@ -45,8 +46,9 @@ function relativeTime($timeOfPost) {
 
 function getPic($id) {
 	//Details to login connect to the database
-	include("/home1/etherals/mysqlDetails.php");
-	$dbname = "etherals_campfyre";
+	include("/home/nick/mysqlDetails.php");
+	include("/home/nick/passwords.php");
+	$dbname = "campfyre";
 
 	//Connect to the database
 	$con=mysqli_connect("localhost", $MYSQL_USERNAME, $MYSQL_PASSWORD, $dbname);
