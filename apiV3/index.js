@@ -2,14 +2,26 @@ var app = require('express')();
 var http = require('http').Server(app);
 var ws = require('socket.io')(http);
 var mysql = require('mysql');
-var sys = require('sys');
+var dbName = process.argv[2];
+var dbUsername = process.argv[3];
+var dbPassword = process.argv[4];
+var emailPassword = process.argv[5];
 
 //Connect to the database
 var con = mysql.createConnection({
-	host: 'localhost',
-	user: '',
-	password: ''
+	host : 'localhost',
+	user : dbUsername,
+	password : dbPassword,
+	database : dbName
 });
+con.connect(function(e) {
+	if (e) throw e;
+});
+
+con.query('SELECT * FROM posts ORDER BY id DESC LIMIT 50', function(e, rows) {
+	if (e) throw e;
+	console.log(rows[0])
+})
 
 function getPosts(size, search, nsfw, startingPost) {
 
