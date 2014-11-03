@@ -20,6 +20,7 @@
   "dependencies": {
     "express": "^4.10.1",
     "socket.io": "^1.2.0",
-    "mysql": "~2.5.2"
+    "mysql": "~2.5.2",
+    "utf8": "~2.0.0"
   }
 }
