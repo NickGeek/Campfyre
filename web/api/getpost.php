@@ -63,6 +63,7 @@ function hashify($ret) {
 
 //Connect to the database
 $con=mysqli_connect("localhost", $MYSQL_USERNAME, $MYSQL_PASSWORD, $dbname);
+mysqli_set_charset($con, "utf8");
 
 $id = mysqli_real_escape_string($con, $_GET['id']);
 

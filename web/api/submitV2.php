@@ -8,6 +8,7 @@ $dbname = "campfyre";
 
 //Connect to the database
 $con=mysqli_connect("localhost", $MYSQL_USERNAME, $MYSQL_PASSWORD, $dbname);
+mysqli_set_charset($con, "utf8");
 
 if (isset($_POST['email'])) {
 	$email = $_POST['email'];
