@@ -156,11 +156,12 @@
 
 				//Get hostname
 				var hostname = URLbits.hostname;
-				var sitename = hostname.match(/(youtube|imgur.com|sharepic.tk)/i);
+				var sitename = hostname.match(/(youtube|youtu.be|imgur.com|sharepic.tk)/i);
 				
 				//Create attachement code depending on site
 				if (sitename != null) {
 					switch (sitename[0]) {
+						case "youtu.be":
 						case "youtube":
 							//Thanks to http://stackoverflow.com/questions/3452546/javascript-regex-how-to-get-youtube-video-id-from-url
 							var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
