@@ -13,7 +13,8 @@ var con = mysql.createConnection({
 	host: 'localhost',
 	user: dbUsername,
 	password: dbPassword,
-	database: dbName
+	database: dbName,
+	charset: 'utf8mb4'
 });
 con.connect(function(e) {
 	if (e) throw e;
@@ -28,7 +29,7 @@ function getPosts(size, search, nsfw, startingPost, socket) {
 		for (var i = 0; i < posts.length; ++i) {
 			socket.emit('newPost', posts[0]['post']);
 		}
-		console.log(JSON.parse(JSON.stringify(posts[0]['post'])));
+		console.log(posts[0]['post']);
 	})
 }
 
