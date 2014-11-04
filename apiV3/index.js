@@ -27,7 +27,7 @@ function getPosts(size, search, nsfw, startingPost, socket) {
 		//Send the posts to the user
 		for (var i = 0; i < posts.length; ++i) {
 			var post = posts[i];
-			con.query('SELECT `id` FROM comments WHERE `parent` = '+posts[i]['id']+';', function(e2, comments) {
+			con.query('SELECT `id` FROM comments WHERE `parent` = '+posts[i]['id']+';', (function(i, post, e2, comments) {
 				if (comments.length === 1) {
 					post.commentNum = comments.length+' comment';
 				}
@@ -37,7 +37,7 @@ function getPosts(size, search, nsfw, startingPost, socket) {
 				console.log(post);
 				console.log(i);
 				socket.emit('newPost', post);
-			});
+			}).bind(this, i, post));
 		}
 	})
 }
