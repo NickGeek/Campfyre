@@ -26,9 +26,8 @@ function getPosts(size, search, nsfw, startingPost, socket) {
 		
 		//Send the posts to the user
 		for (var i = 0; i < posts.length; ++i) {
-			socket.emit('newPost', posts[0]['post']);
+			socket.emit('newPost', posts[i]);
 		}
-		console.log(posts[0]['post']);
 	})
 }
 

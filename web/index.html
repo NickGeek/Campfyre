@@ -145,7 +145,7 @@
 			var lastPost = 0;
 			var ws = io('http://'+window.location.hostname+':3973');
 			ws.on('newPost', function(postJSON) {
-				$('.centre').html(postJSON);
+				console.log(postJSON);
 			});
 
 			//Attachments
