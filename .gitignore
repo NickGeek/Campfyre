@@ -101,3 +101,5 @@ proguard/
 # Development version
 devfyre/
 
+# Vagrant Directory
+.vagrant

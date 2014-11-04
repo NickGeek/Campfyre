@@ -1,5 +1,4 @@
 <?php
-require_once "Mail.php";
 
 //Details to login connect to the database
 include("/home/nick/mysqlDetails.php");
@@ -9,6 +8,10 @@ $dbname = "campfyre";
 //Connect to the database
 $con=mysqli_connect("localhost", $MYSQL_USERNAME, $MYSQL_PASSWORD, $dbname);
 mysqli_set_charset($con, "utf8");
+
+if (!isset($CAMPFYRE_DISABLE_EMAIL)) {
+  require_once "Mail.php";
+}
 
 if (isset($_POST['email'])) {
 	$email = $_POST['email'];
@@ -99,38 +102,40 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 		mysqli_query($con,"INSERT INTO comments (comment, ip, parent, time)
 			VALUES ('$text', '$ip', '$parent', '$time')");
 
-		//E-Mail everyone who is subscribed to this post
-		$emailquery = $con->query("SELECT `emails` FROM posts WHERE id = '$parent'");
-		$emails = explode(",", mysqli_fetch_assoc($emailquery)['emails']);
+    if (!isset($CAMPFYRE_DISABLE_EMAIL)) {
+      //E-Mail everyone who is subscribed to this post
+      $emailquery = $con->query("SELECT `emails` FROM posts WHERE id = '$parent'");
+      $emails = explode(",", mysqli_fetch_assoc($emailquery)['emails']);
 
-		foreach ($emails as $address) {
-			//Send the email over SMTP
-			$from = 'notify@campfyre.org';
-			$to = $address;
-			$subject = 'New comment on post - Campfyre';
-			$body = "<img src='http://robohash.org/".md5($ip).".png?set=set3&size=100x100' /> says:<br /><h3>".str_replace(array("\r\n","\r","\n"), "<br />", $originaltext)."</h3><a href='http://campfyre.org/permalink.html?id=".$parent."'>View post on Campfyre.</a>";
-			$headers = array(
-				'From' => $from,
-				'To' => $to,
-				'Subject' => $subject,
-				'Content-type' => 'text/html'
-			);
-			$smtp = Mail::factory('smtp', array(
-				'host' => 'ssl://box710.bluehost.com', //Change these details to your email server for testing, or just comment this section out
-				'port' => '465',
-				'auth' => true,
-				'username' => 'notify@campfyre.org',
-				'password' => $CAMPFYRE_NOTIFY_EMAIL
-			));
-			$mail = $smtp->send($to, $headers, $body);
-		}
+      foreach ($emails as $address) {
+        //Send the email over SMTP
+        $from = 'notify@campfyre.org';
+        $to = $address;
+        $subject = 'New comment on post - Campfyre';
+        $body = "<img src='http://robohash.org/".md5($ip).".png?set=set3&size=100x100' /> says:<br /><h3>".str_replace(array("\r\n","\r","\n"), "<br />", $originaltext)."</h3><a href='http://campfyre.org/permalink.html?id=".$parent."'>View post on Campfyre.</a>";
+        $headers = array(
+          'From' => $from,
+          'To' => $to,
+          'Subject' => $subject,
+          'Content-type' => 'text/html'
+        );
+        $smtp = Mail::factory('smtp', array(
+          'host' => 'ssl://box710.bluehost.com', //Change these details to your email server for testing, or just comment this section out
+          'port' => '465',
+          'auth' => true,
+          'username' => 'notify@campfyre.org',
+          'password' => $CAMPFYRE_NOTIFY_EMAIL
+        ));
+        $mail = $smtp->send($to, $headers, $body);
+      }
 
-		if (!empty($email)) {
-			$email = mysqli_real_escape_string($con, $email);
-			mysqli_query($con,"UPDATE `posts`
-				SET `emails` = IFNULL(CONCAT(`emails`, ',$email'), '$email')
-				WHERE `id` = '$parent'");
-		}
+      if (!empty($email)) {
+        $email = mysqli_real_escape_string($con, $email);
+        mysqli_query($con,"UPDATE `posts`
+          SET `emails` = IFNULL(CONCAT(`emails`, ',$email'), '$email')
+          WHERE `id` = '$parent'");
+      }
+    }
 		if (!isset($_POST['tempFix'])) {
 			echo "Comment submitted";
 		}
