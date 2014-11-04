@@ -2,7 +2,6 @@ var app = require('express')();
 var http = require('http').Server(app);
 var ws = require('socket.io')(http);
 var mysql = require('mysql');
-var utf8 = require('utf8');
 var dbName = process.argv[2];
 var dbUsername = process.argv[3];
 var dbPassword = process.argv[4];
