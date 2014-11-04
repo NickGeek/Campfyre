@@ -6,6 +6,7 @@ $dbname = "campfyre";
 
 //Connect to the database
 $con=mysqli_connect("localhost", $MYSQL_USERNAME, $MYSQL_PASSWORD, $dbname);
+mysqli_set_charset($con, "utf8");
 
 function getRelativeTime($secs) {
 	$second = 1;

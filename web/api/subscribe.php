@@ -6,7 +6,7 @@ $dbname = "campfyre";
 
 //Connect to the database
 $con=mysqli_connect("localhost", $MYSQL_USERNAME, $MYSQL_PASSWORD, $dbname);
-$oldcon = mysql_connect("localhost", $dbusername, $dbpassword);
+mysqli_set_charset($con, "utf8");
 
 $parent = mysqli_real_escape_string($con, $_GET['id']);
 $email = mysqli_real_escape_string($con, $_GET['email']);
