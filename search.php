@@ -129,7 +129,7 @@ function attachmentDisplay($url, $nsfw) {
 				font-family: 'Lato', serif;
 				font-weight:900;
 				font-size: 4em;
-				color: #fa6900;
+				color: #ff6900;
 				padding-right: 20px;
 			}
 			h2 {
