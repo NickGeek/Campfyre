@@ -135,17 +135,70 @@
 		<script src="http://code.jquery.com/jquery.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 		<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+		<script src="js/moment.js"></script>
 		<script>
 			//Setting up variables
 			var showNSFW = 0;
 			var tag = "";
 			var loaded = false;
 			var page = 1;
-			var postJSON = '';
+			var posts;
 			var lastPost = 0;
 			var ws = io('http://'+window.location.hostname+':3973');
-			ws.on('newPost', function(postJSON) {
-				console.log(postJSON);
+
+			//Display posts when they arrive
+			ws.on('newPost', function(posts) {
+				console.log(posts)
+				var newHTML;
+				newHTML = newHTML + "<section id="+posts['id']+" class='card'>";
+					newHTML = newHTML + "<p><i id='ip'><img src='"+posts['pic']+"' /> says...<br></i><a href='permalink.html?id="+posts['id']+"'>Permalink</a> | <span id='postTime"+posts['id']+"'>"+moment(moment.unix(posts['time'])).fromNow()+"</span>";
+						
+						//Tags
+						switch (posts['pic']) {
+							case "http://robohash.org/21232f297a57a5a743894a0e4a801fc3.png?set=set3&size=64x64":
+								newHTML = newHTML + " [admin]";
+								break;
+							case "http://robohash.org/5c1055237c524ca98c243b81ba3f9e93.png?set=set3&size=64x64":
+								newHTML = newHTML + " [Wellington College]";
+								break;
+						}
+						if (posts['nsfw'] == 1) {
+							newHTML = newHTML + " [nsfw]";
+						}
+					newHTML = newHTML + "</p>";
+					newHTML = newHTML + '<h3 id="postText'+posts['id']+'" style="text-align: left;">'+posts['post'].replace(new RegExp('\r?\n','g'), '<br />')+'</h3>';
+
+					//Attachments
+					if (posts['attachment'] != "n/a") {
+						newHTML = newHTML + attach(posts['attachment'])+"<br><br>";
+					}
+
+					//Stokes and Comments
+					newHTML = newHTML + '<span id="stokeBtn'+posts['id']+'"><a class="btn" href="javascript:void();" onclick="stoke('+posts['id']+', '+posts['score']+')">Stoke ('+posts['score']+')</a></span>';
+					newHTML = newHTML + ' <a id="showCommentButton'+posts['id']+'" class="btn" href="javascript:void(0)" onclick="showCommentForm('+posts['id']+')">Load comments ('+posts['commentNum'].split(" ")[0]+')</a>';
+					newHTML = newHTML + ' <a style="display: none;" id="hideCommentButton'+posts['id']+'" class="btn" href="javascript:void(0)" onclick="hideCommentForm('+posts['id']+')">Hide comments</a>';
+					newHTML = newHTML + '<div style="display: none;" id="commentForm'+posts['id']+'">';
+						newHTML = newHTML + '<br><br><form id="postForm" action="api/submitV2.php" method="post">';
+							newHTML = newHTML + '<input type="hidden" name="type" value="comment">';
+							newHTML = newHTML + '<input type="hidden" name="id" value="'+posts['id']+'">';
+							newHTML = newHTML + '<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, '+posts['id']+')" onkeyup="countChar(this, '+posts['id']+')" required></textarea>';
+							newHTML = newHTML + '<div style="font-family: "Lato", serif;" id="counter'+posts['id']+'">256/256</div><br />';
+							newHTML = newHTML + '<b>Subscribe to comments:</b><br />';
+							newHTML = newHTML + '<input type="text" name="catcher" style="display: none;">';
+							newHTML = newHTML + '<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />';
+							newHTML = newHTML + '<input class="btn" type="submit" name="post" value="Post">';
+							newHTML = newHTML + '<input type="hidden" name="tempFix" value="1">';
+						newHTML = newHTML + '</form>';
+						//Comments have been posted lets show them
+						newHTML = newHTML + '<div id="comments'+posts['id']+'">';
+						newHTML = newHTML + '</div>';
+					newHTML = newHTML + '</div>';
+				newHTML = newHTML + "</section>";
+
+				var posts = document.getElementById('posts');
+				posts.innerHTML = newHTML + posts;
+
+				lastPost = posts['id'];
 			});
 
 			//Attachments
@@ -386,7 +439,7 @@
 				}
 			}
 			//Run the above function every 3 seconds
-			setInterval(updatePosts, 3000);
+			//setInterval(updatePosts, 3000);
 
 			function loadPosts(startingPost, nsfw, overwrite, search) {
 				//Get the posts from the server
@@ -638,9 +691,9 @@
 		</div>
 
 		<script>
-			//Display the posts
+			/*/Display the posts
 			page = 1;
-			loadPosts(page*50-50, showNSFW, true, "");
+			loadPosts(page*50-50, showNSFW, true, "");*/
 		</script>
 
 		<script>

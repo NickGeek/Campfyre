@@ -26,7 +26,17 @@ function getPosts(size, search, nsfw, startingPost, socket) {
 		
 		//Send the posts to the user
 		for (var i = 0; i < posts.length; ++i) {
-			socket.emit('newPost', posts[i]);
+			var post = posts[i];
+			con.query('SELECT `id` FROM comments WHERE `parent` = '+posts[i]['id']+';', function(e2, comments) {
+				if (comments.length == 1) {
+					post.commentNum = comments.length+' comment';
+				}
+				else {
+					post.commentNum = comments.length+' comments';
+				}
+				console.log(post);
+				socket.emit('newPost', post);
+			});
 		}
 	})
 }
