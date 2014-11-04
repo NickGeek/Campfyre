@@ -151,10 +151,10 @@
 				console.log(posts)
 				var newHTML;
 				newHTML = newHTML + "<section id="+posts['id']+" class='card'>";
-					newHTML = newHTML + "<p><i id='ip'><img src='"+posts['pic']+"' /> says...<br></i><a href='permalink.html?id="+posts['id']+"'>Permalink</a> | <span id='postTime"+posts['id']+"'>"+moment(moment.unix(posts['time'])).fromNow()+"</span>";
+					newHTML = newHTML + "<p><i id='ip'><img src='"+posts['ip']+"' /> says...<br></i><a href='permalink.html?id="+posts['id']+"'>Permalink</a> | <span id='postTime"+posts['id']+"'>"+moment(moment.unix(posts['time'])).fromNow()+"</span>";
 						
 						//Tags
-						switch (posts['pic']) {
+						switch (posts['ip']) {
 							case "http://robohash.org/21232f297a57a5a743894a0e4a801fc3.png?set=set3&size=64x64":
 								newHTML = newHTML + " [admin]";
 								break;

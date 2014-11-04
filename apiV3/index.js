@@ -2,6 +2,7 @@ var app = require('express')();
 var http = require('http').Server(app);
 var ws = require('socket.io')(http);
 var mysql = require('mysql');
+var md5 = require('md5');
 var dbName = process.argv[2];
 var dbUsername = process.argv[3];
 var dbPassword = process.argv[4];
@@ -34,8 +35,7 @@ function getPosts(size, search, nsfw, startingPost, socket) {
 				else {
 					post.commentNum = comments.length+' comments';
 				}
-				console.log(post);
-				console.log(i);
+				post.ip = md5('http://robohash.org/'+post.ip+'.png?set=set3&size='+size);
 				socket.emit('newPost', post);
 			}).bind(this, i, post));
 		}
