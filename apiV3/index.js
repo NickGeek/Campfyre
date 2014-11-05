@@ -197,7 +197,7 @@ ws.on('connection', function(socket) {
 		var ip = socket.request.connection._peername['address'];
 		submitPost(params.post, params.attachment, params.email, params.catcher, ip, socket);
 	});
-})
+});
 
 http.listen(3973, function(){
 	console.log('listening on *:'+3973);
