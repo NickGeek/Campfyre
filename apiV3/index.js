@@ -20,7 +20,7 @@ con.connect(function(e) {
 	if (e) throw e;
 });
 
-function getPosts(size, search, nsfw, startingPost, socket) {
+function getPosts(size, search, startingPost, socket) {
 	//Get the posts from the database
 	con.query("SELECT * FROM posts WHERE `post` NOT LIKE '%#bonfyre%' ORDER BY id DESC LIMIT "+startingPost+", 50;", function(e, posts) {
 		if (e) throw e;
@@ -52,8 +52,9 @@ app.get('/', function(req, res){
 });
 
 ws.on('connection', function(socket) {
-	console.log('user connected');
-	getPosts('64x64', '', 0, 50-50, socket);
+	socket.on('get posts', function(params) {
+		getPosts(params.size, params.search, params.startingPost, socket);
+	});
 })
 
 http.listen(3973, function(){

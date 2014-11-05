@@ -196,7 +196,11 @@
 
 				var posts = document.getElementById('posts');
 				posts.innerHTML = newHTML + posts.innerHTML;
-				lastPost = postData.id;
+				//Handle NSFW posts
+				if (showNSFW === 0 && postData.nsfw === 1) {
+					$('#'+postData.id).hide();
+				}
+
 				$('#loadingMessage').hide();
 			});
 
@@ -440,114 +444,6 @@
 			//Run the above function every 3 seconds
 			//setInterval(updatePosts, 3000);
 
-			function loadPosts(startingPost, nsfw, overwrite, search) {
-				//Get the posts from the server
-				var request = new XMLHttpRequest();
-				request.onreadystatechange = function () {
-					if (request.readyState == 4 && request.status == 200) {
-						postJSON = JSON.parse(request.responseText);
-						//Hide the loading gif
-						$('#loadingMessage').hide();
-						request = null;
-						var pageID = 0;
-
-						//Display posts
-						var posts = document.getElementById('posts');
-						if (!overwrite) {
-							var newHTML = posts.innerHTML;
-						}
-						else {
-							var newHTML = '';
-							//Making sure that we start on zero because I probably screwed up somewhere
-							page = 1;
-							startingPost = 0;
-						}
-
-						//Display the data
-						for (var i = 0; i < postJSON.length; ++i) {
-							newHTML = newHTML + "<section id="+postJSON[i]['id']+" class='card'>";
-								newHTML = newHTML + "<p><i id='ip'><img src='"+postJSON[i]['pic']+"' /> says...<br></i><a href='permalink.html?id="+postJSON[i]['id']+"'>Permalink</a> | <span id='postTime"+postJSON[i]['id']+"'>"+postJSON[i]['time']+"</span>";
-									
-									//Tags
-									switch (postJSON[i]['pic']) {
-										case "http://robohash.org/21232f297a57a5a743894a0e4a801fc3.png?set=set3&size=64x64":
-											newHTML = newHTML + " [admin]";
-											break;
-										case "http://robohash.org/5c1055237c524ca98c243b81ba3f9e93.png?set=set3&size=64x64":
-											newHTML = newHTML + " [Wellington College]";
-											break;
-									}
-									if (postJSON[i]['nsfw'] == 1) {
-										newHTML = newHTML + " [nsfw]";
-									}
-								newHTML = newHTML + "</p>";
-								newHTML = newHTML + '<h3 id="postText'+postJSON[i]['id']+'" style="text-align: left;">'+postJSON[i]['post'].replace(new RegExp('\r?\n','g'), '<br />')+'</h3>';
-
-								//Attachments
-								if (postJSON[i]['attachment'] != "n/a") {
-									newHTML = newHTML + attach(postJSON[i]['attachment'])+"<br><br>";
-								}
-
-								//Stokes and Comments
-								newHTML = newHTML + '<span id="stokeBtn'+postJSON[i]['id']+'"><a class="btn" href="javascript:void();" onclick="stoke('+postJSON[i]['id']+', '+postJSON[i]['score']+')">Stoke ('+postJSON[i]['score']+')</a></span>';
-								newHTML = newHTML + ' <a id="showCommentButton'+postJSON[i]['id']+'" class="btn" href="javascript:void(0)" onclick="showCommentForm('+postJSON[i]['id']+')">Load comments ('+postJSON[i]['commentNum'].split(" ")[0]+')</a>';
-								newHTML = newHTML + ' <a style="display: none;" id="hideCommentButton'+postJSON[i]['id']+'" class="btn" href="javascript:void(0)" onclick="hideCommentForm('+postJSON[i]['id']+')">Hide comments</a>';
-								newHTML = newHTML + '<div style="display: none;" id="commentForm'+postJSON[i]['id']+'">';
-									newHTML = newHTML + '<br><br><form id="postForm" action="api/submitV2.php" method="post">';
-										newHTML = newHTML + '<input type="hidden" name="type" value="comment">';
-										newHTML = newHTML + '<input type="hidden" name="id" value="'+postJSON[i]['id']+'">';
-										newHTML = newHTML + '<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, '+postJSON[i]['id']+')" onkeyup="countChar(this, '+postJSON[i]['id']+')" required></textarea>';
-										newHTML = newHTML + '<div style="font-family: "Lato", serif;" id="counter'+postJSON[i]['id']+'">256/256</div><br />';
-										newHTML = newHTML + '<b>Subscribe to comments:</b><br />';
-										newHTML = newHTML + '<input type="text" name="catcher" style="display: none;">';
-										newHTML = newHTML + '<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />';
-										newHTML = newHTML + '<input class="btn" type="submit" name="post" value="Post">';
-										newHTML = newHTML + '<input type="hidden" name="tempFix" value="1">';
-									newHTML = newHTML + '</form>';
-									//Comments have been posted lets show them
-									newHTML = newHTML + '<div id="comments'+postJSON[i]['id']+'">';
-									newHTML = newHTML + '</div>';
-								newHTML = newHTML + '</div>';
-							newHTML = newHTML + "</section>";
-
-							lastPost = postJSON[i]['id'];
-						}
-
-						//Push the new HTML to the page
-						posts.innerHTML = newHTML;
-						
-						//Highlight links
-						pageID = postJSON[0]['id']+1;
-						highlighter(pageID);
-
-						loaded = true;
-					}
-					else if (request.readyState < 4) {
-						if (overwrite) {
-							document.getElementById('posts').innerHTML = "";
-						}
-						loaded = false;
-						$('#loadingMessage').show();
-					}
-				}
-
-			//Send the request
-			if (search != "") {
-				var requestURL = "api/getpostsV2.php?size=64x64&search=1&tag="+encodeURIComponent(search)+"&startingPost="+startingPost+"&nsfw="+nsfw+"&cache="+Math.random();
-
-				//Re-arange the site
-				tag = search;
-				$('#submit').hide();
-				$('#searchTitle').html('<h2>Results for: '+tag+'</h2>');
-				$('#goBack').show();
-			}
-			else {
-				var requestURL = "api/getpostsV2.php?size=64x64&startingPost="+startingPost+"&nsfw="+nsfw+"&cache="+Math.random();
-			}
-			request.open("GET", requestURL, true);
-			request.send();
-			}
-
 			function exitSearch() {
 				tag = '';
 				$('#submit').show();
@@ -652,7 +548,12 @@
 						showNSFW = nsfw;
 					}
 					page = 1;
-					loadPosts(page*50-50, showNSFW, true, tag);
+					$('#loadingMessage').show();
+					ws.emit('get posts', {
+						size: '64x64',
+						search: tag,
+						startingPost: page*50-50
+					});
 					nsfwToggle();
 				}
 			</script>
@@ -690,9 +591,14 @@
 		</div>
 
 		<script>
-			/*/Display the posts
+			//Display the posts
 			page = 1;
-			loadPosts(page*50-50, showNSFW, true, "");*/
+			$('#loadingMessage').hide();
+			ws.emit('get posts', {
+				size: '64x64',
+				search: tag,
+				startingPost: page*50-50
+			});
 		</script>
 
 		<script>
