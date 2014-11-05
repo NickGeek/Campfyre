@@ -23,9 +23,11 @@ con.connect(function(e) {
 function getPosts(size, search, startingPost, socket) {
 	//Get the posts from the database
 	if (search) {
+		search = con.escape(search);
 		var query = "SELECT * FROM posts WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% "+search+" %' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% "+search+"' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '"+search+" %' or REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) = '"+search+"' ORDER BY id DESC LIMIT "+startingPost+", 50";
 	}
 	else {
+		startingPost = con.escape(startingPost);
 		var query = "SELECT * FROM posts WHERE `post` NOT LIKE '%#bonfyre%' ORDER BY id DESC LIMIT "+startingPost+", 50;";
 	}
 	con.query(query, function(e, posts) {
@@ -51,13 +53,36 @@ function getPosts(size, search, startingPost, socket) {
 				post.comments = comments;
 
 				post.ip = 'http://robohash.org/'+md5(post.ip)+'.png?set=set3&size='+size;
-				socket.emit('newPost', JSON.stringify(post));
+				socket.emit('new post', JSON.stringify(post));
 			}).bind(this, i, post));
 		}
 	})
 }
 
-app.get('/', function(req, res){
+function stoke(id, socket) {
+	var ip = socket.request.connection.remoteAddress;
+
+	//Check the user hasn't already voted
+	con.query("SELECT `voters` FROM posts WHERE `id` = '"+id+"'", function(e, voters) {
+		if (e) throw e;
+
+		var voters = voters[0].voters.split(',');
+		if (voters.indexOf(ip) == -1) {
+			//Stoke the post
+			con.query("UPDATE `posts` SET `voters` = IFNULL(CONCAT(`voters`, ',"+ip+"'), '"+ip+"') WHERE `id` = '"+con.escape(id)+"';", function (e) {
+				if (e) throw e;
+				con.query("UPDATE `posts` SET `score` = `score` + 1 WHERE `id` = '"+con.escape(id)+"';")
+				socket.emit('success message', JSON.stringify({title: 'Post stoked', body: ''}));
+			});
+		}
+		else {
+			//Don't stoke and return an error
+			socket.emit('error message', JSON.stringify({title: 'Post not stoked', body: 'You can only stoke once'}));
+		}
+	});
+}
+
+app.get('/', function(req, res) {
 	//TODO: emulate old API
 	res.send('<p>Server running</p>');
 });
@@ -65,6 +90,9 @@ app.get('/', function(req, res){
 ws.on('connection', function(socket) {
 	socket.on('get posts', function(params) {
 		getPosts(params.size, params.search, params.startingPost, socket);
+	});
+	socket.on('stoke', function(params) {
+		stoke(params.id, socket)
 	});
 })
 
