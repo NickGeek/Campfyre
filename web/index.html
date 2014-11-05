@@ -196,6 +196,11 @@
 						newHTML = newHTML + '</form>';
 						//Comments have been posted lets show them
 						newHTML = newHTML + '<div id="comments'+postData.id+'">';
+							for (var i = 0; i < postData.comments.length; ++i) {
+								newHTML = newHTML + '<hr />';
+								newHTML = newHTML + "<p><i id='ip'><img src='"+postData.comments[i].ip+"' /> says...<br></i>"+moment(moment.unix(postData.comments[i].time)).fromNow();
+								newHTML = newHTML + '<h4 id="commentText">'+postData.comments[i].comment.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
+							}
 						newHTML = newHTML + '</div>';
 					newHTML = newHTML + '</div>';
 				newHTML = newHTML + "</section>";
@@ -272,39 +277,9 @@
 				divToShow = "commentForm"+id;
 				//Show the comments div
 				document.getElementById(divToShow).style.display = 'inline';
-
 				//Hide the show button
 				document.getElementById("showCommentButton"+id).style.display = "none";
 				document.getElementById("hideCommentButton"+id).style.display = "";
-
-				//Load the comments
-				var crequest = new XMLHttpRequest();
-				crequest.onreadystatechange = function () {
-					if (crequest.readyState == 4 && crequest.status == 200) {
-						var commentJSON = JSON.parse(crequest.responseText);
-						crequest = null;
-
-						//Display comments
-						var newHTML = '';
-
-						//Display the data
-						for (var i = 0; i < commentJSON.length; ++i) {
-							newHTML = newHTML + '<hr />';
-							newHTML = newHTML + "<p><i id='ip'><img src='"+commentJSON[i]['pic']+"' /> says...<br></i>"+commentJSON[i]['time'];
-							newHTML = newHTML + '<h4 id="commentText">'+commentJSON[i]['comment'].replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
-						}
-
-						//Push the new HTML to the page
-						document.getElementById('comments'+id).innerHTML = newHTML;
-					}
-					else if (crequest.readyState < 4) {
-						document.getElementById('comments'+id).innerHTML = '<img id="loadingMessage" src="img/loading.gif" alt="loading..." />';					
-					}
-				}
-
-				//Send the request
-				crequest.open("GET", "api/getcommentsV2.php?size=64x64&id="+id+"&cache="+Math.random(), true);
-				crequest.send();
 			}
 
 			//Hide the comments

@@ -34,8 +34,8 @@ function getPosts(size, search, startingPost, socket) {
 		//Send the posts to the user
 		for (var i = posts.length-1; i > -1; --i) {
 			var post = posts[i];
-			con.query('SELECT `id` FROM comments WHERE `parent` = '+post.id+';', (function(i, post, e2, comments) {
-				if (e2) throw e2;
+			con.query('SELECT * FROM comments WHERE `parent` = '+post.id+';', (function(i, post, e, comments) {
+				if (e) throw e;
 
 				if (comments.length === 1) {
 					post.commentNum = comments.length+' comment';
@@ -43,9 +43,14 @@ function getPosts(size, search, startingPost, socket) {
 				else {
 					post.commentNum = comments.length+' comments';
 				}
-				// var hashedIP = md5('admin');
+
+				for (var j = 0; j < comments.length; ++j) {
+					comments[j].ip = 'http://robohash.org/'+md5(comments[j].ip)+'.png?set=set3&size='+size;
+				}
+
+				post.comments = comments;
+
 				post.ip = 'http://robohash.org/'+md5(post.ip)+'.png?set=set3&size='+size;
-				// post['ip'] = "test123";
 				socket.emit('newPost', JSON.stringify(post));
 			}).bind(this, i, post));
 		}
