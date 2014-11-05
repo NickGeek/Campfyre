@@ -68,7 +68,12 @@ function stoke(id, ip, socket) {
 	con.query("SELECT `voters` FROM posts WHERE `id` = '"+id+"'", function(e, voters) {
 		if (e) throw e;
 
-		voters = voters[0].voters.split(',');
+		if (voters[0].voters){
+			voters = voters[0].voters.split(',');
+		}
+		else {
+			voters = [];
+		}
 		if (voters.indexOf(ip) == -1) {
 			//Stoke the post
 			con.query("UPDATE `posts` SET `voters` = IFNULL(CONCAT(`voters`, ',"+ip+"'), '"+ip+"') WHERE `id` = '"+con.escape(id)+"';", function (e) {
@@ -131,7 +136,7 @@ function submitPost(text, attachment, email, catcher, ip, socket) {
 				else {
 					var nsfw = 0;
 				}
-				con.query("INSERT INTO posts (post, ip, emails, nsfw, time, attachment, score, voters) VALUES ("+safeText+", '"+ip+"', "+email+", "+nsfw+", "+time+", "+attachment+", 1, '"+ip+"');", function (e) {
+				con.query("INSERT INTO posts (post, ip, emails, nsfw, time, attachment) VALUES ("+safeText+", '"+ip+"', "+email+", "+nsfw+", "+time+", "+attachment+");", function (e) {
 					if (e) throw e;
 
 					con.query("SELECT * FROM posts WHERE `post` = "+safeText+" AND `ip` = '"+ip+"' AND `time` = '"+time+"';", function (e, posts) {
