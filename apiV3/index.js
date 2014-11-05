@@ -66,13 +66,23 @@ function stoke(id, socket) {
 	con.query("SELECT `voters` FROM posts WHERE `id` = '"+id+"'", function(e, voters) {
 		if (e) throw e;
 
-		var voters = voters[0].voters.split(',');
+		voters = voters[0].voters.split(',');
 		if (voters.indexOf(ip) == -1) {
 			//Stoke the post
 			con.query("UPDATE `posts` SET `voters` = IFNULL(CONCAT(`voters`, ',"+ip+"'), '"+ip+"') WHERE `id` = '"+con.escape(id)+"';", function (e) {
 				if (e) throw e;
-				con.query("UPDATE `posts` SET `score` = `score` + 1 WHERE `id` = '"+con.escape(id)+"';")
+				con.query("UPDATE `posts` SET `score` = `score` + 1 WHERE `id` = '"+con.escape(id)+"';");
 				socket.emit('success message', JSON.stringify({title: 'Post stoked', body: ''}));
+
+				//Tell everyone about the stoke
+				con.query("SELECT `score` FROM posts WHERE `id` = '"+con.escape(id)+"';", function (e, posts) {
+					if (e) throw e;
+
+					ws.emit('post stoked', JSON.stringify({
+						id: con.escape(id),
+						score: posts[0].score
+					}));
+				});
 			});
 		}
 		else {
