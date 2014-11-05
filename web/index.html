@@ -28,7 +28,7 @@
 				font-family: 'Lato', serif;
 				font-weight:900;
 				font-size: 4em;
-				color: #fa6900;
+				color: #ff6900;
 				padding-right: 20px;
 			}
 			h2 {
@@ -142,19 +142,24 @@
 			var tag = "";
 			var loaded = false;
 			var page = 1;
-			var posts;
 			var lastPost = 0;
 			var ws = io('http://'+window.location.hostname+':3973');
 
 			//Display posts when they arrive
-			ws.on('newPost', function(posts) {
-				console.log(posts)
-				var newHTML;
-				newHTML = newHTML + "<section id="+posts['id']+" class='card'>";
-					newHTML = newHTML + "<p><i id='ip'><img src='"+posts['pic']+"' /> says...<br></i><a href='permalink.html?id="+posts['id']+"'>Permalink</a> | <span id='postTime"+posts['id']+"'>"+moment(moment.unix(posts['time'])).fromNow()+"</span>";
+			ws.on('newPost', function(postData) {
+				postData = JSON.parse(postData);
+				var newHTML = '';
+
+				//Handle NSFW posts
+				if (showNSFW === 0 && postData.nsfw === 1) {
+					return;
+				}
+
+				newHTML = newHTML + "<section id="+postData.id+" class='card'>";
+					newHTML = newHTML + "<p><i id='ip'><img src='"+postData.ip+"' /> says...<br></i><a href='permalink.html?id="+postData.id+"'>Permalink</a> | <span id='postTime"+postData.id+"'>"+moment(moment.unix(postData.time)).fromNow()+"</span>";
 						
 						//Tags
-						switch (posts['pic']) {
+						switch (postData.ip) {
 							case "http://robohash.org/21232f297a57a5a743894a0e4a801fc3.png?set=set3&size=64x64":
 								newHTML = newHTML + " [admin]";
 								break;
@@ -162,27 +167,27 @@
 								newHTML = newHTML + " [Wellington College]";
 								break;
 						}
-						if (posts['nsfw'] == 1) {
+						if (postData.nsfw == 1) {
 							newHTML = newHTML + " [nsfw]";
 						}
 					newHTML = newHTML + "</p>";
-					newHTML = newHTML + '<h3 id="postText'+posts['id']+'" style="text-align: left;">'+posts['post'].replace(new RegExp('\r?\n','g'), '<br />')+'</h3>';
+					newHTML = newHTML + '<h3 id="postText'+postData.id+'" style="text-align: left;">'+postData.post.replace(new RegExp('\r\n','g'), '<br />')+'</h3>';
 
 					//Attachments
-					if (posts['attachment'] != "n/a") {
-						newHTML = newHTML + attach(posts['attachment'])+"<br><br>";
+					if (postData.attachment != "n/a") {
+						newHTML = newHTML + attach(postData.attachment)+"<br><br>";
 					}
 
 					//Stokes and Comments
-					newHTML = newHTML + '<span id="stokeBtn'+posts['id']+'"><a class="btn" href="javascript:void();" onclick="stoke('+posts['id']+', '+posts['score']+')">Stoke ('+posts['score']+')</a></span>';
-					newHTML = newHTML + ' <a id="showCommentButton'+posts['id']+'" class="btn" href="javascript:void(0)" onclick="showCommentForm('+posts['id']+')">Load comments ('+posts['commentNum'].split(" ")[0]+')</a>';
-					newHTML = newHTML + ' <a style="display: none;" id="hideCommentButton'+posts['id']+'" class="btn" href="javascript:void(0)" onclick="hideCommentForm('+posts['id']+')">Hide comments</a>';
-					newHTML = newHTML + '<div style="display: none;" id="commentForm'+posts['id']+'">';
+					newHTML = newHTML + '<span id="stokeBtn'+postData.id+'"><a class="btn" href="javascript:void();" onclick="stoke('+postData.id+', '+postData.score+')">Stoke ('+postData.score+')</a></span>';
+					newHTML = newHTML + ' <a id="showCommentButton'+postData.id+'" class="btn" href="javascript:void(0)" onclick="showCommentForm('+postData.id+')">Load comments ('+postData.commentNum.split(" ")[0]+')</a>';
+					newHTML = newHTML + ' <a style="display: none;" id="hideCommentButton'+postData.id+'" class="btn" href="javascript:void(0)" onclick="hideCommentForm('+postData.id+')">Hide comments</a>';
+					newHTML = newHTML + '<div style="display: none;" id="commentForm'+postData.id+'">';
 						newHTML = newHTML + '<br><br><form id="postForm" action="api/submitV2.php" method="post">';
 							newHTML = newHTML + '<input type="hidden" name="type" value="comment">';
-							newHTML = newHTML + '<input type="hidden" name="id" value="'+posts['id']+'">';
-							newHTML = newHTML + '<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, '+posts['id']+')" onkeyup="countChar(this, '+posts['id']+')" required></textarea>';
-							newHTML = newHTML + '<div style="font-family: "Lato", serif;" id="counter'+posts['id']+'">256/256</div><br />';
+							newHTML = newHTML + '<input type="hidden" name="id" value="'+postData.id+'">';
+							newHTML = newHTML + '<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, '+postData.id+')" onkeyup="countChar(this, '+postData.id+')" required></textarea>';
+							newHTML = newHTML + '<div style="font-family: "Lato", serif;" id="counter'+postData.id+'">256/256</div><br />';
 							newHTML = newHTML + '<b>Subscribe to comments:</b><br />';
 							newHTML = newHTML + '<input type="text" name="catcher" style="display: none;">';
 							newHTML = newHTML + '<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />';
@@ -190,15 +195,18 @@
 							newHTML = newHTML + '<input type="hidden" name="tempFix" value="1">';
 						newHTML = newHTML + '</form>';
 						//Comments have been posted lets show them
-						newHTML = newHTML + '<div id="comments'+posts['id']+'">';
+						newHTML = newHTML + '<div id="comments'+postData.id+'">';
 						newHTML = newHTML + '</div>';
 					newHTML = newHTML + '</div>';
 				newHTML = newHTML + "</section>";
 
 				var posts = document.getElementById('posts');
-				posts.innerHTML = newHTML + posts;
+				posts.innerHTML = newHTML + posts.innerHTML;
 
-				lastPost = posts['id'];
+				//Link #tags/URLs
+				highlighter(postData.id);
+
+				$('#loadingMessage').hide();
 			});
 
 			//Attachments
@@ -315,17 +323,13 @@
 			function linkURLs(text) {
 				return text.replace(
 					url_regex,
-					'<a href="$1">$1</a>'
+					'<a target="_blank" href="$1">$1</a>'
 				);
 			}
 
 			function findLinks(id) {
-				$('h3').each(function() {
-					var postID = $(this).closest("section").attr("id");
-					if (postID < id) {
-						$('#postText'+postID+' a').contents().unwrap();
-						$(this).html(linkURLs($(this).html()));
-					}
+				$('#postText'+id).each(function() {
+					$(this).html(linkURLs($(this).html()));
 				});
 			};
 
@@ -340,16 +344,13 @@
 			function linkHashtags(text) {
 				return text.replace(
 					hashtag_regexp,
-					'<a href="javascript:void(0)" onclick="loadPosts(0, '+showNSFW+', true, \'#$1\')">#$1</a>'
+					'<a href="javascript:void(0);" onclick="runSearch(\'#$1\')">#$1</a>'
 				);
 			}
 
 			function findHashtags(id) {
-				$('h3').each(function() {
-					var postID = $(this).closest("section").attr("id");
-					if (postID < id) {
-						$(this).html(linkHashtags($(this).html()));
-					}
+				$('#postText'+id).each(function() {
+					$(this).html(linkHashtags($(this).html()));
 				});
 			};
 
@@ -399,154 +400,20 @@
 				srequest.send();
 			}
 
-			function updatePosts() {
-				//Update all the information in the last 50 posts (to save data) if they have loaded
-				if (loaded) {
-					var urequest = new XMLHttpRequest();
-
-					var requestURL = '';
-					startingPost = 0;
-					if (tag != "") {
-						var requestURL = "api/getpostsV2.php?size=64x64&search=1&tag="+encodeURIComponent(tag)+"&startingPost="+startingPost+"&nsfw="+showNSFW+"&cache="+Math.random();
-					}
-					else {
-						var requestURL = "api/getpostsV2.php?size=64x64&startingPost="+startingPost+"&nsfw="+showNSFW+"&cache="+Math.random();
-					}
-					urequest.open("GET", requestURL, true);
-
-					urequest.onreadystatechange = function () {
-						if (urequest.readyState == 4 && urequest.status == 200 && lastPost) {
-							var newJSON = JSON.parse(urequest.responseText);
-							for (var i = 0; i < newJSON.length; ++i) {
-								if (newJSON[i]['id'] <= postJSON[0]['id']) {
-									//Update the post
-									$('#stokeBtn'+newJSON[i]['id']).html('<a id="stokeBtn'+newJSON[i]['id']+'" class="btn" href="javascript:void();" onclick="stoke('+newJSON[i]['id']+', '+newJSON[i]['score']+')">Stoke ('+newJSON[i]['score']+')</a>');
-
-									$('#postTime'+newJSON[i]['id']).html(newJSON[i]['time']);
-
-									$('#showCommentButton'+newJSON[i]['id']).html('Load comments ('+newJSON[i]['commentNum'].split(" ")[0]+')');
-								}
-								else {
-									continue;
-								}
-							}
-						}
-						else if (urequest.readyState < 4) {
-						}
-					}
-
-					urequest.send();
-				}
-			}
-			//Run the above function every 3 seconds
-			//setInterval(updatePosts, 3000);
-
-			function loadPosts(startingPost, nsfw, overwrite, search) {
-				//Get the posts from the server
-				var request = new XMLHttpRequest();
-				request.onreadystatechange = function () {
-					if (request.readyState == 4 && request.status == 200) {
-						postJSON = JSON.parse(request.responseText);
-						//Hide the loading gif
-						$('#loadingMessage').hide();
-						request = null;
-						var pageID = 0;
-
-						//Display posts
-						var posts = document.getElementById('posts');
-						if (!overwrite) {
-							var newHTML = posts.innerHTML;
-						}
-						else {
-							var newHTML = '';
-							//Making sure that we start on zero because I probably screwed up somewhere
-							page = 1;
-							startingPost = 0;
-						}
-
-						//Display the data
-						for (var i = 0; i < postJSON.length; ++i) {
-							newHTML = newHTML + "<section id="+postJSON[i]['id']+" class='card'>";
-								newHTML = newHTML + "<p><i id='ip'><img src='"+postJSON[i]['pic']+"' /> says...<br></i><a href='permalink.html?id="+postJSON[i]['id']+"'>Permalink</a> | <span id='postTime"+postJSON[i]['id']+"'>"+postJSON[i]['time']+"</span>";
-									
-									//Tags
-									switch (postJSON[i]['pic']) {
-										case "http://robohash.org/21232f297a57a5a743894a0e4a801fc3.png?set=set3&size=64x64":
-											newHTML = newHTML + " [admin]";
-											break;
-										case "http://robohash.org/5c1055237c524ca98c243b81ba3f9e93.png?set=set3&size=64x64":
-											newHTML = newHTML + " [Wellington College]";
-											break;
-									}
-									if (postJSON[i]['nsfw'] == 1) {
-										newHTML = newHTML + " [nsfw]";
-									}
-								newHTML = newHTML + "</p>";
-								newHTML = newHTML + '<h3 id="postText'+postJSON[i]['id']+'" style="text-align: left;">'+postJSON[i]['post'].replace(new RegExp('\r?\n','g'), '<br />')+'</h3>';
-
-								//Attachments
-								if (postJSON[i]['attachment'] != "n/a") {
-									newHTML = newHTML + attach(postJSON[i]['attachment'])+"<br><br>";
-								}
-
-								//Stokes and Comments
-								newHTML = newHTML + '<span id="stokeBtn'+postJSON[i]['id']+'"><a class="btn" href="javascript:void();" onclick="stoke('+postJSON[i]['id']+', '+postJSON[i]['score']+')">Stoke ('+postJSON[i]['score']+')</a></span>';
-								newHTML = newHTML + ' <a id="showCommentButton'+postJSON[i]['id']+'" class="btn" href="javascript:void(0)" onclick="showCommentForm('+postJSON[i]['id']+')">Load comments ('+postJSON[i]['commentNum'].split(" ")[0]+')</a>';
-								newHTML = newHTML + ' <a style="display: none;" id="hideCommentButton'+postJSON[i]['id']+'" class="btn" href="javascript:void(0)" onclick="hideCommentForm('+postJSON[i]['id']+')">Hide comments</a>';
-								newHTML = newHTML + '<div style="display: none;" id="commentForm'+postJSON[i]['id']+'">';
-									newHTML = newHTML + '<br><br><form id="postForm" action="api/submitV2.php" method="post">';
-										newHTML = newHTML + '<input type="hidden" name="type" value="comment">';
-										newHTML = newHTML + '<input type="hidden" name="id" value="'+postJSON[i]['id']+'">';
-										newHTML = newHTML + '<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, '+postJSON[i]['id']+')" onkeyup="countChar(this, '+postJSON[i]['id']+')" required></textarea>';
-										newHTML = newHTML + '<div style="font-family: "Lato", serif;" id="counter'+postJSON[i]['id']+'">256/256</div><br />';
-										newHTML = newHTML + '<b>Subscribe to comments:</b><br />';
-										newHTML = newHTML + '<input type="text" name="catcher" style="display: none;">';
-										newHTML = newHTML + '<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />';
-										newHTML = newHTML + '<input class="btn" type="submit" name="post" value="Post">';
-										newHTML = newHTML + '<input type="hidden" name="tempFix" value="1">';
-									newHTML = newHTML + '</form>';
-									//Comments have been posted lets show them
-									newHTML = newHTML + '<div id="comments'+postJSON[i]['id']+'">';
-									newHTML = newHTML + '</div>';
-								newHTML = newHTML + '</div>';
-							newHTML = newHTML + "</section>";
-
-							lastPost = postJSON[i]['id'];
-						}
-
-						//Push the new HTML to the page
-						posts.innerHTML = newHTML;
-						
-						//Highlight links
-						pageID = postJSON[0]['id']+1;
-						highlighter(pageID);
-
-						loaded = true;
-					}
-					else if (request.readyState < 4) {
-						if (overwrite) {
-							document.getElementById('posts').innerHTML = "";
-						}
-						loaded = false;
-						$('#loadingMessage').show();
-					}
-				}
-
-			//Send the request
-			if (search != "") {
-				var requestURL = "api/getpostsV2.php?size=64x64&search=1&tag="+encodeURIComponent(search)+"&startingPost="+startingPost+"&nsfw="+nsfw+"&cache="+Math.random();
-
+			function runSearch(searchQuery) {
 				//Re-arange the site
-				tag = search;
+				tag = searchQuery;
 				$('#submit').hide();
 				$('#searchTitle').html('<h2>Results for: '+tag+'</h2>');
 				$('#goBack').show();
-			}
-			else {
-				var requestURL = "api/getpostsV2.php?size=64x64&startingPost="+startingPost+"&nsfw="+nsfw+"&cache="+Math.random();
-			}
-			request.open("GET", requestURL, true);
-			request.send();
+				$('#posts').html('');
+
+				page = 1;
+				ws.emit('get posts', {
+					size: '64x64',
+					search: tag,
+					startingPost: page*50-50
+				});
 			}
 
 			function exitSearch() {
@@ -555,7 +422,11 @@
 				$('#searchTitle').html('');
 				$('#goBack').hide();
 				page = 1;
-				loadPosts(page*50-50, showNSFW, true, tag);
+				ws.emit('get posts', {
+					size: '64x64',
+					search: tag,
+					startingPost: page*50-50
+				});
 			}
 
 			//Load more posts one on the bottom
@@ -588,9 +459,21 @@
 					var searchQuery = $('#searchForm').find('input[name="tag"]').val();
 					//Clear the form
 					$('#searchForm')[0].reset();
-					page = 1;
+					$('#posts').html('');
+					$('#loadingMessage').show();
+
+					//Re-arange the site
 					tag = searchQuery;
-					loadPosts(page*50-50, showNSFW, true, tag);
+					$('#submit').hide();
+					$('#searchTitle').html('<h2>Results for: '+tag+'</h2>');
+					$('#goBack').show();
+
+					page = 1;
+					ws.emit('get posts', {
+						size: '64x64',
+						search: tag,
+						startingPost: page*50-50
+					});
 
 					return false;
 				});
@@ -653,7 +536,12 @@
 						showNSFW = nsfw;
 					}
 					page = 1;
-					loadPosts(page*50-50, showNSFW, true, tag);
+					$('#loadingMessage').show();
+					ws.emit('get posts', {
+						size: '64x64',
+						search: tag,
+						startingPost: page*50-50
+					});
 					nsfwToggle();
 				}
 			</script>
@@ -691,9 +579,14 @@
 		</div>
 
 		<script>
-			/*/Display the posts
+			//Display the posts
 			page = 1;
-			loadPosts(page*50-50, showNSFW, true, "");*/
+			$('#loadingMessage').show();
+			ws.emit('get posts', {
+				size: '64x64',
+				search: tag,
+				startingPost: page*50-50
+			});
 		</script>
 
 		<script>
