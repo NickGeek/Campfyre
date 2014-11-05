@@ -203,6 +203,9 @@
 				var posts = document.getElementById('posts');
 				posts.innerHTML = newHTML + posts.innerHTML;
 
+				//Link #tags/URLs
+				highlighter(postData.id);
+
 				$('#loadingMessage').hide();
 			});
 
@@ -320,17 +323,13 @@
 			function linkURLs(text) {
 				return text.replace(
 					url_regex,
-					'<a href="$1">$1</a>'
+					'<a target="_blank" href="$1">$1</a>'
 				);
 			}
 
 			function findLinks(id) {
-				$('h3').each(function() {
-					var postID = $(this).closest("section").attr("id");
-					if (postID < id) {
-						$('#postText'+postID+' a').contents().unwrap();
-						$(this).html(linkURLs($(this).html()));
-					}
+				$('#postText'+id).each(function() {
+					$(this).html(linkURLs($(this).html()));
 				});
 			};
 
@@ -345,16 +344,13 @@
 			function linkHashtags(text) {
 				return text.replace(
 					hashtag_regexp,
-					'<a href="javascript:void(0)" onclick="loadPosts(0, '+showNSFW+', true, \'#$1\')">#$1</a>'
+					'<a href="javascript:void(0);" onclick="runSearch(\'#$1\')">#$1</a>'
 				);
 			}
 
 			function findHashtags(id) {
-				$('h3').each(function() {
-					var postID = $(this).closest("section").attr("id");
-					if (postID < id) {
-						$(this).html(linkHashtags($(this).html()));
-					}
+				$('#postText'+id).each(function() {
+					$(this).html(linkHashtags($(this).html()));
 				});
 			};
 
@@ -404,47 +400,21 @@
 				srequest.send();
 			}
 
-			function updatePosts() {
-				//Update all the information in the last 50 posts (to save data) if they have loaded
-				if (loaded) {
-					var urequest = new XMLHttpRequest();
+			function runSearch(searchQuery) {
+				//Re-arange the site
+				tag = searchQuery;
+				$('#submit').hide();
+				$('#searchTitle').html('<h2>Results for: '+tag+'</h2>');
+				$('#goBack').show();
+				$('#posts').html('');
 
-					var requestURL = '';
-					startingPost = 0;
-					if (tag != "") {
-						var requestURL = "api/getpostsV2.php?size=64x64&search=1&tag="+encodeURIComponent(tag)+"&startingPost="+startingPost+"&nsfw="+showNSFW+"&cache="+Math.random();
-					}
-					else {
-						var requestURL = "api/getpostsV2.php?size=64x64&startingPost="+startingPost+"&nsfw="+showNSFW+"&cache="+Math.random();
-					}
-					urequest.open("GET", requestURL, true);
-
-					urequest.onreadystatechange = function () {
-						if (urequest.readyState == 4 && urequest.status == 200 && lastPost) {
-							var newJSON = JSON.parse(urequest.responseText);
-							for (var i = 0; i < newJSON.length; ++i) {
-								if (newJSON[i]['id'] <= postJSON[0]['id']) {
-									//Update the post
-									$('#stokeBtn'+newJSON[i]['id']).html('<a id="stokeBtn'+newJSON[i]['id']+'" class="btn" href="javascript:void();" onclick="stoke('+newJSON[i]['id']+', '+newJSON[i]['score']+')">Stoke ('+newJSON[i]['score']+')</a>');
-
-									$('#postTime'+newJSON[i]['id']).html(newJSON[i]['time']);
-
-									$('#showCommentButton'+newJSON[i]['id']).html('Load comments ('+newJSON[i]['commentNum'].split(" ")[0]+')');
-								}
-								else {
-									continue;
-								}
-							}
-						}
-						else if (urequest.readyState < 4) {
-						}
-					}
-
-					urequest.send();
-				}
+				page = 1;
+				ws.emit('get posts', {
+					size: '64x64',
+					search: tag,
+					startingPost: page*50-50
+				});
 			}
-			//Run the above function every 3 seconds
-			//setInterval(updatePosts, 3000);
 
 			function exitSearch() {
 				tag = '';
