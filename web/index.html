@@ -149,6 +149,12 @@
 			ws.on('newPost', function(postData) {
 				postData = JSON.parse(postData);
 				var newHTML = '';
+
+				//Handle NSFW posts
+				if (showNSFW === 0 && postData.nsfw === 1) {
+					return;
+				}
+
 				newHTML = newHTML + "<section id="+postData.id+" class='card'>";
 					newHTML = newHTML + "<p><i id='ip'><img src='"+postData.ip+"' /> says...<br></i><a href='permalink.html?id="+postData.id+"'>Permalink</a> | <span id='postTime"+postData.id+"'>"+moment(moment.unix(postData.time)).fromNow()+"</span>";
 						
@@ -196,10 +202,6 @@
 
 				var posts = document.getElementById('posts');
 				posts.innerHTML = newHTML + posts.innerHTML;
-				//Handle NSFW posts
-				if (showNSFW === 0 && postData.nsfw === 1) {
-					$('#'+postData.id).hide();
-				}
 
 				$('#loadingMessage').hide();
 			});
@@ -450,7 +452,11 @@
 				$('#searchTitle').html('');
 				$('#goBack').hide();
 				page = 1;
-				loadPosts(page*50-50, showNSFW, true, tag);
+				ws.emit('get posts', {
+					size: '64x64',
+					search: tag,
+					startingPost: page*50-50
+				});
 			}
 
 			//Load more posts one on the bottom
@@ -483,9 +489,21 @@
 					var searchQuery = $('#searchForm').find('input[name="tag"]').val();
 					//Clear the form
 					$('#searchForm')[0].reset();
-					page = 1;
+					$('#posts').html('');
+					$('#loadingMessage').show();
+
+					//Re-arange the site
 					tag = searchQuery;
-					loadPosts(page*50-50, showNSFW, true, tag);
+					$('#submit').hide();
+					$('#searchTitle').html('<h2>Results for: '+tag+'</h2>');
+					$('#goBack').show();
+
+					page = 1;
+					ws.emit('get posts', {
+						size: '64x64',
+						search: tag,
+						startingPost: page*50-50
+					});
 
 					return false;
 				});
@@ -593,7 +611,7 @@
 		<script>
 			//Display the posts
 			page = 1;
-			$('#loadingMessage').hide();
+			$('#loadingMessage').show();
 			ws.emit('get posts', {
 				size: '64x64',
 				search: tag,

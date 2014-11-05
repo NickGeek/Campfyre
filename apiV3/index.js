@@ -22,11 +22,17 @@ con.connect(function(e) {
 
 function getPosts(size, search, startingPost, socket) {
 	//Get the posts from the database
-	con.query("SELECT * FROM posts WHERE `post` NOT LIKE '%#bonfyre%' ORDER BY id DESC LIMIT "+startingPost+", 50;", function(e, posts) {
+	if (search) {
+		var query = "SELECT * FROM posts WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% "+search+" %' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% "+search+"' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '"+search+" %' or REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) = '"+search+"' ORDER BY id DESC LIMIT "+startingPost+", 50";
+	}
+	else {
+		var query = "SELECT * FROM posts WHERE `post` NOT LIKE '%#bonfyre%' ORDER BY id DESC LIMIT "+startingPost+", 50;";
+	}
+	con.query(query, function(e, posts) {
 		if (e) throw e;
 		
 		//Send the posts to the user
-		for (var i = 49; i > -1; --i) {
+		for (var i = posts.length-1; i > -1; --i) {
 			var post = posts[i];
 			con.query('SELECT `id` FROM comments WHERE `parent` = '+post.id+';', (function(i, post, e2, comments) {
 				if (e2) throw e2;
