@@ -356,7 +356,6 @@
 			});
 
 			ws.on('post stoked', function (params) {
-				console.log('yolo');
 				params = JSON.parse(params);
 				$('#stokeBtn'+params.id).html('<a id="stokeBtn'+params.id+'" class="btn" href="javascript:void();" onclick="stoke('+params.id+')">Stoke ('+params.score+')</a>');
 			});
@@ -561,41 +560,13 @@
 
 		<script>
 			$('#postForm').submit(function(event) {
-				var request = new XMLHttpRequest();
-				var parameters = $('#postForm').serialize();
-				request.open("POST", "api/submitV2.php", true);
-				request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-
-				request.onreadystatechange = function () {
-					if (request.readyState == 4 && request.status == 200) {
-						//Response from the server
-						var title = '';
-						var message = '';
-						if (request.responseText == "Post submitted" || request.responseText == "Comment submitted") {
-							title = request.responseText;
-							toastr.success(message, title);
-
-							//Clear the form
-							$('#postForm')[0].reset();
-						}
-						else {
-							title = 'Post not submitted'
-							message = request.responseText;
-							toastr.warning(message, title);
-						}
-						page = 1;
-						loadPosts(page*50-50, showNSFW, true, "");
-
-						//Re-enable the post button
-						$('input[type="submit"]').removeAttr('disabled');
-					}
-					else if (request.readyState < 4) {
-						//Disable the post button
-						$('input[type="submit"]').attr('disabled', true);
-					}
-				}
-
-				request.send(parameters);
+				ws.emit('submit post', {
+					post: $('#postForm').find('textarea[name="postText"]').val(),
+					attachment: $('#postForm').find('input[name="attachment"]').val(),
+					email: $('#postForm').find('input[name="email"]').val(),
+					catcher: $('#postForm').find('input[name="catcher"]').val()
+				});
+				$('#postForm')[0].reset();
 				return false;
 			});
 		</script>

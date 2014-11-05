@@ -69,12 +69,10 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 			//Submit a post
 			if (!empty($email)) {
 				$email = mysqli_real_escape_string($con, $email);
-				mysqli_query($con,"INSERT INTO posts (post, ip, emails, nsfw, time, attachment)
-					VALUES ('$text', '$ip', '$email', 1, '$time', '$attachment')");
+				mysqli_query($con,"INSERT INTO posts (post, ip, emails, nsfw, time, attachment) VALUES ('$text', '$ip', '$email', 1, '$time', '$attachment')");
 			}
 			else {
-				mysqli_query($con,"INSERT INTO posts (post, ip, nsfw, time, attachment)
-					VALUES ('$text', '$ip', 1, '$time', '$attachment')");
+				mysqli_query($con,"INSERT INTO posts (post, ip, nsfw, time, attachment) VALUES ('$text', '$ip', 1, '$time', '$attachment')");
 			}
 		}
 		else {
