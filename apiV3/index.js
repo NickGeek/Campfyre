@@ -30,7 +30,10 @@ function getPosts(size, search, startingPost, socket) {
 		startingPost = con.escape(startingPost);
 		var query = "SELECT * FROM posts WHERE `post` NOT LIKE '%#bonfyre%' ORDER BY id DESC LIMIT "+startingPost+", 50;";
 	}
+<<<<<<< HEAD
 	console.log(query);
+=======
+>>>>>>> 971ca4b222e53e61125f6bc0548275cd435caa4f
 	con.query(query, function(e, posts) {
 		if (e) throw e;
 		
@@ -172,6 +175,42 @@ function submitPost(text, attachment, email, catcher, ip, socket) {
 	});
 }
 
+<<<<<<< HEAD
+=======
+function stoke(id, socket) {
+	var ip = socket.request.connection.remoteAddress;
+
+	//Check the user hasn't already voted
+	con.query("SELECT `voters` FROM posts WHERE `id` = '"+id+"'", function(e, voters) {
+		if (e) throw e;
+
+		voters = voters[0].voters.split(',');
+		if (voters.indexOf(ip) == -1) {
+			//Stoke the post
+			con.query("UPDATE `posts` SET `voters` = IFNULL(CONCAT(`voters`, ',"+ip+"'), '"+ip+"') WHERE `id` = '"+con.escape(id)+"';", function (e) {
+				if (e) throw e;
+				con.query("UPDATE `posts` SET `score` = `score` + 1 WHERE `id` = '"+con.escape(id)+"';");
+				socket.emit('success message', JSON.stringify({title: 'Post stoked', body: ''}));
+
+				//Tell everyone about the stoke
+				con.query("SELECT `score` FROM posts WHERE `id` = '"+con.escape(id)+"';", function (e, posts) {
+					if (e) throw e;
+
+					ws.emit('post stoked', JSON.stringify({
+						id: con.escape(id),
+						score: posts[0].score
+					}));
+				});
+			});
+		}
+		else {
+			//Don't stoke and return an error
+			socket.emit('error message', JSON.stringify({title: 'Post not stoked', body: 'You can only stoke once'}));
+		}
+	});
+}
+
+>>>>>>> 971ca4b222e53e61125f6bc0548275cd435caa4f
 app.get('/', function(req, res) {
 	//TODO: emulate old API
 	res.send('<p>Server running</p>');
@@ -182,12 +221,16 @@ ws.on('connection', function(socket) {
 		getPosts(params.size, params.search, params.startingPost, socket);
 	});
 	socket.on('stoke', function(params) {
+<<<<<<< HEAD
 		var ip = socket.request.connection._peername['address'];
 		stoke(params.id, ip, socket)
 	});
 	socket.on('submit post', function(params) {
 		var ip = socket.request.connection._peername['address'];
 		submitPost(params.post, params.attachment, params.email, params.catcher, ip, socket);
+=======
+		stoke(params.id, socket)
+>>>>>>> 971ca4b222e53e61125f6bc0548275cd435caa4f
 	});
 })
 
