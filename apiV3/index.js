@@ -101,7 +101,7 @@ function stoke(id, ip, socket) {
 
 function submitPost(text, attachment, email, catcher, ip, socket) {
 	//Get teh [sic] time
-	var time = Math.floor(Date.now() / 1000);
+	var time = Math.floor(Date.now() / 1000) + 3;
 	
 	//Sort out other vars
 	text = text.replace(/(<([^>]+)>)/ig,"");
