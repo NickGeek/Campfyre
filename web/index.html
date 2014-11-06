@@ -560,10 +560,18 @@
 
 		<script>
 			$('#postForm').submit(function(event) {
+				if ($('#postForm').find('input[name="nsfw"]').is(':checked')) {
+					var nsfwCheckbox = 1;
+				}
+				else {
+					var nsfwCheckbox = '';
+				}
+
 				ws.emit('submit post', {
 					post: $('#postForm').find('textarea[name="postText"]').val(),
 					attachment: $('#postForm').find('input[name="attachment"]').val(),
 					email: $('#postForm').find('input[name="email"]').val(),
+					nsfw: nsfwCheckbox,
 					catcher: $('#postForm').find('input[name="catcher"]').val()
 				});
 				$('#postForm')[0].reset();

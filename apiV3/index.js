@@ -99,7 +99,7 @@ function stoke(id, ip, socket) {
 	});
 }
 
-function submitPost(text, attachment, email, catcher, ip, socket) {
+function submitPost(text, attachment, email, catcher, ip, isNsfw, socket) {
 	//Get teh [sic] time
 	var time = Math.floor(Date.now() / 1000) + 3;
 	
@@ -129,8 +129,8 @@ function submitPost(text, attachment, email, catcher, ip, socket) {
 		//Submit the post
 		if (safeText && ip && attachment) {
 			if (text.length <= 256 && !spamming) {
-				var profanity = text.match('/(cum|jizz|pussy|penis|vagina|cock|dick|cunt|porn|p0rn|tits|tities|boob\S*|sex|ballsack|twat\S*)/im');
-				if (profanity != null){
+				var profanity = text.match(/(cum|jizz|pussy|penis|vagina|cock|dick|cunt|porn|p0rn|tits|tities|boob\S*|sex|ballsack|twat\S*)/im);
+				if (profanity != null || isNsfw){
 					var nsfw = 1;
 				}
 				else {
@@ -195,7 +195,7 @@ ws.on('connection', function(socket) {
 	});
 	socket.on('submit post', function(params) {
 		var ip = socket.request.connection._peername['address'];
-		submitPost(params.post, params.attachment, params.email, params.catcher, ip, socket);
+		submitPost(params.post, params.attachment, params.email, params.catcher, ip, params.nsfw, socket);
 	});
 });
 
