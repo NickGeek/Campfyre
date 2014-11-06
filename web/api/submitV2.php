@@ -94,8 +94,7 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 		//Submit a comment
 		$parent = $_POST['id'];
 		$parent = mysqli_real_escape_string($con, $parent);
-		mysqli_query($con,"INSERT INTO comments (comment, ip, parent, time)
-			VALUES ('$text', '$ip', '$parent', '$time')");
+		mysqli_query($con,"INSERT INTO comments (comment, ip, parent, time) VALUES ('$text', '$ip', '$parent', '$time')");
 
 		//E-Mail everyone who is subscribed to this post
 		$emailquery = $con->query("SELECT `emails` FROM posts WHERE id = '$parent'");
