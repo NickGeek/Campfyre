@@ -30,6 +30,7 @@ ws.use(function(socket, next) {
   socket.campfyreIPAddress = socket.conn.remoteAddress;
   next();
 });
+
 //Connect to the email server
 var transporter = nodemailer.createTransport(smtpPool({
 	host: 'ssl://box710.bluehost.com',
