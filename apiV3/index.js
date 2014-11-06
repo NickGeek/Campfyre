@@ -163,6 +163,11 @@ function submitPost(text, attachment, email, catcher, ip, isNsfw, socket) {
 							post.ip = 'http://robohash.org/'+md5(post.ip)+'.png?set=set3&size=64x64';
 							ws.emit('new post', JSON.stringify(post));
 							socket.emit('success message', JSON.stringify({title: 'Post submitted', body: ''}));
+
+							//If the user isn't showing NSFW posts, and this post is NSFW show them
+							if (nsfw === 1) {
+								socket.emit('show nsfw');
+							}
 						}).bind(this, post));
 					});
 				});
