@@ -24,6 +24,11 @@ con.connect(function(e) {
 	if (e) throw e;
 });
 
+ws.use(function(socket, next) {
+  socket.campfyreIPAddress = socket.conn.remoteAddress;
+  next();
+});
+
 function getPosts(size, search, startingPost, loadBottom, socket) {
 	//Get the posts from the database
 	if (search) {
@@ -222,17 +227,17 @@ ws.on('connection', function(socket) {
 	});
 	socket.on('stoke', function(params) {
 		params = JSON.parse(params);
-		var ip = socket.request.connection._peername['address'];
+		var ip = socket.campfyreIPAddress;
 		stoke(params.id, ip, socket)
 	});
 	socket.on('submit post', function(params) {
 		params = JSON.parse(params);
-		var ip = socket.request.connection._peername['address'];
+		var ip = socket.campfyreIPAddress;
 		submitPost(params.post, params.attachment, params.email, params.catcher, ip, params.nsfw, socket);
 	});
 	socket.on('submit comment', function(params) {
 		params = JSON.parse(params);
-		var ip = socket.request.connection._peername['address'];
+		var ip = socket.campfyreIPAddress;
 		submitPost(params.comment, params.email, params.catcher, ip, socket);
 	});
 });
