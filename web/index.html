@@ -384,6 +384,7 @@
 				$('#searchTitle').html('<h2>Results for: '+tag+'</h2>');
 				$('#goBack').show();
 				$('#posts').html('');
+				$('#loadingMessage').show();
 
 				page = 1;
 				ws.emit('get posts', {
@@ -399,6 +400,7 @@
 				$('#submit').show();
 				$('#searchTitle').html('');
 				$('#goBack').hide();
+				$('#loadingMessage').show();
 
 				$('#posts').html('');
 				page = 1;
@@ -413,6 +415,7 @@
 			//Load more posts one on the bottom
 			$(window).scroll(function() {
 				if($(window).scrollTop() + $(window).height() == $(document).height() & loaded) {
+					$('#loadingMessage').show();
 					page += 1;
 					ws.emit('get posts', {
 						size: '64x64',
