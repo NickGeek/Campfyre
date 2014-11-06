@@ -7,6 +7,8 @@ var http = require('http').Server(app);
 var ws = require('socket.io')(http);
 var mysql = require('mysql');
 var md5 = require('MD5');
+var nodemailer = require('nodemailer');
+var smtpPool = require('nodemailer-smtp-pool');
 var dbName = process.argv[2];
 var dbUsername = process.argv[3];
 var dbPassword = process.argv[4];
@@ -23,6 +25,12 @@ var con = mysql.createConnection({
 con.connect(function(e) {
 	if (e) throw e;
 });
+
+//Connect to the email server
+var transporter = nodemailer.createTransport(smtpPool({
+	host: 'ssl://box710.bluehost.com',
+	
+}));
 
 function getPosts(size, search, startingPost, loadBottom, socket) {
 	//Get the posts from the database
@@ -198,14 +206,18 @@ function submitComment(parent, text, email, catcher, ip, socket) {
 	text = text.replace(/(<([^>]+)>)/ig,"");
 	safeText = con.escape(text);
 	email = con.escape(email);
+	parent = con.escape(parent);
 	var spamming = false;
 	if (catcher.length > 0) spamming = true;
 
-	if (safeText && ip) {
+	if (safeText && ip && parent) {
 		if (text.length <= 256 && !spamming) {
-			if (email) {
+			con.query("INSERT INTO comments (comment, ip, parent, time) VALUES ("+safeText+", "+con.escape(ip)+", "+parent+", '"+time+"');", function (e) {
+				//Do emails if server is setup
+				if (emailPassword) {
 
-			}
+				}
+			})	
 		}
 	}
 }
