@@ -246,7 +246,7 @@ ws.on('connection', function(socket) {
 		try {
 			params = JSON.parse(params);
 			var ip = socket.request.connection._peername['address'];
-			submitPost(params.comment, params.email, params.catcher, ip, socket);
+			submitPost(params.parent, params.comment, params.email, params.catcher, ip, socket);
 		}
 		catch(e) {
 		}
