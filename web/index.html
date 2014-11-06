@@ -143,12 +143,12 @@
 				if($(window).scrollTop() + $(window).height() == $(document).height() & loaded) {
 					$('#loadingMessage').show();
 					page += 1;
-					ws.emit('get posts', {
+					ws.emit('get posts', JSON.stringify({
 						size: '64x64',
 						search: tag,
 						startingPost: page*50-50,
 						loadBottom: true
-					});
+					}));
 				}
 			});
 		</script>
@@ -184,12 +184,12 @@
 					$('#goBack').show();
 
 					page = 1;
-					ws.emit('get posts', {
+					ws.emit('get posts', JSON.stringify({
 						size: '64x64',
 						search: tag,
 						startingPost: page*50-50,
 						loadBottom: false
-					});
+					}));
 
 					return false;
 				});
@@ -254,12 +254,12 @@
 					page = 1;
 					$('#posts').html('');
 					$('#loadingMessage').show();
-					ws.emit('get posts', {
+					ws.emit('get posts', JSON.stringify({
 						size: '64x64',
 						search: tag,
 						startingPost: page*50-50,
 						loadBottom: false
-					});
+					}));
 					nsfwToggle();
 				}
 			</script>
@@ -300,12 +300,12 @@
 			//Display the posts
 			page = 1;
 			$('#loadingMessage').show();
-			ws.emit('get posts', {
+			ws.emit('get posts', JSON.stringify({
 				size: '64x64',
 				search: tag,
 				startingPost: page*50-50,
 				loadBottom: false
-			});
+			}));
 		</script>
 
 		<script>
@@ -317,13 +317,13 @@
 					var nsfwCheckbox = '';
 				}
 
-				ws.emit('submit post', {
+				ws.emit('submit post', JSON.stringify({
 					post: $('#postForm').find('textarea[name="postText"]').val(),
 					attachment: $('#postForm').find('input[name="attachment"]').val(),
 					email: $('#postForm').find('input[name="email"]').val(),
 					nsfw: nsfwCheckbox,
 					catcher: $('#postForm').find('input[name="catcher"]').val()
-				});
+				}));
 				$('#postForm')[0].reset();
 				return false;
 			});

@@ -144,7 +144,7 @@ function submitPost(text, attachment, email, catcher, ip, isNsfw, socket) {
 				else {
 					var nsfw = 0;
 				}
-				con.query("INSERT INTO posts (post, ip, emails, nsfw, time, attachment) VALUES ("+safeText+", '"+ip+"', "+email+", "+nsfw+", "+time+", "+attachment+");", function (e) {
+				con.query("INSERT INTO posts (post, ip, emails, nsfw, time, attachment) VALUES ("+safeText+", "+con.escape(ip)+", "+email+", "+nsfw+", "+time+", "+attachment+");", function (e) {
 					if (e) throw e;
 
 					con.query("SELECT * FROM posts WHERE `post` = "+safeText+" AND `ip` = '"+ip+"' AND `time` = '"+time+"';", function (e, posts) {
@@ -193,6 +193,12 @@ function submitPost(text, attachment, email, catcher, ip, isNsfw, socket) {
 	});
 }
 
+function submitComment(text, email, catcher, ip, socket) {
+	var time = Math.floor(Date.now() / 1000) + 3;
+	text = text.replace(/(<([^>]+)>)/ig,"");
+	safeText = con.escape(text);
+}
+
 app.get('/', function(req, res) {
 	//TODO: emulate old API
 	res.send('<p>Server running</p>');
@@ -200,15 +206,23 @@ app.get('/', function(req, res) {
 
 ws.on('connection', function(socket) {
 	socket.on('get posts', function(params) {
+		params = JSON.parse(params);
 		getPosts(params.size, params.search, params.startingPost, params.loadBottom, socket);
 	});
 	socket.on('stoke', function(params) {
+		params = JSON.parse(params);
 		var ip = socket.request.connection._peername['address'];
 		stoke(params.id, ip, socket)
 	});
 	socket.on('submit post', function(params) {
+		params = JSON.parse(params);
 		var ip = socket.request.connection._peername['address'];
 		submitPost(params.post, params.attachment, params.email, params.catcher, ip, params.nsfw, socket);
+	});
+	socket.on('submit comment', function(params) {
+		params = JSON.parse(params);
+		var ip = socket.request.connection._peername['address'];
+		submitPost(params.comment, params.email, params.catcher, ip, socket);
 	});
 });
 

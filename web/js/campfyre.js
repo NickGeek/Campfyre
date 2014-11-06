@@ -45,7 +45,7 @@ newHTML = newHTML + "<section id="+postData.id+" class='card'>";
 	newHTML = newHTML + ' <a id="showCommentButton'+postData.id+'" class="btn" href="javascript:void(0)" onclick="showCommentForm('+postData.id+')">Load comments ('+postData.commentNum.split(" ")[0]+')</a>';
 	newHTML = newHTML + ' <a style="display: none;" id="hideCommentButton'+postData.id+'" class="btn" href="javascript:void(0)" onclick="hideCommentForm('+postData.id+')">Hide comments</a>';
 	newHTML = newHTML + '<div style="display: none;" id="commentForm'+postData.id+'">';
-		newHTML = newHTML + '<br><br><form id="postForm" action="api/submitV2.php" method="post">';
+		newHTML = newHTML + '<br><br><form id="commentForm" method="post">';
 			newHTML = newHTML + '<input type="hidden" name="type" value="comment">';
 			newHTML = newHTML + '<input type="hidden" name="id" value="'+postData.id+'">';
 			newHTML = newHTML + '<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, '+postData.id+')" onkeyup="countChar(this, '+postData.id+')" required></textarea>';
@@ -74,6 +74,21 @@ if (postData.loadBottom) {
 else {
 	posts.innerHTML = newHTML + posts.innerHTML;
 }
+
+//Submit a comment
+$('#posts').off('submit');
+$('#posts').on('submit','#commentForm',function(e){
+	e.preventDefault();
+	
+	ws.emit('submit comment', JSON.stringify({
+		comment: $(this).find('textarea[name="postText"]').val(),
+		email: $(this).find('input[name="email"]').val(),
+		catcher: $(this).find('input[name="catcher"]').val()
+	}));
+
+	$(this)[0].reset();
+	return false;
+});
 
 //Link #tags/URLs
 highlighter(postData.id);
@@ -233,9 +248,9 @@ if (showNSFW !== 1) refresh(1);
 });
 
 function stoke(postID) {
-ws.emit('stoke', {
+ws.emit('stoke', JSON.stringify({
 	id: postID
-});
+}));
 }
 
 function runSearch(searchQuery) {
@@ -248,12 +263,12 @@ $('#posts').html('');
 $('#loadingMessage').show();
 
 page = 1;
-ws.emit('get posts', {
+ws.emit('get posts', JSON.stringify({
 	size: '64x64',
 	search: tag,
 	startingPost: page*50-50,
 	loadBottom: false
-});
+}));
 }
 
 function exitSearch() {
@@ -265,10 +280,10 @@ $('#loadingMessage').show();
 
 $('#posts').html('');
 page = 1;
-ws.emit('get posts', {
+ws.emit('get posts', JSON.stringify({
 	size: '64x64',
 	search: tag,
 	startingPost: page*50-50,
 	loadBottom: false
-});
+}));
 }
