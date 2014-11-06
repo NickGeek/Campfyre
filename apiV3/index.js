@@ -24,7 +24,7 @@ con.connect(function(e) {
 	if (e) throw e;
 });
 
-function getPosts(size, search, startingPost, socket) {
+function getPosts(size, search, startingPost, loadBottom, socket) {
 	//Get the posts from the database
 	if (search) {
 		search = addslashes(search);
@@ -57,6 +57,14 @@ function getPosts(size, search, startingPost, socket) {
 				post.comments = comments;
 
 				post.ip = 'http://robohash.org/'+md5(post.ip)+'.png?set=set3&size='+size;
+
+				if (loadBottom) {
+					post.loadBottom = true;
+				}
+				else {
+					post.loadBottom = false;
+				}
+
 				socket.emit('new post', JSON.stringify(post));
 			}).bind(this, i, post));
 		}
@@ -192,7 +200,7 @@ app.get('/', function(req, res) {
 
 ws.on('connection', function(socket) {
 	socket.on('get posts', function(params) {
-		getPosts(params.size, params.search, params.startingPost, socket);
+		getPosts(params.size, params.search, params.startingPost, params.loadBottom, socket);
 	});
 	socket.on('stoke', function(params) {
 		var ip = socket.request.connection._peername['address'];

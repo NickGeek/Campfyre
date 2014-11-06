@@ -147,6 +147,7 @@
 
 			//Display posts when they arrive
 			ws.on('new post', function(postData) {
+				loaded = false;
 				postData = JSON.parse(postData);
 				var newHTML = '';
 
@@ -206,12 +207,18 @@
 				newHTML = newHTML + "</section>";
 
 				var posts = document.getElementById('posts');
-				posts.innerHTML = newHTML + posts.innerHTML;
+				if (postData.loadBottom) {
+					posts.innerHTML = posts.innerHTML + newHTML;
+				}
+				else {
+					posts.innerHTML = newHTML + posts.innerHTML;
+				}
 
 				//Link #tags/URLs
 				highlighter(postData.id);
 
 				$('#loadingMessage').hide();
+				loaded = true;
 			});
 
 			//Attachments
@@ -382,7 +389,8 @@
 				ws.emit('get posts', {
 					size: '64x64',
 					search: tag,
-					startingPost: page*50-50
+					startingPost: page*50-50,
+					loadBottom: false
 				});
 			}
 
@@ -397,7 +405,8 @@
 				ws.emit('get posts', {
 					size: '64x64',
 					search: tag,
-					startingPost: page*50-50
+					startingPost: page*50-50,
+					loadBottom: false
 				});
 			}
 
@@ -405,7 +414,12 @@
 			$(window).scroll(function() {
 				if($(window).scrollTop() + $(window).height() == $(document).height() & loaded) {
 					page += 1;
-					loadPosts(page*50-50, showNSFW, false, tag);
+					ws.emit('get posts', {
+						size: '64x64',
+						search: tag,
+						startingPost: page*50-50,
+						loadBottom: true
+					});
 				}
 			});
 		</script>
@@ -444,7 +458,8 @@
 					ws.emit('get posts', {
 						size: '64x64',
 						search: tag,
-						startingPost: page*50-50
+						startingPost: page*50-50,
+						loadBottom: false
 					});
 
 					return false;
@@ -513,7 +528,8 @@
 					ws.emit('get posts', {
 						size: '64x64',
 						search: tag,
-						startingPost: page*50-50
+						startingPost: page*50-50,
+						loadBottom: false
 					});
 					nsfwToggle();
 				}
@@ -558,7 +574,8 @@
 			ws.emit('get posts', {
 				size: '64x64',
 				search: tag,
-				startingPost: page*50-50
+				startingPost: page*50-50,
+				loadBottom: false
 			});
 		</script>
 
