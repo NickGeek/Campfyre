@@ -193,10 +193,21 @@ function submitPost(text, attachment, email, catcher, ip, isNsfw, socket) {
 	});
 }
 
-function submitComment(text, email, catcher, ip, socket) {
+function submitComment(parent, text, email, catcher, ip, socket) {
 	var time = Math.floor(Date.now() / 1000) + 3;
 	text = text.replace(/(<([^>]+)>)/ig,"");
 	safeText = con.escape(text);
+	email = con.escape(email);
+	var spamming = false;
+	if (catcher.length > 0) spamming = true;
+
+	if (safeText && ip) {
+		if (text.length <= 256 && !spamming) {
+			if (email) {
+
+			}
+		}
+	}
 }
 
 app.get('/', function(req, res) {
