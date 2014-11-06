@@ -47,7 +47,7 @@ ws.on('new post', function(postData) {
 		newHTML = newHTML + '<div style="display: none;" id="commentForm'+postData.id+'">';
 			newHTML = newHTML + '<br><br><form id="commentForm" method="post">';
 				newHTML = newHTML + '<input type="hidden" name="type" value="comment">';
-				newHTML = newHTML + '<input type="hidden" name="id" value="'+postData.id+'">';
+				newHTML = newHTML + '<input type="hidden" name="parent" value="'+postData.id+'">';
 				newHTML = newHTML + '<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, '+postData.id+')" onkeyup="countChar(this, '+postData.id+')" required></textarea>';
 				newHTML = newHTML + '<div style="font-family: "Lato", serif;" id="counter'+postData.id+'">256/256</div><br />';
 				newHTML = newHTML + '<b>Subscribe to comments:</b><br />';
@@ -90,7 +90,8 @@ $('#posts').on('submit','#commentForm',function(e){
 	ws.emit('submit comment', JSON.stringify({
 		comment: $(this).find('textarea[name="postText"]').val(),
 		email: $(this).find('input[name="email"]').val(),
-		catcher: $(this).find('input[name="catcher"]').val()
+		catcher: $(this).find('input[name="catcher"]').val(),
+		parent: $(this).find('input[name="parent"]').val()
 	}));
 
 	$(this)[0].reset();

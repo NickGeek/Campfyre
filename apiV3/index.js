@@ -209,7 +209,7 @@ function submitComment(parent, text, email, catcher, ip, socket) {
 	if (safeText && ip) {
 		if (text.length <= 256 && !spamming) {
 			if (email) {
-				
+
 			}
 		}
 	}
@@ -222,23 +222,33 @@ app.get('/', function(req, res) {
 
 ws.on('connection', function(socket) {
 	socket.on('get posts', function(params) {
-		params = JSON.parse(params);
-		getPosts(params.size, params.search, params.startingPost, params.loadBottom, socket);
+		try {
+			params = JSON.parse(params);
+			getPosts(params.size, params.search, params.startingPost, params.loadBottom, socket);
+		}
+		catch(e) {
+		}
 	});
 	socket.on('stoke', function(params) {
-		params = JSON.parse(params);
-		var ip = socket.campfyreIPAddress;
-		stoke(params.id, ip, socket)
+		try {
+			params = JSON.parse(params);
+      var ip = socket.campfyreIPAddress;
+			stoke(params.id, ip, socket)
+		} catch(e) { }
 	});
 	socket.on('submit post', function(params) {
-		params = JSON.parse(params);
-		var ip = socket.campfyreIPAddress;
-		submitPost(params.post, params.attachment, params.email, params.catcher, ip, params.nsfw, socket);
+		try {
+			params = JSON.parse(params);
+      var ip = socket.campfyreIPAddress;
+			submitPost(params.post, params.attachment, params.email, params.catcher, ip, params.nsfw, socket);
+		} catch(e) { }
 	});
 	socket.on('submit comment', function(params) {
-		params = JSON.parse(params);
-		var ip = socket.campfyreIPAddress;
-		submitPost(params.comment, params.email, params.catcher, ip, socket);
+		try {
+			params = JSON.parse(params);
+      var ip = socket.campfyreIPAddress;
+			submitPost(params.parent, params.comment, params.email, params.catcher, ip, socket);
+		} catch(e) { }
 	});
 });
 
