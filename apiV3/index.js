@@ -204,7 +204,7 @@ function submitComment(parent, text, email, catcher, ip, socket) {
 	if (safeText && ip) {
 		if (text.length <= 256 && !spamming) {
 			if (email) {
-
+				
 			}
 		}
 	}
