@@ -29,7 +29,11 @@ con.connect(function(e) {
 //Connect to the email server
 var transporter = nodemailer.createTransport(smtpPool({
 	host: 'ssl://box710.bluehost.com',
-	
+	port: 465,
+	auth: {
+		user: 'notify@campfyre.org',
+		password: emailPassword
+	}
 }));
 
 function getPosts(size, search, startingPost, loadBottom, socket) {
