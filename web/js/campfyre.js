@@ -93,6 +93,7 @@ ws.on('new post', function(postData) {
 	//Link #tags/URLs
 	highlighter(postData.id);
 
+	loaded = true;
 	$('#loadingMessage').hide();
 });
 
