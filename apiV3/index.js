@@ -255,8 +255,6 @@ function submitComment(parent, text, email, catcher, ip, socket) {
 
 						if (addresses.length > 0) {
 							for (var i = 0; i < addresses.length; ++i) {
-								console.log(i);
-								console.log(addresses[i]);
 								transporter.sendMail({
 									from: 'notify@campfyre.org',
 									to: addresses[i],
@@ -281,6 +279,32 @@ function submitComment(parent, text, email, catcher, ip, socket) {
 			})	
 		}
 	}
+}
+
+function getPost(size, id, socket) {
+	con.query("SELECT * FROM `posts` WHERE `id` = "+con.escape(id)+";", function(e, post) {
+		post = post[0];
+		con.query('SELECT * FROM comments WHERE `parent` = '+post.id+';', (function(post, e, comments) {
+			if (e) throw e;
+
+			if (comments.length === 1) {
+				post.commentNum = comments.length+' comment';
+			}
+			else {
+				post.commentNum = comments.length+' comments';
+			}
+
+			for (var j = 0; j < comments.length; ++j) {
+				comments[j].ip = 'http://robohash.org/'+md5(comments[j].ip)+'.png?set=set3&size='+size;
+			}
+
+			post.comments = comments;
+
+			post.ip = 'http://robohash.org/'+md5(post.ip)+'.png?set=set3&size='+size;
+
+			socket.emit('new post', JSON.stringify(post));
+		}).bind(this, post));
+	});
 }
 
 app.get('/', function(req, res) {
@@ -317,6 +341,14 @@ ws.on('connection', function(socket) {
 			var ip = socket.campfyreIPAddress;
 			submitComment(params.parent, params.comment, params.email, params.catcher, ip, socket);
 		} catch(e) { }
+	});
+	socket.on('get post', function(params) {
+		try {
+			params = JSON.parse(params);
+			getPost(params.size, params.id, socket);
+		}
+		catch(e) {
+		}
 	});
 });
 
