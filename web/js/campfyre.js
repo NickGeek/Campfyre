@@ -54,7 +54,6 @@ ws.on('new post', function(postData) {
 				newHTML = newHTML + '<input type="text" name="catcher" style="display: none;">';
 				newHTML = newHTML + '<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />';
 				newHTML = newHTML + '<input class="btn" type="submit" name="post" value="Post">';
-				newHTML = newHTML + '<input type="hidden" name="tempFix" value="1">';
 			newHTML = newHTML + '</form>';
 			//Comments have been posted lets show them
 			newHTML = newHTML + '<div id="comments'+postData.id+'">';
@@ -75,27 +74,42 @@ ws.on('new post', function(postData) {
 		posts.innerHTML = newHTML + posts.innerHTML;
 	}
 
+	//Submit a comment
+	$('#posts').off('submit');
+	$('#posts').on('submit','#commentForm',function(e){
+		e.preventDefault();
+		
+		ws.emit('submit comment', JSON.stringify({
+			comment: $(this).find('textarea[name="postText"]').val(),
+			email: $(this).find('input[name="email"]').val(),
+			catcher: $(this).find('input[name="catcher"]').val(),
+			parent: $(this).find('input[name="parent"]').val()
+		}));
+
+		$(this)[0].reset();
+		return false;
+	});
+
 	//Link #tags/URLs
 	highlighter(postData.id);
 
 	$('#loadingMessage').hide();
-	loaded = true;
 });
 
-//Submit a comment
-$('#posts').off('submit');
-$('#posts').on('submit','#commentForm',function(e){
-	e.preventDefault();
-	
-	ws.emit('submit comment', JSON.stringify({
-		comment: $(this).find('textarea[name="postText"]').val(),
-		email: $(this).find('input[name="email"]').val(),
-		catcher: $(this).find('input[name="catcher"]').val(),
-		parent: $(this).find('input[name="parent"]').val()
-	}));
+ws.on('new comment', function(commentData) {
+	var commentData = JSON.parse(commentData);
+	var newHTML = '';
+	newHTML = newHTML + '<hr />';
+	newHTML = newHTML + "<p><i id='ip'><img src='"+commentData.ip+"' /> says...<br></i>"+moment(moment.unix(commentData.time)).fromNow();
+	newHTML = newHTML + '<h4 id="commentText">'+commentData.comment.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
 
-	$(this)[0].reset();
-	return false;
+	//Insert the comment
+	var comments = document.getElementById('comments'+commentData.parent);
+	comments.innerHTML = comments.innerHTML + newHTML;
+
+	//Increment the number on the counter
+	var newCommNum = parseInt(+document.getElementById('showCommentButton'+commentData.parent).innerHTML.split('(')[1].split(')')[0])+1;
+	document.getElementById('showCommentButton'+commentData.parent).innerHTML = 'Load comments ('+newCommNum+')';
 });
 
 //Attachments

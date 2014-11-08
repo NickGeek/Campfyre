@@ -124,9 +124,7 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 
 		if (!empty($email)) {
 			$email = mysqli_real_escape_string($con, $email);
-			mysqli_query($con,"UPDATE `posts`
-				SET `emails` = IFNULL(CONCAT(`emails`, ',$email'), '$email')
-				WHERE `id` = '$parent'");
+			mysqli_query($con,"UPDATE `posts` SET `emails` = IFNULL(CONCAT(`emails`, ',$email'), '$email') WHERE `id` = '$parent'");
 		}
 		if (!isset($_POST['tempFix'])) {
 			echo "Comment submitted";

@@ -32,14 +32,18 @@ ws.use(function(socket, next) {
 });
 
 //Connect to the email server
-var transporter = nodemailer.createTransport(smtpPool({
-	host: 'ssl://box710.bluehost.com',
-	port: 465,
-	auth: {
-		user: 'notify@campfyre.org',
-		password: emailPassword
-	}
-}));
+if (emailPassword) {
+	process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
+	var transporter = nodemailer.createTransport(smtpPool({
+		host: 'box710.bluehost.com',
+		port: 465,
+		auth: {
+			user: 'notify@campfyre.org',
+			pass: emailPassword
+		},
+		secure: true
+	}));
+}
 
 function getPosts(size, search, startingPost, loadBottom, socket) {
 	//Get the posts from the database
@@ -126,7 +130,7 @@ function stoke(id, ip, socket) {
 
 function submitPost(text, attachment, email, catcher, ip, isNsfw, socket) {
 	//Get teh [sic] time
-	var time = Math.floor(Date.now() / 1000) + 3;
+	var time = Math.floor(Date.now() / 1000) - 5;
 	
 	//Sort out other vars
 	text = text.replace(/(<([^>]+)>)/ig,"");
@@ -164,36 +168,41 @@ function submitPost(text, attachment, email, catcher, ip, isNsfw, socket) {
 				con.query("INSERT INTO posts (post, ip, emails, nsfw, time, attachment) VALUES ("+safeText+", "+con.escape(ip)+", "+email+", "+nsfw+", "+time+", "+attachment+");", function (e) {
 					if (e) throw e;
 
-					con.query("SELECT * FROM posts WHERE `post` = "+safeText+" AND `ip` = '"+ip+"' AND `time` = '"+time+"';", function (e, posts) {
+					con.query("SELECT * FROM posts WHERE `post` = "+safeText+" AND `post` NOT LIKE '%#bonfyre%' AND `ip` = '"+ip+"' AND `time` = '"+time+"';", function (e, posts) {
 						if (e) throw e;
 
 						//Send the posts to the user
-						var post = posts[posts.length-1];
-						con.query('SELECT * FROM comments WHERE `parent` = '+post.id+';', (function(post, e, comments) {
-							if (e) throw e;
+						if (posts.length > 0) {
+							var post = posts[posts.length-1];
+							con.query('SELECT * FROM comments WHERE `parent` = '+post.id+';', (function(post, e, comments) {
+								if (e) throw e;
 
-							if (comments.length === 1) {
-								post.commentNum = comments.length+' comment';
-							}
-							else {
-								post.commentNum = comments.length+' comments';
-							}
+								if (comments.length === 1) {
+									post.commentNum = comments.length+' comment';
+								}
+								else {
+									post.commentNum = comments.length+' comments';
+								}
 
-							for (var j = 0; j < comments.length; ++j) {
-								comments[j].ip = 'http://robohash.org/'+md5(comments[j].ip)+'.png?set=set3&size=64x64';
-							}
+								for (var j = 0; j < comments.length; ++j) {
+									comments[j].ip = 'http://robohash.org/'+md5(comments[j].ip)+'.png?set=set3&size=64x64';
+								}
 
-							post.comments = comments;
+								post.comments = comments;
 
-							post.ip = 'http://robohash.org/'+md5(post.ip)+'.png?set=set3&size=64x64';
-							ws.emit('new post', JSON.stringify(post));
+								post.ip = 'http://robohash.org/'+md5(post.ip)+'.png?set=set3&size=64x64';
+								ws.emit('new post', JSON.stringify(post));
+								socket.emit('success message', JSON.stringify({title: 'Post submitted', body: ''}));
+
+								//If the user isn't showing NSFW posts, and this post is NSFW show them
+								if (nsfw === 1) {
+									socket.emit('show nsfw');
+								}
+							}).bind(this, post));
+						}
+						else {
 							socket.emit('success message', JSON.stringify({title: 'Post submitted', body: ''}));
-
-							//If the user isn't showing NSFW posts, and this post is NSFW show them
-							if (nsfw === 1) {
-								socket.emit('show nsfw');
-							}
-						}).bind(this, post));
+						}
 					});
 				});
 			}
@@ -210,22 +219,65 @@ function submitPost(text, attachment, email, catcher, ip, isNsfw, socket) {
 	});
 }
 
+function subscribe(parent, email) {
+	if (parent && email) {
+		con.query("UPDATE `posts` SET `emails` = IFNULL(CONCAT(`emails`, ',"+email+"'), '"+email+"') WHERE `id` = '"+parent+"';", function (e) {
+			if (e) throw e;
+		});
+	}
+}
+
 function submitComment(parent, text, email, catcher, ip, socket) {
-	var time = Math.floor(Date.now() / 1000) + 3;
+	var time = Math.floor(Date.now() / 1000) - 5;
 	text = text.replace(/(<([^>]+)>)/ig,"");
 	safeText = con.escape(text);
-	email = con.escape(email);
-	parent = con.escape(parent);
+	email = addslashes(email);
 	var spamming = false;
 	if (catcher.length > 0) spamming = true;
 
 	if (safeText && ip && parent) {
 		if (text.length <= 256 && !spamming) {
-			con.query("INSERT INTO comments (comment, ip, parent, time) VALUES ("+safeText+", "+con.escape(ip)+", "+parent+", '"+time+"');", function (e) {
+			con.query("INSERT INTO comments (comment, ip, parent, time) VALUES ("+safeText+", "+con.escape(ip)+", "+con.escape(parent)+", '"+time+"');", function (e) {
 				//Do emails if server is setup
 				if (emailPassword) {
+					con.query("SELECT `emails` FROM posts WHERE id = "+con.escape(parent)+";", function(e, addresses) {
+						try {
+							addresses = addresses[0].emails.split(",");
+						}
+						catch(e) {
+							if (addresses) {
+								addresses = [addresses[0].emails];
+							}
+							else {
+								addresses = [];
+							}
+						}
 
+						if (addresses.length > 0) {
+							for (var i = 0; i < addresses.length; ++i) {
+								console.log(i);
+								console.log(addresses[i]);
+								transporter.sendMail({
+									from: 'notify@campfyre.org',
+									to: addresses[i],
+									subject: 'New comment on post - Campfyre',
+									html: "<img src='http://robohash.org/"+md5(ip)+".png?set=set3&size=100x100' /> says:<br /><h3>"+text.replace(new RegExp('\r\n','g'))+"</h3><a href='http://campfyre.org/permalink.html?id="+parent+"'>View post on Campfyre.</a>",
+								});
+							}
+						}
+
+						if (email) subscribe(parent, email);
+					});
 				}
+
+				//Tell the user and show the comment
+				socket.emit('success message', JSON.stringify({title: 'Comment submitted', body: ''}));
+				ws.emit('new comment', JSON.stringify({
+					parent: parent,
+					comment: text,
+					time: time,
+					ip: 'http://robohash.org/'+md5(ip)+'.png?set=set3&size=64x64'
+				}));
 			})	
 		}
 	}
@@ -248,22 +300,22 @@ ws.on('connection', function(socket) {
 	socket.on('stoke', function(params) {
 		try {
 			params = JSON.parse(params);
-      var ip = socket.campfyreIPAddress;
+			var ip = socket.campfyreIPAddress;
 			stoke(params.id, ip, socket)
 		} catch(e) { }
 	});
 	socket.on('submit post', function(params) {
 		try {
 			params = JSON.parse(params);
-      var ip = socket.campfyreIPAddress;
+			var ip = socket.campfyreIPAddress;
 			submitPost(params.post, params.attachment, params.email, params.catcher, ip, params.nsfw, socket);
 		} catch(e) { }
 	});
 	socket.on('submit comment', function(params) {
 		try {
 			params = JSON.parse(params);
-      var ip = socket.campfyreIPAddress;
-			submitPost(params.parent, params.comment, params.email, params.catcher, ip, socket);
+			var ip = socket.campfyreIPAddress;
+			submitComment(params.parent, params.comment, params.email, params.catcher, ip, socket);
 		} catch(e) { }
 	});
 });
