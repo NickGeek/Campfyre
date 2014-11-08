@@ -69,12 +69,10 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 			//Submit a post
 			if (!empty($email)) {
 				$email = mysqli_real_escape_string($con, $email);
-				mysqli_query($con,"INSERT INTO posts (post, ip, emails, nsfw, time, attachment)
-					VALUES ('$text', '$ip', '$email', 1, '$time', '$attachment')");
+				mysqli_query($con,"INSERT INTO posts (post, ip, emails, nsfw, time, attachment) VALUES ('$text', '$ip', '$email', 1, '$time', '$attachment')");
 			}
 			else {
-				mysqli_query($con,"INSERT INTO posts (post, ip, nsfw, time, attachment)
-					VALUES ('$text', '$ip', 1, '$time', '$attachment')");
+				mysqli_query($con,"INSERT INTO posts (post, ip, nsfw, time, attachment) VALUES ('$text', '$ip', 1, '$time', '$attachment')");
 			}
 		}
 		else {
@@ -96,8 +94,7 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 		//Submit a comment
 		$parent = $_POST['id'];
 		$parent = mysqli_real_escape_string($con, $parent);
-		mysqli_query($con,"INSERT INTO comments (comment, ip, parent, time)
-			VALUES ('$text', '$ip', '$parent', '$time')");
+		mysqli_query($con,"INSERT INTO comments (comment, ip, parent, time) VALUES ('$text', '$ip', '$parent', '$time')");
 
 		//E-Mail everyone who is subscribed to this post
 		$emailquery = $con->query("SELECT `emails` FROM posts WHERE id = '$parent'");
@@ -127,9 +124,7 @@ if (!empty($text) && !empty($type) && !empty($ip) && !empty($type)) {
 
 		if (!empty($email)) {
 			$email = mysqli_real_escape_string($con, $email);
-			mysqli_query($con,"UPDATE `posts`
-				SET `emails` = IFNULL(CONCAT(`emails`, ',$email'), '$email')
-				WHERE `id` = '$parent'");
+			mysqli_query($con,"UPDATE `posts` SET `emails` = IFNULL(CONCAT(`emails`, ',$email'), '$email') WHERE `id` = '$parent'");
 		}
 		if (!isset($_POST['tempFix'])) {
 			echo "Comment submitted";
