@@ -2,7 +2,13 @@ apply plugin: 'android'
 
 android {
     compileSdkVersion 21
-    buildToolsVersion "20.0.0"
+    buildToolsVersion '20.0.0'
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/NOTICE'
+    }
 
     defaultConfig {
         applicationId "nz.co.nickwebster.campfyre"
@@ -20,4 +26,5 @@ android {
 
 dependencies {
     compile project(':floatingActionButton')
+    compile fileTree(dir: 'libs', include: '*.jar')
 }
