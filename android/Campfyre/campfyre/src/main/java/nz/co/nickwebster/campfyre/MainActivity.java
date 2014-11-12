@@ -112,8 +112,8 @@ public class MainActivity extends Activity {
 						ws.connect(campfyreURL, new WebSocketHandler() {
 						   @Override
 							public void onOpen() {
-								//TODO: Get posts
-								
+							//TODO: Get posts
+							
 						   }
 						});
 
