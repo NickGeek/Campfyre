@@ -6,8 +6,11 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import org.json.JSONObject;
+import java.util.Map;
+
+import org.json.JSONArray;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -37,6 +40,7 @@ import com.faizmalkani.floatingactionbutton.Fab;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
 import com.github.nkzawa.socketio.client.IO;
+import com.google.gson.Gson;
 
 public class MainActivity extends Activity {
 	ArrayList<String> list;
@@ -51,14 +55,16 @@ public class MainActivity extends Activity {
 	EditText attachmentTextEdit;
 	CheckBox NSFWcheckBox;
 	TextView counter;
-    Socket ws;
-	String serverURI = "ws://campfyre.org:3973";
+    Gson gson = new Gson();
 
-	private void renderPost(String postData) {
-		//Convert 50dp into px for the image
-		DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
-		Integer size = 60 * (displayData.densityDpi / 160);
-		return;
+    Socket ws;
+	String serverURI = "http://192.168.1.54:3973";
+    boolean showNSFW = false;
+    String tag = "";
+    int page = 1;
+
+	private void renderPost(Object json) {
+        Log.d("CampfyreApp", json.toString());
 	}
 
 
@@ -102,7 +108,21 @@ public class MainActivity extends Activity {
         ws.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
+                //Convert 50dp into px for the image
+                DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
+                final Integer size = 60 * (displayData.densityDpi / 160);
 
+                Map<String, Object> params = new HashMap<String, Object>();
+                params.put("size", size.toString()+"x"+size.toString());
+                params.put("search", tag);
+                params.put("startingPost", page*50-50);
+                params.put("loadBottom", false);
+                ws.emit("get posts", gson.toJson(params));
+            }
+        }).on("new post", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                renderPost(args[0]);
             }
         });
 
