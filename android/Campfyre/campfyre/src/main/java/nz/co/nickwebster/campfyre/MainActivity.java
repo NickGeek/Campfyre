@@ -22,6 +22,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.faizmalkani.floatingactionbutton.Fab;
 import com.github.nkzawa.emitter.Emitter;
@@ -102,6 +103,29 @@ public class MainActivity extends Activity {
         }
 	}
 
+    private void displayMessage(Object json) {
+        try {
+            JSONObject data = new JSONObject(json.toString());
+            String title = data.getString("title");
+            String body = data.getString("body");
+            final String message;
+            if (body.equals("")) {
+                message = title;
+            }
+            else {
+                message = title+": "+body;
+            }
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+        catch (Exception e) {
+            Log.e("CampfyreApp", e.toString());
+        }
+    }
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -151,6 +175,16 @@ public class MainActivity extends Activity {
             @Override
             public void call(Object... args) {
                 renderPost(args[0]);
+            }
+        }).on("success message", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                displayMessage(args[0]);
+            }
+        }).on("error message", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                displayMessage(args[0]);
             }
         });
 
