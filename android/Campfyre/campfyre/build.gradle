@@ -27,4 +27,6 @@ android {
 dependencies {
     compile project(':floatingActionButton')
     compile fileTree(dir: 'libs', include: '*.jar')
+    compile 'com.github.nkzawa:socket.io-client:0.3.0'
+    compile 'com.google.code.gson:gson:2.3'
 }

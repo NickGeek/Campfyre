@@ -42,9 +42,6 @@ import android.widget.Toast;
 
 import com.faizmalkani.floatingactionbutton.Fab;
 
-import de.tavendo.autobahn.WebSocketConnection;
-import de.tavendo.autobahn.WebSocketHandler;
-
 public class MainActivity extends Activity {
 	ArrayList<String> list;
 	ArrayList<String> imageId;
@@ -58,10 +55,7 @@ public class MainActivity extends Activity {
 	EditText attachmentTextEdit;
 	CheckBox NSFWcheckBox;
 	TextView counter;
-	Runnable updateList;
-	Thread updateListThread;
 	String campfyreURL = "ws://campfyre.org:3973";
-	WebSocketConnection ws = new WebSocketConnection();
 
 	private void renderPost(String postData) {
 		//Convert 50dp into px for the image
@@ -99,102 +93,8 @@ public class MainActivity extends Activity {
 			
 			adapter = new StreamAdapter(this, list, imageId, commentNums, postTimes, postScores);
 			postList.setAdapter(adapter);
-			
-			//Request posts
-			updateList = new Runnable() {
-				@Override
-				public void run() {
-					URL url;
-							StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-							StrictMode.setThreadPolicy(policy);
-					try {
-						//Connect to the server
-						ws.connect(campfyreURL, new WebSocketHandler() {
-						   @Override
-							public void onOpen() {
-							//TODO: Get posts
-							
-						   }
-						});
 
-						//Get the posts
-//							Random randomGenerator = new Random();
-//							url = new URL("http://campfyre.org/api/getpostsV2.php?unused="+randomGenerator.nextInt(100000)+"&size="+size.toString()+"x"+size.toString());
-//							InputStream input = url.openStream();
-//							InputStreamReader is = new InputStreamReader(input);
-//							StringBuilder sb=new StringBuilder();
-//							BufferedReader br = new BufferedReader(is);
-//							String read = br.readLine();
-//							sb.append(read);
-//							while ((read = br.readLine()) != null) {
-//								sb.append(read);
-//							}
-//							final String output = sb.toString();
-//
-//							runOnUiThread(new Runnable() {
-//							public void run() {
-//								list.clear();
-//								imageId.clear();
-//								commentNums.clear();
-//								postTimes.clear();
-//								postScores.clear();
-//							}
-//						});
-//
-//							//Decode the JSON response
-//							JSONArray jsonArray;
-//							try {
-//											jsonArray = new JSONArray(output);
-//									} catch (JSONException e) {
-//											throw new RuntimeException(e);
-//									}
-//									for(int i=0; i < jsonArray.length(); i++) {
-//											JSONObject json_data;
-//											try {
-//													json_data = jsonArray.getJSONObject(i);
-//											} catch (JSONException e) {
-//													throw new RuntimeException(e);
-//											}
-//											final String content;
-//											final String imageURL;
-//											final String commentNum;
-//											final String postTime;
-//											final String postScore2;
-//											try{
-//												serverID.add(json_data.getInt("id"));
-//													content = json_data.getString("post");
-//													commentNum = json_data.getString("commentNum");
-//													imageURL = json_data.getString("pic");
-//													postTime = json_data.getString("time");
-//													String postScore = json_data.getString("score");
-//													if (Integer.parseInt(postScore) > 1 || Integer.parseInt(postScore) == 0) {
-//														postScore2 = postScore + " stokes";
-//													}
-//													else {
-//														postScore2 = postScore + " stoke";
-//													}
-//													runOnUiThread(new Runnable() {
-//											public void run() {
-//												list.add(content);
-//												commentNums.add(commentNum);
-//												imageId.add(imageURL);
-//												postTimes.add(postTime);
-//												postScores.add(postScore2);
-//												adapter.notifyDataSetChanged();
-//											}
-//										});
-//											} catch (JSONException e) {
-//													throw new RuntimeException(e);
-//											}
-//									}
-					} catch (Exception e) {
-						Log.wtf("M3K", e);
-					}
-				}
-			};
-			
-			updateListThread = new Thread(updateList);
-			updateListThread.start();
+
 			
 		
 		//Handle clicks
