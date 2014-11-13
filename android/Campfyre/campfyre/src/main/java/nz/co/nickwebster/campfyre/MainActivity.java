@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -23,7 +22,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.faizmalkani.floatingactionbutton.Fab;
 import com.github.nkzawa.emitter.Emitter;
@@ -33,11 +31,6 @@ import com.google.gson.Gson;
 
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -174,6 +167,7 @@ public class MainActivity extends Activity {
 				//Run code
 				Intent postDetail = new Intent(MainActivity.this, postDetial.class);
 				Bundle b = new Bundle();
+                //TODO: WebSockitify
 					
 				//Workout server ID
 				b.putInt("serverID", serverID.get((int) id));
@@ -237,30 +231,29 @@ public class MainActivity extends Activity {
 		.setView(setNameView)
 		.setCancelable(false)
 		.setPositiveButton("Post", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-			final String input = postTextEdit.getText().toString();
-			final String attachment = attachmentTextEdit.getText().toString();
-            final Object nsfw;
-            if (NSFWcheckBox.isChecked()) {
-                nsfw = 1;
-            }
-            else {
-                nsfw = "";
-            }
+            public void onClick(DialogInterface dialog, int id) {
+                final String input = postTextEdit.getText().toString();
+                final String attachment = attachmentTextEdit.getText().toString();
+                final Object nsfw;
+                if (NSFWcheckBox.isChecked()) {
+                    nsfw = 1;
+                } else {
+                    nsfw = "";
+                }
 
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("post", input);
-            params.put("attachment", attachment);
-            params.put("nsfw", nsfw);
-            params.put("catcher", "");
-            ws.emit("submit post", gson.toJson(params));
-				}
-		})
+                Map<String, Object> params = new HashMap<String, Object>();
+                params.put("post", input);
+                params.put("attachment", attachment);
+                params.put("nsfw", nsfw);
+                params.put("catcher", "");
+                ws.emit("submit post", gson.toJson(params));
+            }
+        })
 		.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-						dialog.cancel();
-				}
-		}).show();
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        }).show();
 	}
 	
 	

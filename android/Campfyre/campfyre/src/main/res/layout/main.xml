@@ -28,7 +28,6 @@
 		android:divider="@null"
 		android:paddingLeft="16dp"
 		android:paddingRight="16dp" />
-        
     </LinearLayout>      
 
      <com.faizmalkani.floatingactionbutton.Fab

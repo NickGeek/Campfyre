@@ -21,5 +21,6 @@
     <string name="hint_attachment">Link to image/video (optional)</string>
     <string name="action_search">Search</string>
     <string name="search_hint">#hashtag</string>
+    <string name="action_loadmore">Load more</string>
 
 </resources>
