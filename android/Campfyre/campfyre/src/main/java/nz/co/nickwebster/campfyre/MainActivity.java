@@ -52,7 +52,7 @@ public class MainActivity extends Activity {
 	ArrayList<String> commentNums;
 	ArrayList<String> postTimes;
 	ArrayList<String> postScores;
-	String[] values = {"Loading..."};
+	String[] values = {};
 	StreamAdapter adapter;
 	List<Integer> serverID = new ArrayList<Integer>();
 	EditText postTextEdit;
@@ -66,11 +66,12 @@ public class MainActivity extends Activity {
     boolean showNSFW = false;
     String tag = "";
     int page = 1;
-    boolean overwrite = true;
+    boolean overwrite = false;
 
 	private void renderPost(Object json) {
         JSONObject postData;
         try {
+            //Get and format the post data
             postData = new JSONObject(json.toString());
 
             serverID.add(postData.getInt("id"));
@@ -80,20 +81,39 @@ public class MainActivity extends Activity {
 
             //Time
             long postTimestampMilli = (long)postData.getInt("time")*1000;
-            Log.d("CampfyreApp", postData.getString("time"));
-            Log.d("CampfyreApp", ""+postTimestampMilli);
             Date now = new Date();
             long currentTime = now.getTime();
-            String relativeTime = DateUtils.getRelativeTimeSpanString(postTimestampMilli, currentTime, 0).toString();
+            final String relativeTime = DateUtils.getRelativeTimeSpanString(postTimestampMilli, currentTime, 0).toString();
 
             //Score
-            String postScore = "Error";
+            final String postScore;
             if (postData.getInt("score") == 1) {
                postScore = Integer.toString(postData.getInt("score"))+" stokes";
             }
             else {
                 postScore = Integer.toString(postData.getInt("score"))+" stokes";
             }
+
+            //Add the post to the list
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (overwrite) {
+                        list.clear();
+                        imageId.clear();
+                        commentNums.clear();
+                        postTimes.clear();
+                        postScores.clear();
+                    }
+
+                    list.add(0, content);
+                    commentNums.add(0, commentNum);
+                    imageId.add(0, imageURL);
+                    postTimes.add(0, relativeTime);
+                    postScores.add(0, postScore);
+                    adapter.notifyDataSetChanged();
+                }
+            });
         }
         catch (Exception e) {
             Log.e("CampfyreApp", e.toString());
@@ -119,13 +139,6 @@ public class MainActivity extends Activity {
 			imageId = new ArrayList<String>();
 			postTimes = new ArrayList<String>();
 			postScores = new ArrayList<String>();
-			for (int i = 0; i < values.length; ++i) {
-				list.add(values[i]);
-				commentNums.add(values[i]);
-				imageId.add(values[i]);
-				postTimes.add(values[i]);
-				postScores.add(values[i]);
-			}
 			
 			adapter = new StreamAdapter(this, list, imageId, commentNums, postTimes, postScores);
 			postList.setAdapter(adapter);
