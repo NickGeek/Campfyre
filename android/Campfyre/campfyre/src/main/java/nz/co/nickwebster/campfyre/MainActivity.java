@@ -6,11 +6,14 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -22,6 +25,7 @@ import android.os.StrictMode;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
@@ -62,9 +66,38 @@ public class MainActivity extends Activity {
     boolean showNSFW = false;
     String tag = "";
     int page = 1;
+    boolean overwrite = true;
 
 	private void renderPost(Object json) {
-        Log.d("CampfyreApp", json.toString());
+        JSONObject postData;
+        try {
+            postData = new JSONObject(json.toString());
+
+            serverID.add(postData.getInt("id"));
+            final String content = postData.getString("post");
+            final String commentNum = postData.getString("commentNum");
+            final String imageURL = postData.getString("ip");
+
+            //Time
+            long postTimestampMilli = (long)postData.getInt("time")*1000;
+            Log.d("CampfyreApp", postData.getString("time"));
+            Log.d("CampfyreApp", ""+postTimestampMilli);
+            Date now = new Date();
+            long currentTime = now.getTime();
+            String relativeTime = DateUtils.getRelativeTimeSpanString(postTimestampMilli, currentTime, 0).toString();
+
+            //Score
+            String postScore = "Error";
+            if (postData.getInt("score") == 1) {
+               postScore = Integer.toString(postData.getInt("score"))+" stokes";
+            }
+            else {
+                postScore = Integer.toString(postData.getInt("score"))+" stokes";
+            }
+        }
+        catch (Exception e) {
+            Log.e("CampfyreApp", e.toString());
+        }
 	}
 
 
@@ -113,9 +146,9 @@ public class MainActivity extends Activity {
                 final Integer size = 60 * (displayData.densityDpi / 160);
 
                 Map<String, Object> params = new HashMap<String, Object>();
-                params.put("size", size.toString()+"x"+size.toString());
+                params.put("size", size.toString() + "x" + size.toString());
                 params.put("search", tag);
-                params.put("startingPost", page*50-50);
+                params.put("startingPost", page * 50 - 50);
                 params.put("loadBottom", false);
                 ws.emit("get posts", gson.toJson(params));
             }
