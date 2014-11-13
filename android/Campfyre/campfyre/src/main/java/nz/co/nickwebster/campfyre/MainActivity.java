@@ -238,57 +238,22 @@ public class MainActivity extends Activity {
 		.setCancelable(false)
 		.setPositiveButton("Post", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
-					final String input = postTextEdit.getText().toString();
-					final String attachment = attachmentTextEdit.getText().toString();
-					final String attachmentURL;
-					if (attachment.equals("")) {
-						attachmentURL = "n/a";
-					}
-					else {
-						attachmentURL = attachmentTextEdit.getText().toString();
-					}
-					//Submit comment
-					//do tha biz
-				Runnable comment = new Runnable() {
-							@Override
-							public void run() {
-								URL url;
-										StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-										StrictMode.setThreadPolicy(policy);
-								try {
-									if (!NSFWcheckBox.isChecked()) {
-										url = new URL("http://campfyre.org/api/submit.php?type=post&postText="+URLEncoder.encode(input, "utf-8")+"&attachment="+URLEncoder.encode(attachmentURL, "utf-8"));
-									}
-									else {
-										url = new URL("http://campfyre.org/api/submit.php?type=post&postText="+URLEncoder.encode(input, "utf-8")+"&attachment="+URLEncoder.encode(attachmentURL, "utf-8")+"&nsfw=1");
-									}
-									InputStream input = url.openStream();
-									InputStreamReader is = new InputStreamReader(input);
-									StringBuilder sb=new StringBuilder();
-									BufferedReader br = new BufferedReader(is);
-									String read = br.readLine();
-									sb.append(read);
-									final String output = sb.toString();
-										runOnUiThread(new Runnable() {
-											public void run() {
-												Toast.makeText(getApplicationContext(), output, Toast.LENGTH_SHORT).show();
-											}
-										});
-										Intent intent = getIntent();
-													intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-													finish();
-													overridePendingTransition(0, 0);
+			final String input = postTextEdit.getText().toString();
+			final String attachment = attachmentTextEdit.getText().toString();
+            final Object nsfw;
+            if (NSFWcheckBox.isChecked()) {
+                nsfw = 1;
+            }
+            else {
+                nsfw = "";
+            }
 
-													startActivity(intent);
-													overridePendingTransition(0, 0);
-								} catch (Exception e) {
-									Log.wtf("M3K", e);
-								}
-							}
-						};
-						
-						Thread commentThread = new Thread(comment);
-						commentThread.start();
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("post", input);
+            params.put("attachment", attachment);
+            params.put("nsfw", nsfw);
+            params.put("catcher", "");
+            ws.emit("submit post", gson.toJson(params));
 				}
 		})
 		.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
