@@ -1,25 +1,10 @@
 package nz.co.nickwebster.campfyre;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.text.Editable;
@@ -42,9 +27,22 @@ import android.widget.Toast;
 
 import com.faizmalkani.floatingactionbutton.Fab;
 import com.github.nkzawa.emitter.Emitter;
-import com.github.nkzawa.socketio.client.Socket;
 import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
 import com.google.gson.Gson;
+
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends Activity {
 	ArrayList<String> list;
@@ -52,7 +50,6 @@ public class MainActivity extends Activity {
 	ArrayList<String> commentNums;
 	ArrayList<String> postTimes;
 	ArrayList<String> postScores;
-	String[] values = {};
 	StreamAdapter adapter;
 	List<Integer> serverID = new ArrayList<Integer>();
 	EditText postTextEdit;
@@ -62,11 +59,11 @@ public class MainActivity extends Activity {
     Gson gson = new Gson();
 
     Socket ws;
-	String serverURI = "http://192.168.1.54:3973";
+	String serverURI = "http://192.168.1.54:3973"; // Comment this out
+    //String serverURI = "http://campfyre.org:3973"; // Uncomment this
     boolean showNSFW = false;
     String tag = "";
     int page = 1;
-    boolean overwrite = false;
 
 	private void renderPost(Object json) {
         JSONObject postData;
@@ -74,7 +71,7 @@ public class MainActivity extends Activity {
             //Get and format the post data
             postData = new JSONObject(json.toString());
 
-            serverID.add(postData.getInt("id"));
+            serverID.add(0, postData.getInt("id"));
             final String content = postData.getString("post");
             final String commentNum = postData.getString("commentNum");
             final String imageURL = postData.getString("ip");
@@ -98,14 +95,6 @@ public class MainActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (overwrite) {
-                        list.clear();
-                        imageId.clear();
-                        commentNums.clear();
-                        postTimes.clear();
-                        postScores.clear();
-                    }
-
                     list.add(0, content);
                     commentNums.add(0, commentNum);
                     imageId.add(0, imageURL);
@@ -323,19 +312,23 @@ public class MainActivity extends Activity {
 			// automatically handle clicks on the Home/Up button, so long
 			// as you specify a parent activity in AndroidManifest.xml.
 			int id = item.getItemId();
-			if (id == R.id.action_showall) {
-				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://campfyre.org/?show=1"));
-				startActivity(browserIntent);
-					return true;
-			}
-			else if (id == R.id.action_refresh) {
-				Intent intent = getIntent();
-					intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-					finish();
-					overridePendingTransition(0, 0);
+			if (id == R.id.action_refresh) {
+                list.clear();
+                imageId.clear();
+                commentNums.clear();
+                postTimes.clear();
+                postScores.clear();
 
-					startActivity(intent);
-					overridePendingTransition(0, 0);
+                //Convert 50dp into px for the image
+                DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
+                final Integer size = 60 * (displayData.densityDpi / 160);
+
+                Map<String, Object> params = new HashMap<String, Object>();
+                params.put("size", size.toString() + "x" + size.toString());
+                params.put("search", tag);
+                params.put("startingPost", page * 50 - 50);
+                params.put("loadBottom", false);
+                ws.emit("get posts", gson.toJson(params));
 			}
 			else if (id == R.id.action_search) {
 				//Display a dialog to enter the data
