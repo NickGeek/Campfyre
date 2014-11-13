@@ -3,20 +3,13 @@ package nz.co.nickwebster.campfyre;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -41,6 +34,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.faizmalkani.floatingactionbutton.Fab;
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.Socket;
+import com.github.nkzawa.socketio.client.IO;
 
 public class MainActivity extends Activity {
 	ArrayList<String> list;
@@ -55,7 +51,8 @@ public class MainActivity extends Activity {
 	EditText attachmentTextEdit;
 	CheckBox NSFWcheckBox;
 	TextView counter;
-	String campfyreURL = "ws://campfyre.org:3973";
+    Socket ws;
+	String serverURI = "ws://campfyre.org:3973";
 
 	private void renderPost(String postData) {
 		//Convert 50dp into px for the image
@@ -94,7 +91,22 @@ public class MainActivity extends Activity {
 			adapter = new StreamAdapter(this, list, imageId, commentNums, postTimes, postScores);
 			postList.setAdapter(adapter);
 
+        //API communication
+        try {
+            ws = IO.socket(serverURI);
+        }
+        catch (Exception e) {
+            Log.e("CampfyreApp", e.toString());
+        }
 
+        ws.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+
+            }
+        });
+
+        ws.connect();
 			
 		
 		//Handle clicks
