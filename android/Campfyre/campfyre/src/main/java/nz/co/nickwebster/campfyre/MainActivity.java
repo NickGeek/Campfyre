@@ -55,8 +55,8 @@ public class MainActivity extends Activity {
     SharedPreferences prefs;
 
     Socket ws;
-	//String serverURI = "http://192.168.1.54:3973"; // Comment this out
-    String serverURI = "http://campfyre.org:3973"; // Uncomment this
+	String serverURI = "http://192.168.1.54:3973"; // Comment this out
+    //String serverURI = "http://campfyre.org:3973"; // Uncomment this
     boolean showNSFW = false;
     String tag = "";
     int page = 1;
@@ -93,6 +93,10 @@ public class MainActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    if (isNSFW == 1 && !showNSFW) {
+                        return;
+                    }
+
                     if (!loadBottom) {
                         list.add(0, content);
                         commentNums.add(0, commentNum);
@@ -138,6 +142,25 @@ public class MainActivity extends Activity {
         catch (Exception e) {
             Log.e("CampfyreApp", e.toString());
         }
+    }
+
+    private void refresh() {
+        list.clear();
+        imageId.clear();
+        commentNums.clear();
+        postTimes.clear();
+        postScores.clear();
+
+        //Convert 50dp into px for the image
+        DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
+        final Integer size = 60 * (displayData.densityDpi / 160);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("size", size.toString() + "x" + size.toString());
+        params.put("search", tag);
+        params.put("startingPost", page * 50 - 50);
+        params.put("loadBottom", false);
+        ws.emit("get posts", gson.toJson(params));
     }
 
 	@Override
@@ -323,22 +346,7 @@ public boolean onOptionsItemSelected(MenuItem item) {
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.action_refresh) {
-            list.clear();
-            imageId.clear();
-            commentNums.clear();
-            postTimes.clear();
-            postScores.clear();
-
-            //Convert 50dp into px for the image
-            DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
-            final Integer size = 60 * (displayData.densityDpi / 160);
-
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("size", size.toString() + "x" + size.toString());
-            params.put("search", tag);
-            params.put("startingPost", page * 50 - 50);
-            params.put("loadBottom", false);
-            ws.emit("get posts", gson.toJson(params));
+            refresh();
 		}
 		else if (id == R.id.action_search) {
 			//Display a dialog to enter the data
