@@ -58,7 +58,7 @@ public class MainActivity extends Activity {
 
     Socket ws;
 	String serverURI = "http://192.168.1.54:3973"; // Comment this out
-    //String serverURI = "http://campfyre.org:3973"; // Uncomment this
+//    String serverURI = "http://campfyre.org:3973"; // Uncomment this
     boolean showNSFW;
     String tag = "";
     int page = 1;
@@ -205,6 +205,11 @@ public class MainActivity extends Activity {
             //Convert 50dp into px for the image
             DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
             final Integer size = 60 * (displayData.densityDpi / 160);
+            list.clear();
+            imageId.clear();
+            commentNums.clear();
+            postTimes.clear();
+            postScores.clear();
 
             page = 1;
             Map<String, Object> params = new HashMap<String, Object>();
@@ -213,6 +218,11 @@ public class MainActivity extends Activity {
             params.put("startingPost", page * 50 - 50);
             params.put("loadBottom", false);
             ws.emit("get posts", gson.toJson(params));
+        }
+    }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            ws.connect();
         }
     }).on("new post", new Emitter.Listener() {
         @Override
@@ -323,6 +333,7 @@ public class MainActivity extends Activity {
         else {
             tag = "";
             setTitle(R.string.app_name);
+            page = 1;
             refresh();
         }
     }
@@ -449,7 +460,7 @@ public boolean onOptionsItemSelected(MenuItem item) {
             page = 1;
             tag = input.getText().toString();
             setTitle(tag);
-
+            oldLast = 0;
             refresh();
 		}
 		});
