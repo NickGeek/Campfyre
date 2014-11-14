@@ -250,7 +250,6 @@ public class MainActivity extends Activity {
     });
 
     ws.connect();
-		
 	
 	//Handle clicks
 	postList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -297,6 +296,19 @@ public class MainActivity extends Activity {
 			}
 	});
 }
+
+    //Handle back button
+    @Override
+    public void onBackPressed() {
+        if (tag.equals("")) {
+            super.onBackPressed();
+        }
+        else {
+            tag = "";
+            setTitle(R.string.app_name);
+            refresh();
+        }
+    }
 
 //Handle submit button
 public void submitPost(View view) {
@@ -412,19 +424,14 @@ public boolean onOptionsItemSelected(MenuItem item) {
 	builder.setView(input);
 
 	// Set up the buttons
-	builder.setPositiveButton("Search", new DialogInterface.OnClickListener() { 
+	builder.setPositiveButton("Search", new DialogInterface.OnClickListener() {
 		@Override
 		public void onClick(DialogInterface dialog, int which) {
 			//TODO: Search
-			//Load search activity
-			Intent searchResults = new Intent(MainActivity.this, SearchResultsActivity.class);
-						Bundle b = new Bundle();
-						
-						//Workout server ID
-						b.putString("tag", input.getText().toString());
-						searchResults.putExtras(b);
-						startActivity(searchResults);
-						overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
+            tag = input.getText().toString();
+            setTitle(tag);
+
+            refresh();
 		}
 		});
 		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

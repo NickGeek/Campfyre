@@ -29,8 +29,6 @@
 			android:name=".postDetial"
 			android:label="Post Detail" >
 		</activity>
-		<activity android:name=".SearchResultsActivity" >
-		</activity>
-	</application>
+    </application>
 
 </manifest>
