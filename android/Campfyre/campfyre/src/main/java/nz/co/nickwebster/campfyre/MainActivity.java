@@ -54,6 +54,7 @@ public class MainActivity extends Activity {
     Gson gson = new Gson();
     SharedPreferences prefs;
     Menu activityMenu;
+    int oldLast;
 
     Socket ws;
 	String serverURI = "http://192.168.1.54:3973"; // Comment this out
@@ -205,6 +206,7 @@ public class MainActivity extends Activity {
             DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
             final Integer size = 60 * (displayData.densityDpi / 160);
 
+            page = 1;
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("size", size.toString() + "x" + size.toString());
             params.put("search", tag);
@@ -284,12 +286,27 @@ public class MainActivity extends Activity {
 			@Override
 			public void onScroll(AbsListView view, int firstVisibleItem,
 				int visibleItemCount, int totalItemCount) {
-                //TODO: Load more posts at bottom - http://stackoverflow.com/questions/5123675/find-out-if-listview-is-scrolled-to-the-bottom
+                int lastItem = firstVisibleItem + visibleItemCount;
+                if (lastItem == totalItemCount && lastItem != oldLast) {
+                    oldLast = lastItem;
+                    page++;
+
+                    //Convert 50dp into px for the image
+                    DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
+                    final Integer size = 60 * (displayData.densityDpi / 160);
+
+                    Map<String, Object> params = new HashMap<String, Object>();
+                    params.put("size", size.toString() + "x" + size.toString());
+                    params.put("search", tag);
+                    params.put("startingPost", page * 50 - 50);
+                    params.put("loadBottom", true);
+                    ws.emit("get posts", gson.toJson(params));
+                }
 
 				if(mLastFirstVisibleItem < firstVisibleItem) {
 					submitButton.hideFab();
 				}
-				if(mLastFirstVisibleItem > firstVisibleItem) {
+				else if(mLastFirstVisibleItem > firstVisibleItem) {
 					submitButton.showFab();
 				}
 				mLastFirstVisibleItem = firstVisibleItem;
@@ -388,6 +405,7 @@ public boolean onOptionsItemSelected(MenuItem item) {
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.action_refresh) {
+            page = 1;
             refresh();
 		}
         else if (id == R.id.action_showNSFW) {
@@ -427,7 +445,8 @@ public boolean onOptionsItemSelected(MenuItem item) {
 	builder.setPositiveButton("Search", new DialogInterface.OnClickListener() {
 		@Override
 		public void onClick(DialogInterface dialog, int which) {
-			//TODO: Search
+			//Search
+            page = 1;
             tag = input.getText().toString();
             setTitle(tag);
 
