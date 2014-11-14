@@ -601,12 +601,7 @@ public class postDetial extends Activity {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.action_showall) {
-			Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://campfyre.org/?show=1"));
-			startActivity(browserIntent);
-			return true;
-		}
-		else if (id == R.id.action_subscribe) {
+		if (id == R.id.action_subscribe) {
 			//Display a dialog to enter the data
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("Subscribe to comments");

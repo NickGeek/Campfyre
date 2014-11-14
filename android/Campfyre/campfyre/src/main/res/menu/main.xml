@@ -3,10 +3,10 @@
     tools:context="nz.co.nickwebster.campfyre.MainActivity" >
     
     <item
-        android:id="@+id/action_showall"
+        android:id="@+id/action_showNSFW"
         android:orderInCategory="100"
         android:showAsAction="never"
-        android:title="@string/action_showall"/>
+        android:title="@string/action_showNSFW"/>
     
     <!--  <item android:id="@+id/action_post" android:orderInCategory="1" android:icon="@drawable/ic_action_edit" android:title="@string/action_post" android:showAsAction="always|withText"></item> -->
     <item android:id="@+id/action_refresh" android:orderInCategory="20" android:icon="@drawable/ic_action_refresh" android:title="@string/action_refresh" android:showAsAction="ifRoom"></item>

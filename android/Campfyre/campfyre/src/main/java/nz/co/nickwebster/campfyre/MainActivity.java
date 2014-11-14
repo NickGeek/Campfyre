@@ -53,11 +53,12 @@ public class MainActivity extends Activity {
 	TextView counter;
     Gson gson = new Gson();
     SharedPreferences prefs;
+    Menu activityMenu;
 
     Socket ws;
 	String serverURI = "http://192.168.1.54:3973"; // Comment this out
     //String serverURI = "http://campfyre.org:3973"; // Uncomment this
-    boolean showNSFW = false;
+    boolean showNSFW;
     String tag = "";
     int page = 1;
 
@@ -71,7 +72,7 @@ public class MainActivity extends Activity {
             final String content = postData.getString("post");
             final String commentNum = postData.getString("commentNum");
             final String imageURL = postData.getString("ip");
-            final Boolean loadBottom = postData.getBoolean("loadBottom");
+            final boolean loadBottom = postData.getBoolean("loadBottom");
             final int isNSFW = postData.getInt("nsfw");
 
             //Time
@@ -226,6 +227,26 @@ public class MainActivity extends Activity {
         public void call(Object... args) {
             displayMessage(args[0]);
         }
+    }).on("show nsfw", new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            if (!showNSFW) {
+                showNSFW = true;
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.clear();
+                editor.putBoolean("showNSFW", true);
+                editor.apply();
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        MenuItem nsfwButton = activityMenu.findItem(R.id.action_showNSFW);
+                        nsfwButton.setTitle(R.string.action_hideNSFW);
+                    }
+                });
+                refresh();
+            }
+        }
     });
 
     ws.connect();
@@ -331,11 +352,20 @@ public void submitPost(View view) {
     }).show();
 }
 
-
 @Override
 public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
+        activityMenu = menu;
 		getMenuInflater().inflate(R.menu.main, menu);
+
+        //NSFW button
+        MenuItem nsfwButton = menu.findItem(R.id.action_showNSFW);
+        if (showNSFW) {
+            nsfwButton.setTitle(R.string.action_hideNSFW);
+        }
+        else {
+            nsfwButton.setTitle(R.string.action_showNSFW);
+        }
 return true;
 }
 
@@ -348,6 +378,27 @@ public boolean onOptionsItemSelected(MenuItem item) {
 		if (id == R.id.action_refresh) {
             refresh();
 		}
+        else if (id == R.id.action_showNSFW) {
+            if (showNSFW) {
+                showNSFW = false;
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.clear();
+                editor.putBoolean("showNSFW", false);
+                editor.apply();
+
+                item.setTitle(R.string.action_showNSFW);
+            }
+            else {
+                showNSFW = true;
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.clear();
+                editor.putBoolean("showNSFW", true);
+                editor.apply();
+
+                item.setTitle(R.string.action_hideNSFW);
+            }
+            refresh();
+        }
 		else if (id == R.id.action_search) {
 			//Display a dialog to enter the data
 	AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);

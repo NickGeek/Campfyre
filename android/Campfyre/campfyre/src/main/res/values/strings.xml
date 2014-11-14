@@ -4,7 +4,8 @@
     <string name="app_name">Campfyre</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="action_showall">Show all posts and comments</string>
+    <string name="action_showNSFW">Show offensive/NSFW posts</string>
+    <string name="action_hideNSFW">Hide offensive/NSFW posts</string>
     <string name="text_loadingPost">Loading post&#8230;</string>
     <string name="text_loadingIP">Loading IP&#8230;</string>
     <string name="action_subscribe">Subscribe to comments</string>
