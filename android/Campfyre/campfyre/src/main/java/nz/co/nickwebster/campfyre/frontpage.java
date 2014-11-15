@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -168,7 +170,7 @@ public class frontpage extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
+		setContentView(R.layout.frontpage);
 
         //Set NSFW
         prefs = getSharedPreferences("CampfyreApp", MODE_PRIVATE);
@@ -178,8 +180,16 @@ public class frontpage extends Activity {
 		final Fab submitButton = (Fab)findViewById(R.id.submitButton);
 		submitButton.setFabColor(getResources().getColor(android.R.color.holo_orange_dark));
 		submitButton.setFabDrawable(getResources().getDrawable(R.drawable.ic_action_edit));
+
+        //Setup recyclerview
+        RecyclerView frontpageList = (RecyclerView) findViewById(R.id.frontpageList);
+        frontpageList.setHasFixedSize(true);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        frontpageList.setLayoutManager(layoutManager);
+
 		
-		//Set listview contents
+		/*/Set listview contents
 		final ListView postList = (ListView) findViewById(R.id.postListView);
 		
 		list = new ArrayList<String>();
@@ -189,7 +199,7 @@ public class frontpage extends Activity {
 		postScores = new ArrayList<String>();
 		
 		adapter = new StreamAdapter(this, list, imageId, commentNums, postTimes, postScores);
-		postList.setAdapter(adapter);
+		postList.setAdapter(adapter);*/
 
     //API communication
     try {
@@ -261,9 +271,9 @@ public class frontpage extends Activity {
         }
     });
 
-    ws.connect();
+    //ws.connect();
 	
-	//Handle clicks
+	/*/Handle clicks
 	postList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
 		public void onItemClick(AdapterView<?> parent, final View view,
@@ -321,7 +331,7 @@ public class frontpage extends Activity {
 				}
 				mLastFirstVisibleItem = firstVisibleItem;
 			}
-	});
+	});*/
 }
 
     //Handle back button
