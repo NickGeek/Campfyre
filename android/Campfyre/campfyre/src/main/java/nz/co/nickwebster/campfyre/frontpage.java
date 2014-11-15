@@ -57,8 +57,8 @@ public class frontpage extends Activity {
     int oldLast;
 
     Socket ws;
-	String serverURI = "http://192.168.1.54:3973"; // Comment this out
-//    String serverURI = "http://campfyre.org:3973"; // Uncomment this
+//	String serverURI = "http://192.168.1.54:3973"; // Comment this out
+    String serverURI = "http://campfyre.org:3973"; // Uncomment this
     boolean showNSFW;
     String tag = "";
     int page = 1;
