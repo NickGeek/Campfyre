@@ -57,8 +57,8 @@ public class MainActivity extends Activity {
     int oldLast;
 
     Socket ws;
-	String serverURI = "http://192.168.1.54:3973"; // Comment this out
-//    String serverURI = "http://campfyre.org:3973"; // Uncomment this
+//	String serverURI = "http://192.168.1.54:3973"; // Comment this out
+    String serverURI = "http://campfyre.org:3973"; // Uncomment this
     boolean showNSFW;
     String tag = "";
     int page = 1;
@@ -75,21 +75,13 @@ public class MainActivity extends Activity {
             final String imageURL = postData.getString("ip");
             final boolean loadBottom = postData.getBoolean("loadBottom");
             final int isNSFW = postData.getInt("nsfw");
+            final String postScore = postData.getString("score");
 
             //Time
             long postTimestampMilli = (long)postData.getInt("time")*1000;
             Date now = new Date();
             long currentTime = now.getTime();
             final String relativeTime = DateUtils.getRelativeTimeSpanString(postTimestampMilli, currentTime, 0).toString();
-
-            //Score
-            final String postScore;
-            if (postData.getInt("score") == 1) {
-               postScore = Integer.toString(postData.getInt("score"))+" stokes";
-            }
-            else {
-                postScore = Integer.toString(postData.getInt("score"))+" stokes";
-            }
 
             //Add the post to the list
             runOnUiThread(new Runnable() {

@@ -8,63 +8,92 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginBottom="6dp"
-                android:layout_marginLeft="6dp"
-                android:layout_marginRight="6dp"
-                android:layout_marginTop="6dp"
-                android:background="@drawable/bg_card" >
+            android:layout_height="wrap_content"
+            android:paddingBottom="6dp"
+            android:paddingLeft="6dp"
+            android:paddingRight="6dp"
+            android:paddingTop="6dp"
+            android:background="@drawable/bg_card">
 
             <LinearLayout
-                android:layout_width="fill_parent"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/imageDesign"
+                android:layout_width="60dp"
+                android:layout_height="60dp" />
+
+            <TextView
+                android:id="@+id/postDesign"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal" >
+                android:textSize="20sp" />
+        </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/imageDesign"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
 
-                <TextView
-                    android:id="@+id/postDesign"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="20sp" />
-            </LinearLayout>
+            <TextView
+                android:id="@+id/commentcountTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/seperator1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/text_seperator" />
+
+            <TextView
+                android:id="@+id/postTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/postAttachment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/attachmentButton"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-                
-                <TextView
-                    android:id="@+id/postScore"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-                
-                <TextView
-                    android:id="@+id/seperator1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/text_seperator" />
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                style="?android:attr/buttonStyleSmall"
+                android:textColor="#ff6900"
+                android:singleLine="true"
+                android:visibility="gone"/>
 
-                <TextView
-                    android:id="@+id/commentcountTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+            <View android:layout_height="1dp" android:layout_width="fill_parent" android:background="#eee"/>
 
-                <TextView
-                    android:id="@+id/seperator2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/text_seperator" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:background="@null"
+                style="?android:attr/buttonStyleSmall"
+                android:text="@string/action_stoke"
+                android:id="@+id/stokeButton"/>
 
-                <TextView
-                    android:id="@+id/postTime"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:background="@null"
+                android:layout_marginLeft="15dp"
+                style="?android:attr/buttonStyleSmall"
+                android:text="@string/action_share"
+                android:id="@+id/shareButton"/>
+        </LinearLayout>
 
         </LinearLayout>
 

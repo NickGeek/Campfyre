@@ -23,7 +23,7 @@
     <string name="action_search">Search</string>
     <string name="search_hint">#hashtag</string>
     <string name="action_loadmore">Load more</string>
-    <string name="action_stoke">Stoke</string>
-    <string name="action_share">Share</string>
+    <string name="action_stoke">STOKE</string>
+    <string name="action_share">SHARE</string>
 
 </resources>

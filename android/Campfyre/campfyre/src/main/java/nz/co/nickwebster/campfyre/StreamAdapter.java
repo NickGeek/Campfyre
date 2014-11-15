@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -42,11 +43,11 @@ public class StreamAdapter extends ArrayAdapter<String> {
 	final ImageView imageView = (ImageView) rowView.findViewById(R.id.imageDesign);
 	TextView commentCounter = (TextView) rowView.findViewById(R.id.commentcountTextView);
 	TextView postTimeText = (TextView) rowView.findViewById(R.id.postTime);
-	TextView postScoreText = (TextView) rowView.findViewById(R.id.postScore);
+    Button stokeBtn = (Button)rowView.findViewById(R.id.stokeButton);
 	txtTitle.setText(list.get(position));
 	commentCounter.setText(commentNums.get(position));
 	postTimeText.setText(postTimes.get(position));
-	postScoreText.setText(postScores.get(position));
+	stokeBtn.setText("STOKE ("+postScores.get(position)+")");
 	
 	//Get and display image from server
 	Runnable getIP = new Runnable() {
@@ -62,12 +63,12 @@ public class StreamAdapter extends ArrayAdapter<String> {
 				connection.connect();
 				InputStream input2 = connection.getInputStream();
 				final Bitmap profilePicture = BitmapFactory.decodeStream(input2);
-				((Activity)context).runOnUiThread(new Runnable() {
-						public void run() {
-							//Set image
-							imageView.setImageBitmap(profilePicture);
-						}
-					});
+				context.runOnUiThread(new Runnable() {
+                    public void run() {
+                        //Set image
+                        imageView.setImageBitmap(profilePicture);
+                    }
+                });
 			} catch (Exception e) {
 			}
 		}
@@ -75,8 +76,6 @@ public class StreamAdapter extends ArrayAdapter<String> {
 	
 	Thread getIPThread = new Thread(getIP);
 	getIPThread.start();
-	
-	//Show us the comment count
 	
 	
 	return rowView;
