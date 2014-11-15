@@ -3,10 +3,10 @@ package nz.co.nickwebster.campfyre;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -18,12 +18,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +37,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardHeader;
+import it.gmariotti.cardslib.library.view.CardViewNative;
+
 public class frontpage extends Activity {
 	ArrayList<String> list;
 	ArrayList<String> imageId;
@@ -57,6 +57,8 @@ public class frontpage extends Activity {
     SharedPreferences prefs;
     Menu activityMenu;
     int oldLast;
+    private RecyclerView frontpageList;
+    private FrontpageAdapter frontpageAdapter;
 
     Socket ws;
 //	String serverURI = "http://192.168.1.54:3973"; // Comment this out
@@ -182,11 +184,15 @@ public class frontpage extends Activity {
 		submitButton.setFabDrawable(getResources().getDrawable(R.drawable.ic_action_edit));
 
         //Setup recyclerview
-        RecyclerView frontpageList = (RecyclerView) findViewById(R.id.frontpageList);
+        frontpageList = (RecyclerView) findViewById(R.id.frontpageList);
         frontpageList.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         frontpageList.setLayoutManager(layoutManager);
+        frontpageList.setItemAnimator(new DefaultItemAnimator());
+        frontpageAdapter = new FrontpageAdapter(getPosts(), R.layout.cardview, this);
+        frontpageList.setAdapter(frontpageAdapter);
+
 
 		
 		/*/Set listview contents
