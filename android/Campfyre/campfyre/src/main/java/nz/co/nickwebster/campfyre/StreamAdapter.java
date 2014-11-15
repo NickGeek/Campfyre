@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class StreamAdapter extends ArrayAdapter<String> {
@@ -24,8 +25,9 @@ public class StreamAdapter extends ArrayAdapter<String> {
 	private final ArrayList<String> commentNums;
 	private final ArrayList<String> postTimes;
 	private final ArrayList<String> postScores;
+    private final ArrayList<String> attachments;
 	
-	public StreamAdapter(Activity context, ArrayList<String> list, ArrayList<String> imageId, ArrayList<String> commentNums, ArrayList<String> postTimes, ArrayList<String> postScores) {
+	public StreamAdapter(Activity context, ArrayList<String> list, ArrayList<String> imageId, ArrayList<String> commentNums, ArrayList<String> postTimes, ArrayList<String> postScores, ArrayList<String> attachments) {
 		super(context, R.layout.post_list_row_layout, list);
 		this.context = context;
 		this.list = list;
@@ -33,6 +35,7 @@ public class StreamAdapter extends ArrayAdapter<String> {
 		this.commentNums = commentNums;
 		this.postTimes = postTimes;
 		this.postScores = postScores;
+        this.attachments = attachments;
 	}
 	
 	@Override
@@ -47,7 +50,16 @@ public class StreamAdapter extends ArrayAdapter<String> {
 	txtTitle.setText(list.get(position));
 	commentCounter.setText(commentNums.get(position));
 	postTimeText.setText(postTimes.get(position));
-	stokeBtn.setText("STOKE ("+postScores.get(position)+")");
+	stokeBtn.setText("STOKE (" + postScores.get(position) + ")");
+
+    //Attachments
+    Button attachmentBtn = (Button)rowView.findViewById(R.id.attachmentButton);
+    RelativeLayout attachmentLayout = (RelativeLayout)rowView.findViewById(R.id.attachmentLayout);
+    ImageView attachmentImage = (ImageView)rowView.findViewById(R.id.attachmentImage);
+    if (!attachments.get(position).equals("n/a")) {
+        attachmentBtn.setText(attachments.get(position));
+        attachmentLayout.setVisibility(View.VISIBLE);
+    }
 	
 	//Get and display image from server
 	Runnable getIP = new Runnable() {

@@ -4,16 +4,16 @@
          xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingBottom="6dp"
+        android:paddingLeft="6dp"
+        android:paddingRight="6dp"
+        android:paddingTop="6dp"
          >
 
         <LinearLayout
             android:layout_width="match_parent"
             android:orientation="vertical"
             android:layout_height="wrap_content"
-            android:paddingBottom="6dp"
-            android:paddingLeft="6dp"
-            android:paddingRight="6dp"
-            android:paddingTop="6dp"
             android:background="@drawable/bg_card">
 
             <LinearLayout
@@ -56,19 +56,41 @@
         </LinearLayout>
 
         <ImageView
-            android:id="@+id/postAttachment"
+            android:id="@+id/attachmentImage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-            <Button
-                android:id="@+id/attachmentButton"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:focusable="false"
-                style="?android:attr/buttonStyleSmall"
-                android:textColor="#ff6900"
-                android:singleLine="true"
-                android:visibility="gone"/>
+                android:layout_gravity="center_vertical"
+                android:visibility="gone"
+                android:id="@+id/attachmentLayout">
+                <View android:layout_height="1dp" android:layout_width="fill_parent" android:background="#eee"/>
+
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:id="@+id/arrowImage"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_arrow_forward_grey600_48dp"
+                    />
+
+                <Button
+                    android:id="@+id/attachmentButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:background="@null"
+                    style="?android:attr/buttonStyleSmall"
+                    android:textColor="#05c5cf"
+                    android:singleLine="true"
+                    android:layout_marginLeft="2dp"
+                    android:layout_weight="1"
+                    android:layout_toRightOf="@+id/arrowImage"/>
+
+            </RelativeLayout>
 
             <View android:layout_height="1dp" android:layout_width="fill_parent" android:background="#eee"/>
 

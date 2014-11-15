@@ -25,5 +25,6 @@
     <string name="action_loadmore">Load more</string>
     <string name="action_stoke">STOKE</string>
     <string name="action_share">SHARE</string>
+    <string name="title_attachment">ATTACHMENT: </string>
 
 </resources>

@@ -45,6 +45,7 @@ public class MainActivity extends Activity {
 	ArrayList<String> commentNums;
 	ArrayList<String> postTimes;
 	ArrayList<String> postScores;
+    ArrayList<String> attachments;
 	StreamAdapter adapter;
 	List<Integer> serverID = new ArrayList<Integer>();
 	EditText postTextEdit;
@@ -76,6 +77,7 @@ public class MainActivity extends Activity {
             final boolean loadBottom = postData.getBoolean("loadBottom");
             final int isNSFW = postData.getInt("nsfw");
             final String postScore = postData.getString("score");
+            final String attachment = postData.getString("attachment");
 
             //Time
             long postTimestampMilli = (long)postData.getInt("time")*1000;
@@ -97,6 +99,7 @@ public class MainActivity extends Activity {
                         imageId.add(0, imageURL);
                         postTimes.add(0, relativeTime);
                         postScores.add(0, postScore);
+                        attachments.add(0, attachment);
                     }
                     else {
                         list.add(content);
@@ -104,6 +107,7 @@ public class MainActivity extends Activity {
                         imageId.add(imageURL);
                         postTimes.add(relativeTime);
                         postScores.add(postScore);
+                        attachments.add(attachment);
                     }
                     adapter.notifyDataSetChanged();
                 }
@@ -144,6 +148,7 @@ public class MainActivity extends Activity {
         commentNums.clear();
         postTimes.clear();
         postScores.clear();
+        attachments.clear();
 
         //Convert 50dp into px for the image
         DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
@@ -179,8 +184,9 @@ public class MainActivity extends Activity {
 		imageId = new ArrayList<String>();
 		postTimes = new ArrayList<String>();
 		postScores = new ArrayList<String>();
+        attachments = new ArrayList<String>();
 		
-		adapter = new StreamAdapter(this, list, imageId, commentNums, postTimes, postScores);
+		adapter = new StreamAdapter(this, list, imageId, commentNums, postTimes, postScores, attachments);
 		postList.setAdapter(adapter);
 
     //API communication
@@ -202,6 +208,7 @@ public class MainActivity extends Activity {
             commentNums.clear();
             postTimes.clear();
             postScores.clear();
+            attachments.clear();
 
             page = 1;
             Map<String, Object> params = new HashMap<String, Object>();
