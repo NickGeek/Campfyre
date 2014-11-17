@@ -47,7 +47,7 @@ public class MainActivity extends Activity {
 	ArrayList<String> postScores;
     ArrayList<String> attachments;
 	StreamAdapter adapter;
-	List<Integer> serverID = new ArrayList<Integer>();
+	ArrayList<Integer> serverID;
 	EditText postTextEdit;
 	EditText attachmentTextEdit;
 	CheckBox NSFWcheckBox;
@@ -70,7 +70,7 @@ public class MainActivity extends Activity {
             //Get and format the post data
             postData = new JSONObject(json.toString());
 
-            serverID.add(0, postData.getInt("id"));
+            final Integer postid = postData.getInt("id");
             final String content = postData.getString("post");
             final String commentNum = postData.getString("commentNum");
             final String imageURL = postData.getString("ip");
@@ -95,6 +95,7 @@ public class MainActivity extends Activity {
 
                     if (!loadBottom) {
                         list.add(0, content);
+                        serverID.add(0, postid);
                         commentNums.add(0, commentNum);
                         imageId.add(0, imageURL);
                         postTimes.add(0, relativeTime);
@@ -103,6 +104,7 @@ public class MainActivity extends Activity {
                     }
                     else {
                         list.add(content);
+                        serverID.add(postid);
                         commentNums.add(commentNum);
                         imageId.add(imageURL);
                         postTimes.add(relativeTime);
@@ -178,6 +180,7 @@ public class MainActivity extends Activity {
 		
 		//Set listview contents
 		final ListView postList = (ListView) findViewById(R.id.postListView);
+        postList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		
 		list = new ArrayList<String>();
 		commentNums = new ArrayList<String>();
@@ -185,8 +188,9 @@ public class MainActivity extends Activity {
 		postTimes = new ArrayList<String>();
 		postScores = new ArrayList<String>();
         attachments = new ArrayList<String>();
+        serverID = new ArrayList<Integer>();
 		
-		adapter = new StreamAdapter(this, list, imageId, commentNums, postTimes, postScores, attachments);
+		adapter = new StreamAdapter(this, list, imageId, commentNums, postTimes, postScores, attachments, serverID);
 		postList.setAdapter(adapter);
 
     //API communication

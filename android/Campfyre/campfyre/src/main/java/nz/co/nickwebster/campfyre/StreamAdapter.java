@@ -5,7 +5,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import android.app.Activity;
@@ -23,6 +25,10 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
+import com.google.gson.Gson;
+
 public class StreamAdapter extends ArrayAdapter<String> {
 	private final Activity context;
 	private final ArrayList<String> list;
@@ -31,9 +37,13 @@ public class StreamAdapter extends ArrayAdapter<String> {
 	private final ArrayList<String> postTimes;
 	private final ArrayList<String> postScores;
     private final ArrayList<String> attachments;
+    private final ArrayList<Integer> serverID;
     String imageID;
+    Socket ws;
+    //	String serverURI = "http://192.168.1.54:3973"; // Comment this out
+    String serverURI = "http://campfyre.org:3973"; // Uncomment this
 	
-	public StreamAdapter(Activity context, ArrayList<String> list, ArrayList<String> imageId, ArrayList<String> commentNums, ArrayList<String> postTimes, ArrayList<String> postScores, ArrayList<String> attachments) {
+	public StreamAdapter(Activity context, ArrayList<String> list, ArrayList<String> imageId, ArrayList<String> commentNums, ArrayList<String> postTimes, ArrayList<String> postScores, ArrayList<String> attachments, ArrayList<Integer> serverID) {
 		super(context, R.layout.post_list_row_layout, list);
 		this.context = context;
 		this.list = list;
@@ -42,6 +52,7 @@ public class StreamAdapter extends ArrayAdapter<String> {
 		this.postTimes = postTimes;
 		this.postScores = postScores;
         this.attachments = attachments;
+        this.serverID = serverID;
 	}
 	
 	@Override
@@ -145,6 +156,24 @@ public class StreamAdapter extends ArrayAdapter<String> {
 	
 	Thread getIPThread = new Thread(getIP);
 	getIPThread.start();
+
+        //Listeners for buttons on row
+        stokeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Gson gson = new Gson();
+                try {
+                    ws = IO.socket(serverURI);
+                }
+                catch (Exception e) {
+                    Log.e("CampfyreApp", e.toString());
+                }
+                ws.connect();
+                Map<String, Object> params = new HashMap<String, Object>();
+                params.put("id", serverID.get(position));
+                ws.emit("stoke", gson.toJson(params));
+            }
+        });
 	
 	
 	return rowView;
