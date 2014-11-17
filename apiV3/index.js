@@ -191,6 +191,7 @@ function submitPost(text, attachment, email, catcher, ip, isNsfw, socket) {
 								post.comments = comments;
 
 								post.ip = 'http://robohash.org/'+md5(post.ip)+'.png?set=set3&size=64x64';
+								post.loadBottom = false;
 								ws.emit('new post', JSON.stringify(post));
 								socket.emit('success message', JSON.stringify({title: 'Post submitted', body: ''}));
 
@@ -301,6 +302,7 @@ function getPost(size, id, socket) {
 			post.comments = comments;
 
 			post.ip = 'http://robohash.org/'+md5(post.ip)+'.png?set=set3&size='+size;
+			post.loadBottom = false;
 
 			socket.emit('new post', JSON.stringify(post));
 		}).bind(this, post));
