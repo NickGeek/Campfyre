@@ -64,6 +64,7 @@ public class StreamAdapter extends ArrayAdapter<String> {
 	TextView txtTitle = (TextView) rowView.findViewById(R.id.postDesign);
 	final ImageView robofaceView = (ImageView) rowView.findViewById(R.id.imageDesign);
     final ImageButton attachmentImage = (ImageButton)rowView.findViewById(R.id.attachmentImage);
+    final Button attachmentBtn = (Button)rowView.findViewById(R.id.attachmentButton);
 	TextView commentCounter = (TextView) rowView.findViewById(R.id.commentcountTextView);
 	TextView postTimeText = (TextView) rowView.findViewById(R.id.postTime);
     Button stokeBtn = (Button)rowView.findViewById(R.id.stokeButton);
@@ -73,7 +74,6 @@ public class StreamAdapter extends ArrayAdapter<String> {
 	stokeBtn.setText("STOKE (" + postScores.get(position) + ")");
 
         //Attachments
-        final Button attachmentBtn = (Button)rowView.findViewById(R.id.attachmentButton);
         RelativeLayout attachmentLayout = (RelativeLayout)rowView.findViewById(R.id.attachmentLayout);
         if (!attachments.get(position).equals("n/a")) {
             try {
@@ -183,7 +183,13 @@ public class StreamAdapter extends ArrayAdapter<String> {
                 context.startActivity(intent);
             }
         });
-	
+
+        attachmentBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(attachments.get(position)));
+                context.startActivity(intent);
+            }
+        });
 	
 	return rowView;
 	}
