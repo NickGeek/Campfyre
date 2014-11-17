@@ -11,8 +11,10 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -61,6 +63,7 @@ public class StreamAdapter extends ArrayAdapter<String> {
 	View rowView = inflater.inflate(R.layout.post_list_row_layout, null, true);
 	TextView txtTitle = (TextView) rowView.findViewById(R.id.postDesign);
 	final ImageView robofaceView = (ImageView) rowView.findViewById(R.id.imageDesign);
+    final ImageButton attachmentImage = (ImageButton)rowView.findViewById(R.id.attachmentImage);
 	TextView commentCounter = (TextView) rowView.findViewById(R.id.commentcountTextView);
 	TextView postTimeText = (TextView) rowView.findViewById(R.id.postTime);
     Button stokeBtn = (Button)rowView.findViewById(R.id.stokeButton);
@@ -72,7 +75,6 @@ public class StreamAdapter extends ArrayAdapter<String> {
         //Attachments
         final Button attachmentBtn = (Button)rowView.findViewById(R.id.attachmentButton);
         RelativeLayout attachmentLayout = (RelativeLayout)rowView.findViewById(R.id.attachmentLayout);
-        final ImageButton attachmentImage = (ImageButton)rowView.findViewById(R.id.attachmentImage);
         if (!attachments.get(position).equals("n/a")) {
             try {
                 URL attachmentURL = new URL(attachments.get(position));
@@ -172,6 +174,13 @@ public class StreamAdapter extends ArrayAdapter<String> {
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("id", serverID.get(position));
                 ws.emit("stoke", gson.toJson(params));
+            }
+        });
+
+        attachmentImage.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(attachments.get(position)));
+                context.startActivity(intent);
             }
         });
 	
