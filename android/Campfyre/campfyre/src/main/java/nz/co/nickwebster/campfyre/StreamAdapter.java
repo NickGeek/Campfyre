@@ -105,7 +105,7 @@ public class StreamAdapter extends ArrayAdapter<String> {
                             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
                             StrictMode.setThreadPolicy(policy);
                             try {
-                                url = new URL("http://i.imgur.com/"+imageID+"m.png");
+                                url = new URL("http://i.imgur.com/"+imageID+"l.png");
                                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                                 connection.setDoInput(true);
                                 connection.connect();
