@@ -15,6 +15,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
@@ -192,16 +193,16 @@ public class MainActivity extends Activity {
         //Set NSFW
         prefs = getSharedPreferences("CampfyreApp", MODE_PRIVATE);
         showNSFW = prefs.getBoolean("showNSFW", false);
-		
+
 		//Floating action button - https://github.com/FaizMalkani/FloatingActionButton
 		final Fab submitButton = (Fab)findViewById(R.id.submitButton);
 		submitButton.setFabColor(getResources().getColor(R.color.campfyre_orange));
 		submitButton.setFabDrawable(getResources().getDrawable(R.drawable.ic_action_edit));
-		
+
 		//Set listview contents
 		final ListView postList = (ListView) findViewById(R.id.postListView);
         postList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-		
+
 		list = new ArrayList<String>();
 		commentNums = new ArrayList<String>();
 		imageId = new ArrayList<String>();
@@ -209,7 +210,7 @@ public class MainActivity extends Activity {
 		postScores = new ArrayList<String>();
         attachments = new ArrayList<String>();
         serverID = new ArrayList<Integer>();
-		
+
 		adapter = new StreamAdapter(this, list, imageId, commentNums, postTimes, postScores, attachments, serverID);
 		postList.setAdapter(adapter);
 
@@ -290,7 +291,7 @@ public class MainActivity extends Activity {
     });
 
     ws.connect();
-	
+
 	//Handle clicks
 	postList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -302,7 +303,7 @@ public class MainActivity extends Activity {
 			Intent postDetail = new Intent(MainActivity.this, postDetial.class);
 			Bundle b = new Bundle();
             //TODO: WebSockitify
-				
+
 			//Workout server ID
 			b.putInt("serverID", serverID.get((int) id));
 			postDetail.putExtras(b);
@@ -311,19 +312,29 @@ public class MainActivity extends Activity {
 		}
 
 	});
-	
+
 	//Show/hide FAB based on scrolling
 	postList.setOnScrollListener(new OnScrollListener() {
-			private int mLastFirstVisibleItem;
+        private int mLastFirstVisibleItem;
+
+        public void onScrollStateChanged(AbsListView view, int scrollState) {
+            final ListView lw = postList;
+
+            if (view.getId() == lw.getId()) {
+                final int currentFirstVisibleItem = lw.getFirstVisiblePosition();
+
+                if (currentFirstVisibleItem > mLastFirstVisibleItem) {
+                    submitButton.hideFab();
+                } else if (currentFirstVisibleItem < mLastFirstVisibleItem) {
+                    submitButton.showFab();
+                }
+
+                mLastFirstVisibleItem = currentFirstVisibleItem;
+            }
+        }
 
 			@Override
-			public void onScrollStateChanged(AbsListView view, int scrollState) {
-
-			}
-
-			@Override
-			public void onScroll(AbsListView view, int firstVisibleItem,
-				int visibleItemCount, int totalItemCount) {
+			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 int lastItem = firstVisibleItem + visibleItemCount;
                 if (lastItem == totalItemCount && lastItem != oldLast) {
                     oldLast = lastItem;
@@ -340,14 +351,9 @@ public class MainActivity extends Activity {
                     params.put("loadBottom", true);
                     ws.emit("get posts", gson.toJson(params));
                 }
-
-				if(mLastFirstVisibleItem < firstVisibleItem) {
-					submitButton.hideFab();
-				}
-				else if(mLastFirstVisibleItem > firstVisibleItem) {
-					submitButton.showFab();
-				}
-				mLastFirstVisibleItem = firstVisibleItem;
+                else if (firstVisibleItem == 0) {
+                    submitButton.showFab();
+                }
 			}
 	});
 }
