@@ -27,14 +27,14 @@
 
             <ImageView
                 android:id="@+id/imageDesign"
-                android:layout_width="60dp"
-                android:layout_height="60dp" />
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
 
             <TextView
                 android:id="@+id/postDesign"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20sp" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
         </LinearLayout>
 
         <LinearLayout
@@ -47,18 +47,21 @@
             <TextView
                 android:id="@+id/commentcountTextView"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
 
             <TextView
                 android:id="@+id/seperator1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
                 android:text="@string/text_seperator" />
 
             <TextView
                 android:id="@+id/postTime"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
 
         </LinearLayout>
 

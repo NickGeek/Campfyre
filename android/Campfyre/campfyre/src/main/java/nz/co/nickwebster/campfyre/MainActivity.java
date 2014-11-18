@@ -75,7 +75,7 @@ public class MainActivity extends Activity {
 
         //Convert 50dp into px for the image
         DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
-        final Integer size = 60 * (displayData.densityDpi / 160);
+        final Integer size = 50 * (displayData.densityDpi / 160);
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("size", size.toString() + "x" + size.toString());
@@ -226,7 +226,7 @@ public class MainActivity extends Activity {
         public void call(Object... args) {
             //Convert 50dp into px for the image
             DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
-            final Integer size = 60 * (displayData.densityDpi / 160);
+            final Integer size = 50 * (displayData.densityDpi / 160);
             list.clear();
             imageId.clear();
             commentNums.clear();
@@ -331,7 +331,7 @@ public class MainActivity extends Activity {
 
                     //Convert 50dp into px for the image
                     DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
-                    final Integer size = 60 * (displayData.densityDpi / 160);
+                    final Integer size = 50 * (displayData.densityDpi / 160);
 
                     Map<String, Object> params = new HashMap<String, Object>();
                     params.put("size", size.toString() + "x" + size.toString());
