@@ -65,6 +65,7 @@ public class StreamAdapter extends ArrayAdapter<String> {
 	final ImageView robofaceView = (ImageView) rowView.findViewById(R.id.imageDesign);
     final ImageButton attachmentImage = (ImageButton)rowView.findViewById(R.id.attachmentImage);
     final Button attachmentBtn = (Button)rowView.findViewById(R.id.attachmentButton);
+    final Button shareBtn = (Button)rowView.findViewById(R.id.shareButton);
 	TextView commentCounter = (TextView) rowView.findViewById(R.id.commentcountTextView);
 	TextView postTimeText = (TextView) rowView.findViewById(R.id.postTime);
     Button stokeBtn = (Button)rowView.findViewById(R.id.stokeButton);
@@ -189,6 +190,17 @@ public class StreamAdapter extends ArrayAdapter<String> {
         attachmentBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(attachments.get(position)));
+                context.startActivity(intent);
+            }
+        });
+
+        shareBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_SUBJECT, list.get(position));
+                intent.putExtra(Intent.EXTRA_TEXT, "http://campfyre.org/permalink.html?id="+serverID.get(position));
                 context.startActivity(intent);
             }
         });
