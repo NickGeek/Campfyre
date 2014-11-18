@@ -75,6 +75,7 @@ public class StreamAdapter extends ArrayAdapter<String> {
 
         //Attachments
         RelativeLayout attachmentLayout = (RelativeLayout)rowView.findViewById(R.id.attachmentLayout);
+        final View contentSeperator = rowView.findViewById(R.id.contentSeperator);
         if (!attachments.get(position).equals("n/a")) {
             try {
                 URL attachmentURL = new URL(attachments.get(position));
@@ -83,6 +84,7 @@ public class StreamAdapter extends ArrayAdapter<String> {
                 String domainname = hostnameArr[hostnameArr.length-2];
                 if (domainname.equals("imgur")) {
                     attachmentImage.setVisibility(View.VISIBLE);
+                    contentSeperator.setVisibility(View.GONE);
                     String[] imgURL = attachments.get(position).split(Pattern.quote("/"));
                     String imageFile = imgURL[imgURL.length-1];
                     try {
@@ -100,7 +102,7 @@ public class StreamAdapter extends ArrayAdapter<String> {
                             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
                             StrictMode.setThreadPolicy(policy);
                             try {
-                                url = new URL("http://i.imgur.com/"+imageID+".png");
+                                url = new URL("http://i.imgur.com/"+imageID+"m.png");
                                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                                 connection.setDoInput(true);
                                 connection.connect();
