@@ -195,7 +195,7 @@ public class MainActivity extends Activity {
 		
 		//Floating action button - https://github.com/FaizMalkani/FloatingActionButton
 		final Fab submitButton = (Fab)findViewById(R.id.submitButton);
-		submitButton.setFabColor(getResources().getColor(android.R.color.holo_orange_dark));
+		submitButton.setFabColor(getResources().getColor(R.color.campfyre_orange));
 		submitButton.setFabDrawable(getResources().getDrawable(R.drawable.ic_action_edit));
 		
 		//Set listview contents
