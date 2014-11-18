@@ -42,7 +42,7 @@ public class StreamAdapter extends ArrayAdapter<String> {
     private final ArrayList<Integer> serverID;
     String imageID;
     Socket ws;
-    //	String serverURI = "http://192.168.1.54:3973"; // Comment this out
+//    	String serverURI = "http://192.168.1.54:3973"; // Comment this out
     String serverURI = "http://campfyre.org:3973"; // Uncomment this
 	
 	public StreamAdapter(Activity context, ArrayList<String> list, ArrayList<String> imageId, ArrayList<String> commentNums, ArrayList<String> postTimes, ArrayList<String> postScores, ArrayList<String> attachments, ArrayList<Integer> serverID) {
@@ -73,6 +73,8 @@ public class StreamAdapter extends ArrayAdapter<String> {
 	commentCounter.setText(commentNums.get(position));
 	postTimeText.setText(postTimes.get(position));
 	stokeBtn.setText("STOKE (" + postScores.get(position) + ")");
+    MainActivity mainActivity = new MainActivity();
+    mainActivity.idComparison.put(serverID.get(position), position);
 
         //Attachments
         RelativeLayout attachmentLayout = (RelativeLayout)rowView.findViewById(R.id.attachmentLayout);

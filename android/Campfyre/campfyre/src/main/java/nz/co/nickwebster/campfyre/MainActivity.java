@@ -56,6 +56,7 @@ public class MainActivity extends Activity {
     SharedPreferences prefs;
     Menu activityMenu;
     int oldLast;
+    public static Map<Integer, Integer> idComparison = new HashMap<Integer, Integer>();
 
     Socket ws;
 //	String serverURI = "http://192.168.1.54:3973"; // Comment this out
@@ -63,6 +64,26 @@ public class MainActivity extends Activity {
     boolean showNSFW;
     String tag = "";
     int page = 1;
+
+    private void refresh() {
+        list.clear();
+        imageId.clear();
+        commentNums.clear();
+        postTimes.clear();
+        postScores.clear();
+        attachments.clear();
+
+        //Convert 50dp into px for the image
+        DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
+        final Integer size = 60 * (displayData.densityDpi / 160);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("size", size.toString() + "x" + size.toString());
+        params.put("search", tag);
+        params.put("startingPost", page * 50 - 50);
+        params.put("loadBottom", false);
+        ws.emit("get posts", gson.toJson(params));
+    }
 
 	private void renderPost(Object json) {
         JSONObject postData;
@@ -144,24 +165,23 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void refresh() {
-        list.clear();
-        imageId.clear();
-        commentNums.clear();
-        postTimes.clear();
-        postScores.clear();
-        attachments.clear();
-
-        //Convert 50dp into px for the image
-        DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
-        final Integer size = 60 * (displayData.densityDpi / 160);
-
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("size", size.toString() + "x" + size.toString());
-        params.put("search", tag);
-        params.put("startingPost", page * 50 - 50);
-        params.put("loadBottom", false);
-        ws.emit("get posts", gson.toJson(params));
+    private void updateStokes(Object json) {
+        try {
+            JSONObject data = new JSONObject(json.toString());
+            String newScore = data.getString("score");
+            int idOnServer = data.getInt("id");
+            int positionInList = idComparison.get(idOnServer);
+            postScores.set(positionInList, newScore);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    adapter.notifyDataSetChanged();
+                }
+            });
+        }
+        catch (Exception e) {
+            Log.e("CampfyreApp", e.toString());
+        }
     }
 
 	@Override
@@ -261,6 +281,11 @@ public class MainActivity extends Activity {
                 });
                 refresh();
             }
+        }
+    }).on("post stoked", new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            updateStokes(args[0]);
         }
     });
 
