@@ -60,7 +60,7 @@ ws.on('new post', function(postData) {
 				for (var i = 0; i < postData.comments.length; ++i) {
 					newHTML = newHTML + '<hr />';
 					newHTML = newHTML + "<p><i id='ip'><img src='"+postData.comments[i].ip+"' /> says...<br></i>"+moment(moment.unix(postData.comments[i].time)).fromNow();
-					newHTML = newHTML + '<h4 id="commentText">'+postData.comments[i].comment.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
+					newHTML = newHTML + '<h4 id="commentText">'+emojione.unicodeToImage(postData.comments[i].comment.replace(new RegExp('\r?\n','g'), '<br />'))+'</h4>';
 				}
 			newHTML = newHTML + '</div>';
 		newHTML = newHTML + '</div>';
@@ -102,7 +102,7 @@ ws.on('new comment', function(commentData) {
 	var newHTML = '';
 	newHTML = newHTML + '<hr />';
 	newHTML = newHTML + "<p><i id='ip'><img src='"+commentData.ip+"' /> says...<br></i>"+moment(moment.unix(commentData.time)).fromNow();
-	newHTML = newHTML + '<h4 id="commentText">'+commentData.comment.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
+	newHTML = newHTML + '<h4 id="commentText">'+emojione.unicodeToImage(commentData.comment.replace(new RegExp('\r?\n','g'), '<br />'))+'</h4>';
 
 	//Insert the comment
 	var comments = document.getElementById('comments'+commentData.parent);
