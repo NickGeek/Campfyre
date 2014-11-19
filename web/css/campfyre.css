@@ -1,0 +1,122 @@
+body {
+	background: url(../img/bg.jpg) no-repeat center center fixed;
+	background-size: cover;
+}
+.centre {
+	text-align: center;
+}
+h1 {
+	font-family: 'Lato', serif;
+	font-weight:900;
+	font-size: 4em;
+	color: #ff6900;
+	padding-right: 20px;
+}
+h2 {
+	text-align: center;
+	padding-right: 20px;
+	font-weight:100;
+	font-family: 'Lato', serif;
+	padding-left: 10px;
+}
+h3 {
+	padding-right: 20px;
+	font-weight:100;
+	font-family: 'Lato', serif;
+	padding-left: 10px;
+}
+
+h4 {
+	padding-right: 20px;
+	font-weight:100;
+	font-family: 'Lato', serif;
+	padding-left: 10px;
+}
+
+.emojione {
+	width: 24px;
+	height: 24px;
+}
+
+/* Mobile */
+@media (max-width: 960px) {
+	.card {
+		padding:1rem;
+		box-shadow:0 1px 2px #aaa;
+		background:white;
+		margin:0 1rem 1rem;
+		border-radius:3px;
+		width: 80%;
+		margin-left:auto;
+		margin-right:auto;
+		word-wrap: break-word;
+	}
+}
+/* Widescreen */
+@media (min-width: 960px) {
+	.card {
+		padding:1rem;
+		box-shadow:0 1px 2px #aaa;
+		background:white;
+		margin:0 1rem 1rem;
+		border-radius:3px;
+		width: 50%;
+		margin-left:auto;
+		margin-right:auto;
+		word-wrap: break-word;
+	}
+}
+
+#ip {
+	font-family: 'Lato', serif;
+}
+p {
+	font-family: 'Lato', serif;
+}
+a:link {
+	color: #5C5858;
+	text-decoration: none;
+}
+a:visited {
+	color: #5C5858;
+	text-decoration: none;
+}
+a:hover {
+	color: black;
+	text-decoration: underline;
+}
+a:active {
+	color: black;
+	text-decoration: underline;
+}
+#postText {
+	width: 95%;
+	height: auto;
+}
+.campaigns {
+	text-align: center;
+}
+#search {
+	margin-left: 15px;
+	margin-top: 15px;
+}
+#loadingMessage {
+	text-align: center;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	width: 100px;
+	height: 100px;
+}
+#loadingComments {
+	text-align: center;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	width: 100px;
+	height: 100px;
+}
+#centre {
+	text-align: center;
+	margin-top: 1%;
+}
