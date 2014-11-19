@@ -4,7 +4,7 @@ var tag = "";
 var loaded = false;
 var page = 1;
 var lastPost = 0;
-io('ws://'+window.location.hostname+':3973');
+var ws = io('ws://'+window.location.hostname+':3973');
 
 //Display posts when they arrive
 ws.on('new post', function(postData) {
