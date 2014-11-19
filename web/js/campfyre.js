@@ -4,7 +4,7 @@ var tag = "";
 var loaded = false;
 var page = 1;
 var lastPost = 0;
-var ws = io('ws://'+window.location.hostname+':3973');
+io('ws://'+window.location.hostname+':3973');
 
 //Display posts when they arrive
 ws.on('new post', function(postData) {
@@ -33,7 +33,7 @@ ws.on('new post', function(postData) {
 				newHTML = newHTML + " [nsfw]";
 			}
 		newHTML = newHTML + "</p>";
-		newHTML = newHTML + '<h3 id="postText'+postData.id+'" style="text-align: left;">'+postData.post.replace(new RegExp('\r\n','g'), '<br />')+'</h3>';
+		newHTML = newHTML + '<h3 id="postText'+postData.id+'" style="text-align: left;">'+emojione.unicodeToImage(postData.post.replace(new RegExp('\r\n','g'), '<br />'))+'</h3>';
 
 		//Attachments
 		if (postData.attachment != "n/a") {
