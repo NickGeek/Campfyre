@@ -17,6 +17,7 @@
 		<link rel="stylesheet" type="text/css" href="lato.css">
 		<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/2.3.2/css/bootstrap.min.css">
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+		<link rel="stylesheet" href="//cdn.jsdelivr.net/emojione/1.3.0/assets/css/emojione.min.css" />
 
 		<style>
 			body {
@@ -52,6 +53,11 @@
 				font-weight:100;
 				font-family: 'Lato', serif;
 				padding-left: 10px;
+			}
+
+			.emojione {
+				width: 24px;
+				height: 24px;
 			}
 
 			/* Mobile */
@@ -138,6 +144,7 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 		<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
 		<script src="js/moment.js"></script>
+		<script src="//cdn.jsdelivr.net/emojione/1.3.0/lib/js/emojione.min.js"></script>
 		<script src="js/campfyre.js"></script>
 		<script>
 			//Load more posts one on the bottom
@@ -149,7 +156,8 @@
 						size: '64x64',
 						search: tag,
 						startingPost: page*50-50,
-						loadBottom: true
+						loadBottom: true,
+						reverse: true
 					}));
 				}
 			});
