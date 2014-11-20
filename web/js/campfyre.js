@@ -5,6 +5,7 @@ var loaded = false;
 var page = 1;
 var lastPost = 0;
 var ws = io('ws://'+window.location.hostname+':3973');
+var userID = '';
 
 //Display posts when they arrive
 ws.on('new post', function(postData) {
@@ -18,11 +19,11 @@ ws.on('new post', function(postData) {
 	}
 
 	newHTML = newHTML + "<section id="+postData.id+" class='card'>";
-		var userID = postData.ip.split("g/")[1].split(".")[0];
-		newHTML = newHTML + "<p><i id='ip'><img src='"+postData.ip+"' /> says...<br></i><a href='permalink.html?id="+postData.id+"'>Permalink</a> | <span id='postTime"+postData.id+"'>"+moment(moment.unix(postData.time)).fromNow()+"</span>";
+		var submitterHash = postData.ip.split("g/")[1].split(".")[0];
+		newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+submitterHash+"\")'><img src='"+postData.ip+"' /></a> says...<br></i><a href='permalink.html?id="+postData.id+"'>Permalink</a> | <span id='postTime"+postData.id+"'>"+moment(moment.unix(postData.time)).fromNow()+"</span>";
 			
 			//Tags
-			switch (userID) {
+			switch (submitterHash) {
 				case "21232f297a57a5a743894a0e4a801fc3":
 					newHTML = newHTML + " [admin]";
 					break;
@@ -59,8 +60,19 @@ ws.on('new post', function(postData) {
 			//Comments have been posted lets show them
 			newHTML = newHTML + '<div id="comments'+postData.id+'">';
 				for (var i = 0; i < postData.comments.length; ++i) {
+					var commenterHash = postData.comments[i].ip.split("g/")[1].split(".")[0];
 					newHTML = newHTML + '<hr />';
-					newHTML = newHTML + "<p><i id='ip'><img src='"+postData.comments[i].ip+"' /> says...<br></i>"+moment(moment.unix(postData.comments[i].time)).fromNow();
+					newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+postData.comments[i].ip+"' /></a> says...<br></i>"+moment(moment.unix(postData.comments[i].time)).fromNow();
+					//Tags
+					switch (commenterHash) {
+						case "21232f297a57a5a743894a0e4a801fc3":
+							newHTML = newHTML + " [admin]";
+							break;
+						case "5c1055237c524ca98c243b81ba3f9e93":
+							newHTML = newHTML + " [Wellington College]";
+							break;
+					}
+					newHTML = newHTML + "</p>";
 					newHTML = newHTML + '<h4 id="commentText">'+emojione.unicodeToImage(postData.comments[i].comment.replace(new RegExp('\r?\n','g'), '<br />'))+'</h4>';
 				}
 			newHTML = newHTML + '</div>';
@@ -101,9 +113,20 @@ ws.on('new post', function(postData) {
 ws.on('new comment', function(commentData) {
 	var commentData = JSON.parse(commentData);
 	var newHTML = '';
+	var commenterHash = postData.comments[i].ip.split("g/")[1].split(".")[0];
 	newHTML = newHTML + '<hr />';
-	newHTML = newHTML + "<p><i id='ip'><img src='"+commentData.ip+"' /> says...<br></i>"+moment(moment.unix(commentData.time)).fromNow();
-	newHTML = newHTML + '<h4 id="commentText">'+emojione.unicodeToImage(commentData.comment.replace(new RegExp('\r?\n','g'), '<br />'))+'</h4>';
+	newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+postData.comments[i].ip+"' /></a> says...<br></i>"+moment(moment.unix(postData.comments[i].time)).fromNow();
+	//Tags
+	switch (commenterHash) {
+		case "21232f297a57a5a743894a0e4a801fc3":
+			newHTML = newHTML + " [admin]";
+			break;
+		case "5c1055237c524ca98c243b81ba3f9e93":
+			newHTML = newHTML + " [Wellington College]";
+			break;
+	}
+	newHTML = newHTML + "</p>";
+	newHTML = newHTML + '<h4 id="commentText">'+emojione.unicodeToImage(postData.comments[i].comment.replace(new RegExp('\r?\n','g'), '<br />'))+'</h4>';
 
 	//Insert the comment
 	var comments = document.getElementById('comments'+commentData.parent);
@@ -229,78 +252,82 @@ $('#postText'+id).each(function() {
 });
 };
 
-/*/You can have your damn ~tags
-tildetag_regexp = /~([a-zA-Z]+)/g;
-
-function linkTildetags(text) {
-return text.replace(
-	tildetag_regexp,
-	'<a href="search.php?tag=%7E$1">~$1</a>'
-);
-}
-
-$(document).ready(function(){
-$('h3').each(function() {
-	$(this).html(linkTildetags($(this).html()));
-});
-});*/
-
 ws.on('success message', function(message) {
-message = JSON.parse(message);
-toastr.success(message.body, message.title);
+	message = JSON.parse(message);
+	toastr.success(message.body, message.title);
 });
 
 ws.on('error message', function(message) {
-message = JSON.parse(message);
-toastr.warning(message.body, message.title);
+	message = JSON.parse(message);
+	toastr.warning(message.body, message.title);
 });
 
 ws.on('post stoked', function(params) {
-params = JSON.parse(params);
-$('#stokeBtn'+params.id).html('<a id="stokeBtn'+params.id+'" class="btn" href="javascript:void();" onclick="stoke('+params.id+')">Stoke ('+params.score+')</a>');
+	params = JSON.parse(params);
+	$('#stokeBtn'+params.id).html('<a id="stokeBtn'+params.id+'" class="btn" href="javascript:void();" onclick="stoke('+params.id+')">Stoke ('+params.score+')</a>');
 });
 
 ws.on('show nsfw', function() {
-if (showNSFW !== 1) refresh(1);
+	if (showNSFW !== 1) refresh(1);
 });
 
 function stoke(postID) {
-ws.emit('stoke', JSON.stringify({
-	id: postID
-}));
+	ws.emit('stoke', JSON.stringify({
+		id: postID
+	}));
 }
 
 function runSearch(searchQuery) {
-//Re-arange the site
-tag = searchQuery;
-$('#submit').hide();
-$('#searchTitle').html('<h2>Results for: '+tag+'</h2>');
-$('#goBack').show();
-$('#posts').html('');
-$('#loadingMessage').show();
+	//Re-arange the site
+	tag = searchQuery;
+	$('#submit').hide();
+	$('#searchTitle').html('<h2>Results for: '+tag+'</h2>');
+	$('#goBack').show();
+	$('#posts').html('');
+	$('#loadingMessage').show();
 
-page = 1;
-ws.emit('get posts', JSON.stringify({
-	size: '64x64',
-	search: tag,
-	startingPost: page*50-50,
-	loadBottom: false
-}));
+	page = 1;
+	ws.emit('get posts', JSON.stringify({
+		size: '64x64',
+		search: tag,
+		startingPost: page*50-50,
+		loadBottom: false
+	}));
 }
 
 function exitSearch() {
-tag = '';
-$('#submit').show();
-$('#searchTitle').html('');
-$('#goBack').hide();
-$('#loadingMessage').show();
+	tag = '';
+	userID = '';
+	$('#submit').show();
+	$('#searchTitle').html('');
+	$('#goBack').hide();
+	$('#loadingMessage').show();
 
-$('#posts').html('');
-page = 1;
-ws.emit('get posts', JSON.stringify({
-	size: '64x64',
-	search: tag,
-	startingPost: page*50-50,
-	loadBottom: false
-}));
+	$('#posts').html('');
+	page = 1;
+	ws.emit('get posts', JSON.stringify({
+		size: '64x64',
+		search: tag,
+		startingPost: page*50-50,
+		loadBottom: false
+	}));
+}
+
+function loadUserPage(id) {
+	//Re-arange the site
+	userID = id;
+	$('#submit').hide();
+	$('#searchTitle').html('<h2>Viewing posts from <img src="http://robohash.org/'+userID+'.png?set=set3&size=64x64"/></h2>');
+	$('#goBack').show();
+	$('#posts').html('');
+	$('#loadingMessage').show();
+
+	page = 1;
+	ws.emit('get posts', JSON.stringify({
+		size: '64x64',
+		search: tag,
+		startingPost: page*50-50,
+		loadBottom: false,
+		user: userID
+	}));
 }

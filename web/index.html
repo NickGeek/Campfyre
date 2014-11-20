@@ -37,7 +37,8 @@
 						search: tag,
 						startingPost: page*50-50,
 						loadBottom: true,
-						reverse: true
+						reverse: true,
+						user: userID
 					}));
 				}
 			});
@@ -148,7 +149,8 @@
 						size: '64x64',
 						search: tag,
 						startingPost: page*50-50,
-						loadBottom: false
+						loadBottom: false,
+						user: userID
 					}));
 					nsfwToggle();
 				}
@@ -192,7 +194,8 @@
 				size: '64x64',
 				search: tag,
 				startingPost: page*50-50,
-				loadBottom: false
+				loadBottom: false,
+				user: userID
 			}));
 		</script>
 
