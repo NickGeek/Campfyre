@@ -187,16 +187,23 @@
 		</div>
 
 		<script>
-			//Display the posts
-			page = 1;
-			$('#loadingMessage').show();
-			ws.emit('get posts', JSON.stringify({
-				size: '64x64',
-				search: tag,
-				startingPost: page*50-50,
-				loadBottom: false,
-				user: userID
-			}));
+			//User pages
+			var uid = $.urlParam('u');
+			if (uid) {
+				loadUserPage(uid)
+			}
+			else {
+				//Display the posts
+				page = 1;
+				$('#loadingMessage').show();
+				ws.emit('get posts', JSON.stringify({
+					size: '64x64',
+					search: tag,
+					startingPost: page*50-50,
+					loadBottom: false,
+					user: userID
+				}));
+			}
 		</script>
 
 		<script>

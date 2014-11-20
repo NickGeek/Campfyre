@@ -258,6 +258,17 @@ $('#postText'+id).each(function() {
 });
 };
 
+$.urlParam = function(name, url) {
+	if (!url) {
+	 url = window.location.href;
+	}
+	var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(url);
+	if (!results) { 
+		return undefined;
+	}
+	return results[1] || undefined;
+}
+
 ws.on('success message', function(message) {
 	message = JSON.parse(message);
 	toastr.success(message.body, message.title);
@@ -326,8 +337,7 @@ function exitSearch() {
 }
 
 function loadUserPage(id) {
-	//Re-arange the site
-	userID = id;
+	userID = id.split("/")[0];
 	$('#submit').hide();
 	$('#searchTitle').html('<h2>Viewing posts from <img src="http://robohash.org/'+userID+'.png?set=set3&size=64x64"/></h2>');
 	$('#goBack').show();
