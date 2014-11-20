@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -31,7 +32,7 @@ import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.google.gson.Gson;
 
-public class StreamAdapter extends ArrayAdapter<String> {
+public class StreamAdapter extends BaseExpandableListAdapter {
 	private final Activity context;
 	private final ArrayList<String> list;
 	private final ArrayList<String> imageId;
@@ -46,7 +47,6 @@ public class StreamAdapter extends ArrayAdapter<String> {
     String serverURI = "http://campfyre.org:3973"; // Uncomment this
 	
 	public StreamAdapter(Activity context, ArrayList<String> list, ArrayList<String> imageId, ArrayList<String> commentNums, ArrayList<String> postTimes, ArrayList<String> postScores, ArrayList<String> attachments, ArrayList<Integer> serverID) {
-		super(context, R.layout.post_list_row_layout, list);
 		this.context = context;
 		this.list = list;
 		this.imageId = imageId;
@@ -56,9 +56,9 @@ public class StreamAdapter extends ArrayAdapter<String> {
         this.attachments = attachments;
         this.serverID = serverID;
 	}
-	
+
 	@Override
-	public View getView(final int position, View view, ViewGroup parent) {
+	public View getGroupView(final int position, boolean isExpanded, View view, ViewGroup parent) {
 	LayoutInflater inflater = context.getLayoutInflater();
 	View rowView = inflater.inflate(R.layout.post_list_row_layout, null, true);
 	TextView txtTitle = (TextView) rowView.findViewById(R.id.postDesign);
@@ -209,4 +209,42 @@ public class StreamAdapter extends ArrayAdapter<String> {
 	
 	return rowView;
 	}
+
+    public View getChildView(int postPosition, final int commentPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+        LayoutInflater inflater = context.getLayoutInflater();
+        View commentHolderView = inflater.inflate(R.layout.comment_list_layout, null, true);
+        return commentHolderView;
+    }
+
+    public boolean isChildSelectable(int groupPosition, int ChildPosition) {
+        return false;
+    }
+
+    public int getGroupCount() {
+        return list.size();
+    }
+
+    public boolean hasStableIds() {
+        return false;
+    }
+
+    public Object getChild(int groupPosition, int childPosition) {
+        return "hi";
+    }
+
+    public long getChildId(int groupPosition, int childPosition) {
+        return childPosition;
+    }
+
+    public long getGroupId(int groupPosition) {
+        return groupPosition;
+    }
+
+    public Object getGroup(int groupPosition) {
+        return "hi";
+    }
+
+    public int getChildrenCount(int groupPosition) {
+        return 1;
+    }
 }

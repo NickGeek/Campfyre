@@ -21,10 +21,6 @@
 			</intent-filter>
 			<meta-data android:name="android.app.searchable" android:resource="@xml/searchable" />
 		</activity>
-		<activity
-			android:name=".postDetial"
-			android:label="Post Detail" >
-		</activity>
     </application>
 
 </manifest>

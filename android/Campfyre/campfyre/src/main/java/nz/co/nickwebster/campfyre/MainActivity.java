@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -17,11 +19,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ExpandableListView;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +38,7 @@ import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.google.gson.Gson;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -58,6 +65,7 @@ public class MainActivity extends Activity {
     Menu activityMenu;
     int oldLast;
     public static Map<Integer, Integer> idComparison = new HashMap<Integer, Integer>();
+    public static Map<Integer, Map<String, Object>> commentData = new HashMap<Integer, Map<String, Object>>();
 
     Socket ws;
 //	String serverURI = "http://192.168.1.54:3973"; // Comment this out
@@ -65,6 +73,7 @@ public class MainActivity extends Activity {
     boolean showNSFW;
     String tag = "";
     int page = 1;
+    boolean commenting = false;
 
     private void refresh() {
         list.clear();
@@ -100,12 +109,30 @@ public class MainActivity extends Activity {
             final int isNSFW = postData.getInt("nsfw");
             final String postScore = postData.getString("score");
             final String attachment = postData.getString("attachment");
+            final JSONArray commentArr = postData.getJSONArray("comments");
 
             //Time
             long postTimestampMilli = (long)postData.getInt("time")*1000;
             Date now = new Date();
             long currentTime = now.getTime();
             final String relativeTime = DateUtils.getRelativeTimeSpanString(postTimestampMilli, currentTime, 0).toString();
+
+            //Comment data
+            for (int i = 0; i < commentArr.length(); i++) {
+                JSONObject commentObj = commentArr.getJSONObject(i);
+                Map<String, Object> comment = new HashMap<String, Object>();
+                comment.put("comment", commentObj.getString("comment"));
+                comment.put("imageURL", commentObj.getString("ip"));
+
+                //Time
+                postTimestampMilli = (long)commentObj.getInt("time")*1000;
+                now = new Date();
+                currentTime = now.getTime();
+                comment.put("time", DateUtils.getRelativeTimeSpanString(postTimestampMilli, currentTime, 0).toString());
+
+                //Put in the map
+                commentData.put(postid, comment);
+            }
 
             //Add the post to the list
             runOnUiThread(new Runnable() {
@@ -200,8 +227,8 @@ public class MainActivity extends Activity {
 		submitButton.setFabDrawable(getResources().getDrawable(R.drawable.ic_action_edit));
 
 		//Set listview contents
-		final ListView postList = (ListView) findViewById(R.id.postListView);
-        postList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		final ExpandableListView postList = (ExpandableListView) findViewById(R.id.postExpListView);
+        postList.setChoiceMode(ExpandableListView.CHOICE_MODE_SINGLE);
 
 		list = new ArrayList<String>();
 		commentNums = new ArrayList<String>();
@@ -292,36 +319,13 @@ public class MainActivity extends Activity {
 
     ws.connect();
 
-	//Handle clicks
-	postList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-		public void onItemClick(AdapterView<?> parent, final View view,
-			int position, long id) {
-			//final String item = (String) parent.getItemAtPosition(position);
-
-			//Run code
-			Intent postDetail = new Intent(MainActivity.this, postDetial.class);
-			Bundle b = new Bundle();
-            //TODO: WebSockitify
-
-			//Workout server ID
-			b.putInt("serverID", serverID.get((int) id));
-			postDetail.putExtras(b);
-			startActivity(postDetail);
-			overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
-		}
-
-	});
-
 	//Show/hide FAB based on scrolling
 	postList.setOnScrollListener(new OnScrollListener() {
         private int mLastFirstVisibleItem;
 
         public void onScrollStateChanged(AbsListView view, int scrollState) {
-            final ListView lw = postList;
-
-            if (view.getId() == lw.getId()) {
-                final int currentFirstVisibleItem = lw.getFirstVisiblePosition();
+            if (view.getId() == postList.getId()) {
+                final int currentFirstVisibleItem = postList.getFirstVisiblePosition();
 
                 if (currentFirstVisibleItem > mLastFirstVisibleItem) {
                     submitButton.hideFab();
@@ -336,7 +340,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 int lastItem = firstVisibleItem + visibleItemCount;
-                if (lastItem == totalItemCount && lastItem != oldLast) {
+                if (lastItem == totalItemCount && lastItem != oldLast && !commenting) {
                     oldLast = lastItem;
                     page++;
 
@@ -349,6 +353,7 @@ public class MainActivity extends Activity {
                     params.put("search", tag);
                     params.put("startingPost", page * 50 - 50);
                     params.put("loadBottom", true);
+                    params.put("reverse", true);
                     ws.emit("get posts", gson.toJson(params));
                 }
                 else if (firstVisibleItem == 0) {
