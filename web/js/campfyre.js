@@ -119,9 +119,9 @@ ws.on('new post', function(postData) {
 ws.on('new comment', function(commentData) {
 	var commentData = JSON.parse(commentData);
 	var newHTML = '';
-	var commenterHash = postData.comments[i].ip.split("g/")[1].split(".")[0];
+	var commenterHash = commentData.ip.split("g/")[1].split(".")[0];
 	newHTML = newHTML + '<hr />';
-	newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+postData.comments[i].ip+"' /></a> says...<br></i>"+moment(moment.unix(postData.comments[i].time)).fromNow();
+	newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+commentData.ip+"' /></a> says...<br></i>"+moment(moment.unix(commentData.time)).fromNow();
 	//Tags
 	switch (commenterHash) {
 		case "21232f297a57a5a743894a0e4a801fc3":
@@ -132,7 +132,7 @@ ws.on('new comment', function(commentData) {
 			break;
 	}
 	newHTML = newHTML + "</p>";
-	newHTML = newHTML + '<h4 id="commentText">'+emojione.unicodeToImage(postData.comments[i].comment.replace(new RegExp('\r?\n','g'), '<br />'))+'</h4>';
+	newHTML = newHTML + '<h4 id="commentText">'+emojione.unicodeToImage(commentData.comment.replace(new RegExp('\r?\n','g'), '<br />'))+'</h4>';
 
 	//Insert the comment
 	var comments = document.getElementById('comments'+commentData.parent);
