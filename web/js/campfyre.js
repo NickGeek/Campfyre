@@ -337,6 +337,7 @@ function exitSearch() {
 }
 
 function loadUserPage(id) {
+	tag = ''
 	userID = id.split("/")[0];
 	$('#submit').hide();
 	$('#searchTitle').html('<h2>Viewing posts from <img src="http://robohash.org/'+userID+'.png?set=set3&size=64x64"/></h2>');
