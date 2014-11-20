@@ -30,6 +30,9 @@ ws.on('new post', function(postData) {
 				case "5c1055237c524ca98c243b81ba3f9e93":
 					newHTML = newHTML + " [Wellington College]";
 					break;
+				case "6285b28b64eb14ba3188048edce3356b":
+					newHTML = newHTML + " [developer]";
+					break;
 			}
 			if (postData.nsfw == 1) {
 				newHTML = newHTML + " [nsfw]";
@@ -70,6 +73,9 @@ ws.on('new post', function(postData) {
 							break;
 						case "5c1055237c524ca98c243b81ba3f9e93":
 							newHTML = newHTML + " [Wellington College]";
+							break;
+						case "6285b28b64eb14ba3188048edce3356b":
+							newHTML = newHTML + " [developer]";
 							break;
 					}
 					newHTML = newHTML + "</p>";
@@ -271,6 +277,12 @@ ws.on('show nsfw', function() {
 	if (showNSFW !== 1) refresh(1);
 });
 
+ws.on('score result', function(params) {
+	params = JSON.parse(params);
+	var title = document.getElementById('searchTitle');
+	title.innerHTML = title.innerHTML + '<h2>Stokes: '+params.score+'</h2>';
+});
+
 function stoke(postID) {
 	ws.emit('stoke', JSON.stringify({
 		id: postID
@@ -321,6 +333,10 @@ function loadUserPage(id) {
 	$('#goBack').show();
 	$('#posts').html('');
 	$('#loadingMessage').show();
+
+	ws.emit('get total score', JSON.stringify({
+		id: userID
+	}));
 
 	page = 1;
 	ws.emit('get posts', JSON.stringify({

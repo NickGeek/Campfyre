@@ -347,6 +347,16 @@ function getPost(size, id, socket) {
 	});
 }
 
+function getStokeCount(id, socket) {
+	con.query("SELECT `score` FROM `posts` WHERE md5(`ip`) = "+con.escape(id)+";", function(e, results) {
+		totalScore = 0;
+		for (var l = 0; l < results.length; ++l) {
+			totalScore += results[l].score;
+		}
+		socket.emit('score result', JSON.stringify({score: totalScore}));
+	});
+}
+
 app.get('/', function(req, res) {
 	//TODO: emulate old API
 	res.send('<p>Server running</p>');
@@ -389,6 +399,13 @@ ws.on('connection', function(socket) {
 		}
 		catch(e) {
 		}
+	});
+	socket.on('get total score', function(params) {
+		try {
+			params = JSON.parse(params);
+			getStokeCount(params.id, socket)
+		}
+		catch(e) {}
 	});
 });
 
