@@ -45,15 +45,20 @@ if (emailPassword) {
 	}));
 }
 
-function getPosts(size, search, startingPost, loadBottom, socket, reverse) {
+function getPosts(size, search, startingPost, loadBottom, socket, reverse, user) {
 	//Get the posts from the database
 	if (search) {
 		search = addslashes(search);
-		var query = "SELECT * FROM posts WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% "+search+" %' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% "+search+"' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '"+search+" %' or REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) = '"+search+"' ORDER BY id DESC LIMIT "+startingPost+", 100";
+		var query = "SELECT * FROM posts WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% "+search+" %' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% "+search+"' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '"+search+" %' or REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) = '"+search+"' ORDER BY id DESC LIMIT "+con.escape(startingPost)+", 100";
 	}
 	else {
-		startingPost = con.escape(startingPost);
-		var query = "SELECT * FROM posts WHERE `post` NOT LIKE '%#bonfyre%' ORDER BY id DESC LIMIT "+startingPost+", 50;";
+		if (user) {
+			var query = "SELECT * FROM posts WHERE `post` NOT LIKE '%#bonfyre%' AND md5(`ip`) = "+con.escape(user)+" ORDER BY id DESC LIMIT "+con.escape(startingPost)+", 50;";
+		}
+		else {
+			var query = "SELECT * FROM posts WHERE `post` NOT LIKE '%#bonfyre%' ORDER BY id DESC LIMIT "+con.escape(startingPost)+", 50;";
+		}
+		console.log(query);
 	}
 	con.query(query, function(e, posts) {
 		if (e) throw e;
@@ -352,12 +357,7 @@ ws.on('connection', function(socket) {
 	socket.on('get posts', function(params) {
 		try {
 			params = JSON.parse(params);
-			if (params.reverse) {
-				getPosts(params.size, params.search, params.startingPost, params.loadBottom, socket, params.reverse);
-			}
-			else {
-				getPosts(params.size, params.search, params.startingPost, params.loadBottom, socket);
-			}
+			getPosts(params.size, params.search, params.startingPost, params.loadBottom, socket, params.reverse, params.user);
 		}
 		catch(e) {
 		}
