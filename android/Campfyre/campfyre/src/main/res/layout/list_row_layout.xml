@@ -43,6 +43,7 @@
                     android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
 
             </LinearLayout>
+            <View android:layout_height="1dp" android:layout_width="fill_parent" android:background="#eee"/>
 
         </LinearLayout>
 

@@ -25,6 +25,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -41,12 +42,14 @@ public class StreamAdapter extends BaseExpandableListAdapter {
 	private final ArrayList<String> postScores;
     private final ArrayList<String> attachments;
     private final ArrayList<Integer> serverID;
+    private final Map<Integer, List<Map<String, Object>>> commentData;
     String imageID;
     Socket ws;
 //    	String serverURI = "http://192.168.1.54:3973"; // Comment this out
     String serverURI = "http://campfyre.org:3973"; // Uncomment this
+    Integer id;
 	
-	public StreamAdapter(Activity context, ArrayList<String> list, ArrayList<String> imageId, ArrayList<String> commentNums, ArrayList<String> postTimes, ArrayList<String> postScores, ArrayList<String> attachments, ArrayList<Integer> serverID) {
+	public StreamAdapter(Activity context, ArrayList<String> list, ArrayList<String> imageId, ArrayList<String> commentNums, ArrayList<String> postTimes, ArrayList<String> postScores, ArrayList<String> attachments, ArrayList<Integer> serverID, Map<Integer, List<Map<String, Object>>> commentData) {
 		this.context = context;
 		this.list = list;
 		this.imageId = imageId;
@@ -55,10 +58,12 @@ public class StreamAdapter extends BaseExpandableListAdapter {
 		this.postScores = postScores;
         this.attachments = attachments;
         this.serverID = serverID;
+        this.commentData = commentData;
 	}
 
 	@Override
 	public View getGroupView(final int position, boolean isExpanded, View view, ViewGroup parent) {
+    id = serverID.get(position);
 	LayoutInflater inflater = context.getLayoutInflater();
 	View rowView = inflater.inflate(R.layout.post_list_row_layout, null, true);
 	TextView txtTitle = (TextView) rowView.findViewById(R.id.postDesign);
@@ -212,7 +217,17 @@ public class StreamAdapter extends BaseExpandableListAdapter {
 
     public View getChildView(int postPosition, final int commentPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         LayoutInflater inflater = context.getLayoutInflater();
-        View commentHolderView = inflater.inflate(R.layout.comment_list_layout, null, true);
+        View commentHolderView = inflater.inflate(R.layout.list_row_layout, null, true);
+
+        TextView commentText = (TextView) commentHolderView.findViewById(R.id.postDesignC);
+        ImageView robofaceView = (ImageView) commentHolderView.findViewById(R.id.imageDesignC);
+        TextView postTimeText = (TextView) commentHolderView.findViewById(R.id.postTimeC);
+        List<Map<String, Object>> comments = commentData.get(id);
+        for (Map<String, Object> comment : comments) {
+            commentText.setText(comment.get("comment").toString());
+            postTimeText.setText(comment.get("time").toString());
+        }
+
         return commentHolderView;
     }
 
@@ -229,7 +244,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
     }
 
     public Object getChild(int groupPosition, int childPosition) {
-        return "hi";
+        return true;
     }
 
     public long getChildId(int groupPosition, int childPosition) {
@@ -241,10 +256,19 @@ public class StreamAdapter extends BaseExpandableListAdapter {
     }
 
     public Object getGroup(int groupPosition) {
-        return "hi";
+        return true;
     }
 
     public int getChildrenCount(int groupPosition) {
-        return 1;
+        MainActivity mainActivity = new MainActivity();
+        Integer servID;
+        for (Map.Entry<Integer, Integer> entry : mainActivity.idComparison.entrySet()) {
+            if (entry.getValue() == groupPosition) {
+                servID = entry.getKey();
+                List<Map<String, Object>> comments = commentData.get(list.size()-groupPosition);
+                return comments.size();
+            }
+        }
+        return 0;
     }
 }

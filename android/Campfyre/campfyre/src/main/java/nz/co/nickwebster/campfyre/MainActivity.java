@@ -65,7 +65,7 @@ public class MainActivity extends Activity {
     Menu activityMenu;
     int oldLast;
     public static Map<Integer, Integer> idComparison = new HashMap<Integer, Integer>();
-    public static Map<Integer, Map<String, Object>> commentData = new HashMap<Integer, Map<String, Object>>();
+    public static Map<Integer, List<Map<String, Object>>> commentData = new HashMap<Integer, List<Map<String, Object>>>();
 
     Socket ws;
 //	String serverURI = "http://192.168.1.54:3973"; // Comment this out
@@ -118,6 +118,7 @@ public class MainActivity extends Activity {
             final String relativeTime = DateUtils.getRelativeTimeSpanString(postTimestampMilli, currentTime, 0).toString();
 
             //Comment data
+            List<Map<String, Object>> commentTotal = new ArrayList<Map<String, Object>>();
             for (int i = 0; i < commentArr.length(); i++) {
                 JSONObject commentObj = commentArr.getJSONObject(i);
                 Map<String, Object> comment = new HashMap<String, Object>();
@@ -131,8 +132,10 @@ public class MainActivity extends Activity {
                 comment.put("time", DateUtils.getRelativeTimeSpanString(postTimestampMilli, currentTime, 0).toString());
 
                 //Put in the map
-                commentData.put(postid, comment);
+                commentTotal.add(comment);
             }
+            commentData.put(postid, commentTotal);
+
 
             //Add the post to the list
             runOnUiThread(new Runnable() {
@@ -150,8 +153,7 @@ public class MainActivity extends Activity {
                         postTimes.add(0, relativeTime);
                         postScores.add(0, postScore);
                         attachments.add(0, attachment);
-                    }
-                    else {
+                    } else {
                         list.add(content);
                         serverID.add(postid);
                         commentNums.add(commentNum);
@@ -238,7 +240,7 @@ public class MainActivity extends Activity {
         attachments = new ArrayList<String>();
         serverID = new ArrayList<Integer>();
 
-		adapter = new StreamAdapter(this, list, imageId, commentNums, postTimes, postScores, attachments, serverID);
+		adapter = new StreamAdapter(this, list, imageId, commentNums, postTimes, postScores, attachments, serverID, commentData);
 		postList.setAdapter(adapter);
 
     //API communication
