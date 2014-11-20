@@ -18,14 +18,15 @@ ws.on('new post', function(postData) {
 	}
 
 	newHTML = newHTML + "<section id="+postData.id+" class='card'>";
+		var userID = postData.ip.split("g/")[1].split(".")[0];
 		newHTML = newHTML + "<p><i id='ip'><img src='"+postData.ip+"' /> says...<br></i><a href='permalink.html?id="+postData.id+"'>Permalink</a> | <span id='postTime"+postData.id+"'>"+moment(moment.unix(postData.time)).fromNow()+"</span>";
 			
 			//Tags
-			switch (postData.ip) {
-				case "http://robohash.org/21232f297a57a5a743894a0e4a801fc3.png?set=set3&size=64x64":
+			switch (userID) {
+				case "21232f297a57a5a743894a0e4a801fc3":
 					newHTML = newHTML + " [admin]";
 					break;
-				case "http://robohash.org/5c1055237c524ca98c243b81ba3f9e93.png?set=set3&size=64x64":
+				case "5c1055237c524ca98c243b81ba3f9e93":
 					newHTML = newHTML + " [Wellington College]";
 					break;
 			}

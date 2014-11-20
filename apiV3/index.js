@@ -58,7 +58,6 @@ function getPosts(size, search, startingPost, loadBottom, socket, reverse, user)
 		else {
 			var query = "SELECT * FROM posts WHERE `post` NOT LIKE '%#bonfyre%' ORDER BY id DESC LIMIT "+con.escape(startingPost)+", 50;";
 		}
-		console.log(query);
 	}
 	con.query(query, function(e, posts) {
 		if (e) throw e;
