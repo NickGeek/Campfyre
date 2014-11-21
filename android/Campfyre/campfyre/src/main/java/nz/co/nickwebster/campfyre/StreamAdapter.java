@@ -161,6 +161,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
                         }
                     });
                 } catch (Exception e) {
+                    Log.e("CampfyreApp", e.toString());
                 }
             }
         };
@@ -213,48 +214,46 @@ public class StreamAdapter extends BaseExpandableListAdapter {
         return rowView;
     }
 
-    public View getChildView(int groupPosition, final int commentPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+    public View getChildView(int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         LayoutInflater inflater = context.getLayoutInflater();
         View commentHolderView = inflater.inflate(R.layout.list_row_layout, null, true);
 
         TextView commentText = (TextView) commentHolderView.findViewById(R.id.postDesignC);
         final ImageView robofaceView = (ImageView) commentHolderView.findViewById(R.id.imageDesignC);
         TextView postTimeText = (TextView) commentHolderView.findViewById(R.id.postTimeC);
-        List<Map<String, Object>> comments = commentData.get(serverID.get(groupPosition));
-        for (final Map<String, Object> comment : comments) {
-            if (comment.get("comment").toString() != "") {
-                commentText.setText(comment.get("comment").toString());
-                postTimeText.setText(comment.get("time").toString());
+        final List<Map<String, Object>> comments = commentData.get(serverID.get(groupPosition));
+        if (comments.get(childPosition).get("comment").toString().equals("")) {
+            commentText.setText(comments.get(childPosition).get("comment").toString());
+            postTimeText.setText(comments.get(childPosition).get("time").toString());
 
-                //Get and display image from server
-                Runnable getIP = new Runnable() {
-                    @Override
-                    public void run() {
-                        URL url;
-                        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                        StrictMode.setThreadPolicy(policy);
-                        try {
-                            url = new URL(comment.get("imageURL").toString());
-                            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                            connection.setDoInput(true);
-                            connection.connect();
-                            InputStream input = connection.getInputStream();
-                            final Bitmap profilePicture = BitmapFactory.decodeStream(input);
-                            context.runOnUiThread(new Runnable() {
-                                public void run() {
-                                    //Set image
-                                    robofaceView.setImageBitmap(profilePicture);
-                                }
-                            });
-                        } catch (Exception e) {
-                            Log.e("CampfyreApp", e.toString());
-                        }
+            //Get and display image from server
+            Runnable getIP = new Runnable() {
+                @Override
+                public void run() {
+                    URL url;
+                    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                    StrictMode.setThreadPolicy(policy);
+                    try {
+                        url = new URL(comments.get(childPosition).get("imageURL").toString());
+                        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                        connection.setDoInput(true);
+                        connection.connect();
+                        InputStream input = connection.getInputStream();
+                        final Bitmap profilePicture = BitmapFactory.decodeStream(input);
+                        context.runOnUiThread(new Runnable() {
+                            public void run() {
+                                //Set image
+                                robofaceView.setImageBitmap(profilePicture);
+                            }
+                        });
+                    } catch (Exception e) {
+                        Log.e("CampfyreApp", e.toString());
                     }
-                };
+                }
+            };
 
-                Thread getIPThread = new Thread(getIP);
-                getIPThread.start();
-            }
+            Thread getIPThread = new Thread(getIP);
+            getIPThread.start();
         }
 
         return commentHolderView;
@@ -295,7 +294,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
         try {
             Object commentText = firstComment.get("comment");
             if (commentText != null) {
-                if (commentText.toString() != "") {
+                if (commentText.toString().equals("")) {
                     return comments.size();
                 } else {
                     return 0;
