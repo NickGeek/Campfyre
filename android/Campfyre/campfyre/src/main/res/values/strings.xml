@@ -11,7 +11,7 @@
     <string name="action_subscribe">Subscribe to comments</string>
     <string name="hint_comment">Comment Text</string>
     <string name="text_charlimit">/256</string>
-    <string name="action_comment">Comment</string>
+    <string name="action_comment">Submit Comment</string>
     <string name="action_post">Post</string>
     <string name="hint_post">Post text</string>
     <string name="text_placeholderCounter">256</string>
@@ -26,5 +26,7 @@
     <string name="action_stoke">STOKE</string>
     <string name="action_share">SHARE</string>
     <string name="title_attachment">ATTACHMENT: </string>
+    <string name="title_subscribe">Subscribe to comments:</string>
+    <string name="hint_subscribe">E-mail address (optional)</string>
 
 </resources>

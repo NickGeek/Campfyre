@@ -3,12 +3,9 @@ package nz.co.nickwebster.campfyre;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -17,18 +14,12 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
-import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,32 +39,33 @@ import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends Activity {
-	ArrayList<String> list;
-	ArrayList<String> imageId;
-	ArrayList<String> commentNums;
-	ArrayList<String> postTimes;
-	ArrayList<String> postScores;
+    ArrayList<String> list;
+    ArrayList<String> imageId;
+    ArrayList<String> commentNums;
+    ArrayList<String> postTimes;
+    ArrayList<String> postScores;
     ArrayList<String> attachments;
-	StreamAdapter adapter;
-	ArrayList<Integer> serverID;
-	EditText postTextEdit;
-	EditText attachmentTextEdit;
-	CheckBox NSFWcheckBox;
-	TextView counter;
+    StreamAdapter adapter;
+    ArrayList<Integer> serverID;
+    EditText postTextEdit;
+    EditText attachmentTextEdit;
+    CheckBox NSFWcheckBox;
+    TextView counter;
     Gson gson = new Gson();
     SharedPreferences prefs;
     Menu activityMenu;
     int oldLast;
     public static Map<Integer, Integer> idComparison = new HashMap<Integer, Integer>();
-    public static Map<Integer, List<Map<String, Object>>> commentData = new HashMap<Integer, List<Map<String, Object>>>();
+    Map<Integer, List<Map<String, Object>>> commentData = new HashMap<Integer, List<Map<String, Object>>>();
+    ExpandableListView postList;
 
     Socket ws;
-//	String serverURI = "http://192.168.1.54:3973"; // Comment this out
+    //	String serverURI = "http://192.168.1.54:3973"; // Comment this out
     String serverURI = "http://campfyre.org:3973"; // Uncomment this
     boolean showNSFW;
     String tag = "";
     int page = 1;
-    boolean commenting = false;
+    public static boolean commenting = false;
 
     private void refresh() {
         list.clear();
@@ -95,7 +87,7 @@ public class MainActivity extends Activity {
         ws.emit("get posts", gson.toJson(params));
     }
 
-	private void renderPost(Object json) {
+    private void renderPost(Object json) {
         JSONObject postData;
         try {
             //Get and format the post data
@@ -112,7 +104,7 @@ public class MainActivity extends Activity {
             final JSONArray commentArr = postData.getJSONArray("comments");
 
             //Time
-            long postTimestampMilli = (long)postData.getInt("time")*1000;
+            long postTimestampMilli = (long) postData.getInt("time") * 1000;
             Date now = new Date();
             long currentTime = now.getTime();
             final String relativeTime = DateUtils.getRelativeTimeSpanString(postTimestampMilli, currentTime, 0).toString();
@@ -126,7 +118,7 @@ public class MainActivity extends Activity {
                 comment.put("imageURL", commentObj.getString("ip"));
 
                 //Time
-                postTimestampMilli = (long)commentObj.getInt("time")*1000;
+                postTimestampMilli = (long) commentObj.getInt("time") * 1000;
                 now = new Date();
                 currentTime = now.getTime();
                 comment.put("time", DateUtils.getRelativeTimeSpanString(postTimestampMilli, currentTime, 0).toString());
@@ -170,11 +162,10 @@ public class MainActivity extends Activity {
                     adapter.notifyDataSetChanged();
                 }
             });
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Log.e("CampfyreApp", e.toString());
         }
-	}
+    }
 
     private void displayMessage(Object json) {
         try {
@@ -184,9 +175,8 @@ public class MainActivity extends Activity {
             final String message;
             if (body.equals("")) {
                 message = title;
-            }
-            else {
-                message = title+": "+body;
+            } else {
+                message = title + ": " + body;
             }
             runOnUiThread(new Runnable() {
                 @Override
@@ -194,8 +184,7 @@ public class MainActivity extends Activity {
                     Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
                 }
             });
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Log.e("CampfyreApp", e.toString());
         }
     }
@@ -213,139 +202,137 @@ public class MainActivity extends Activity {
                     adapter.notifyDataSetChanged();
                 }
             });
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Log.e("CampfyreApp", e.toString());
         }
     }
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
 
         //Set NSFW
         prefs = getSharedPreferences("CampfyreApp", MODE_PRIVATE);
         showNSFW = prefs.getBoolean("showNSFW", false);
 
-		//Floating action button - https://github.com/FaizMalkani/FloatingActionButton
-		final Fab submitButton = (Fab)findViewById(R.id.submitButton);
-		submitButton.setFabColor(getResources().getColor(R.color.campfyre_orange));
-		submitButton.setFabDrawable(getResources().getDrawable(R.drawable.ic_action_edit));
+        //Floating action button - https://github.com/FaizMalkani/FloatingActionButton
+        final Fab submitButton = (Fab) findViewById(R.id.submitButton);
+        submitButton.setFabColor(getResources().getColor(R.color.campfyre_orange));
+        submitButton.setFabDrawable(getResources().getDrawable(R.drawable.ic_action_edit));
 
-		//Set listview contents
-		final ExpandableListView postList = (ExpandableListView) findViewById(R.id.postExpListView);
+        //Set listview contents
+        postList = (ExpandableListView) findViewById(R.id.postExpListView);
         postList.setChoiceMode(ExpandableListView.CHOICE_MODE_SINGLE);
 
-		list = new ArrayList<String>();
-		commentNums = new ArrayList<String>();
-		imageId = new ArrayList<String>();
-		postTimes = new ArrayList<String>();
-		postScores = new ArrayList<String>();
+        list = new ArrayList<String>();
+        commentNums = new ArrayList<String>();
+        imageId = new ArrayList<String>();
+        postTimes = new ArrayList<String>();
+        postScores = new ArrayList<String>();
         attachments = new ArrayList<String>();
         serverID = new ArrayList<Integer>();
 
-		adapter = new StreamAdapter(this, list, imageId, commentNums, postTimes, postScores, attachments, serverID, commentData);
-		postList.setAdapter(adapter);
+        adapter = new StreamAdapter(this, list, imageId, commentNums, postTimes, postScores, attachments, serverID, commentData);
+        postList.setAdapter(adapter);
 
-    //API communication
-    try {
-        ws = IO.socket(serverURI);
-    }
-    catch (Exception e) {
-        Log.e("CampfyreApp", e.toString());
-    }
+        //API communication
+        try {
+            ws = IO.socket(serverURI);
+        } catch (Exception e) {
+            Log.e("CampfyreApp", e.toString());
+        }
 
-    ws.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            //Convert 50dp into px for the image
-            DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
-            final Integer size = 50 * (displayData.densityDpi / 160);
-            list.clear();
-            imageId.clear();
-            commentNums.clear();
-            postTimes.clear();
-            postScores.clear();
-            attachments.clear();
+        ws.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                //Convert 50dp into px for the image
+                DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
+                final Integer size = 50 * (displayData.densityDpi / 160);
+                list.clear();
+                imageId.clear();
+                commentNums.clear();
+                postTimes.clear();
+                postScores.clear();
+                attachments.clear();
 
-            page = 1;
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("size", size.toString() + "x" + size.toString());
-            params.put("search", tag);
-            params.put("startingPost", page * 50 - 50);
-            params.put("loadBottom", false);
-            ws.emit("get posts", gson.toJson(params));
-        }
-    }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            ws.connect();
-        }
-    }).on("new post", new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            renderPost(args[0]);
-        }
-    }).on("success message", new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            displayMessage(args[0]);
-        }
-    }).on("error message", new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            displayMessage(args[0]);
-        }
-    }).on("show nsfw", new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            if (!showNSFW) {
-                showNSFW = true;
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.clear();
-                editor.putBoolean("showNSFW", true);
-                editor.apply();
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        MenuItem nsfwButton = activityMenu.findItem(R.id.action_showNSFW);
-                        nsfwButton.setTitle(R.string.action_hideNSFW);
-                    }
-                });
-                refresh();
+                page = 1;
+                Map<String, Object> params = new HashMap<String, Object>();
+                params.put("size", size.toString() + "x" + size.toString());
+                params.put("search", tag);
+                params.put("startingPost", page * 50 - 50);
+                params.put("loadBottom", false);
+                ws.emit("get posts", gson.toJson(params));
             }
-        }
-    }).on("post stoked", new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            updateStokes(args[0]);
-        }
-    });
+        }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                ws.connect();
+            }
+        }).on("new post", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                renderPost(args[0]);
+            }
+        }).on("success message", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                displayMessage(args[0]);
+            }
+        }).on("error message", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                displayMessage(args[0]);
+            }
+        }).on("show nsfw", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                if (!showNSFW) {
+                    showNSFW = true;
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.clear();
+                    editor.putBoolean("showNSFW", true);
+                    editor.apply();
 
-    ws.connect();
-
-	//Show/hide FAB based on scrolling
-	postList.setOnScrollListener(new OnScrollListener() {
-        private int mLastFirstVisibleItem;
-
-        public void onScrollStateChanged(AbsListView view, int scrollState) {
-            if (view.getId() == postList.getId()) {
-                final int currentFirstVisibleItem = postList.getFirstVisiblePosition();
-
-                if (currentFirstVisibleItem > mLastFirstVisibleItem) {
-                    submitButton.hideFab();
-                } else if (currentFirstVisibleItem < mLastFirstVisibleItem) {
-                    submitButton.showFab();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            MenuItem nsfwButton = activityMenu.findItem(R.id.action_showNSFW);
+                            nsfwButton.setTitle(R.string.action_hideNSFW);
+                        }
+                    });
+                    refresh();
                 }
-
-                mLastFirstVisibleItem = currentFirstVisibleItem;
             }
-        }
+        }).on("post stoked", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                updateStokes(args[0]);
+            }
+        });
 
-			@Override
-			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        ws.connect();
+
+        //Show/hide FAB based on scrolling
+        postList.setOnScrollListener(new OnScrollListener() {
+            private int mLastFirstVisibleItem;
+
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                if (view.getId() == postList.getId()) {
+                    final int currentFirstVisibleItem = postList.getFirstVisiblePosition();
+
+                    if (currentFirstVisibleItem > mLastFirstVisibleItem) {
+                        submitButton.hideFab();
+                    } else if (currentFirstVisibleItem < mLastFirstVisibleItem) {
+                        submitButton.showFab();
+                    }
+
+                    mLastFirstVisibleItem = currentFirstVisibleItem;
+                }
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 int lastItem = firstVisibleItem + visibleItemCount;
                 if (lastItem == totalItemCount && lastItem != oldLast && !commenting) {
                     oldLast = lastItem;
@@ -362,21 +349,19 @@ public class MainActivity extends Activity {
                     params.put("loadBottom", true);
                     params.put("reverse", true);
                     ws.emit("get posts", gson.toJson(params));
-                }
-                else if (firstVisibleItem == 0) {
+                } else if (firstVisibleItem == 0) {
                     submitButton.showFab();
                 }
-			}
-	});
-}
+            }
+        });
+    }
 
     //Handle back button
     @Override
     public void onBackPressed() {
         if (tag.equals("")) {
             super.onBackPressed();
-        }
-        else {
+        } else {
             tag = "";
             setTitle(R.string.app_name);
             page = 1;
@@ -384,88 +369,87 @@ public class MainActivity extends Activity {
         }
     }
 
-//Handle submit button
-public void submitPost(View view) {
-	View setNameView = View.inflate(this, R.layout.write_post, null);
-	postTextEdit = (EditText)setNameView.findViewById(R.id.postTextEdit);
-	attachmentTextEdit = (EditText)setNameView.findViewById(R.id.attachmentTextEdit);
-	counter = (TextView)setNameView.findViewById(R.id.counterTextView);
-	NSFWcheckBox = (CheckBox)setNameView.findViewById(R.id.NSFWcheckBox);
-	
-	//Counter
-	final TextWatcher txwatcher = new TextWatcher() {
-			 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			 }
+    //Handle submit button
+    public void submitPost(View view) {
+            View setNameView = View.inflate(this, R.layout.write_post, null);
+            postTextEdit = (EditText) setNameView.findViewById(R.id.postTextEdit);
+            attachmentTextEdit = (EditText) setNameView.findViewById(R.id.attachmentTextEdit);
+            counter = (TextView) setNameView.findViewById(R.id.counterTextView);
+            NSFWcheckBox = (CheckBox) setNameView.findViewById(R.id.NSFWcheckBox);
+            final EditText emailTextEdit = (EditText)setNameView.findViewById(R.id.subscribeTextEdit);
 
-			 public void onTextChanged(CharSequence s, int start, int before, int count) {
+            //Counter
+            final TextWatcher txwatcher = new TextWatcher() {
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
 
-					counter.setText(String.valueOf(256-s.length()));
-			 }
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    counter.setText(String.valueOf(256 - s.length()));
+                }
 
-			 public void afterTextChanged(Editable s) {
-			 }
-		};
-		postTextEdit.addTextChangedListener(txwatcher);
-	
-	//Back to the dialog!
-	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-	builder.setTitle("Submit post")
-	.setView(setNameView)
-	.setCancelable(false)
-	.setPositiveButton("Post", new DialogInterface.OnClickListener() {
-        public void onClick(DialogInterface dialog, int id) {
-            final String input = postTextEdit.getText().toString();
-            final String attachment = attachmentTextEdit.getText().toString();
-            final Object nsfw;
-            if (NSFWcheckBox.isChecked()) {
-                nsfw = 1;
-            } else {
-                nsfw = "";
-            }
+                public void afterTextChanged(Editable s) {
+                }
+            };
+            postTextEdit.addTextChangedListener(txwatcher);
 
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("post", input);
-            params.put("attachment", attachment);
-            params.put("nsfw", nsfw);
-            params.put("catcher", "");
-            ws.emit("submit post", gson.toJson(params));
-        }
-    })
-	.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-        public void onClick(DialogInterface dialog, int id) {
-            dialog.cancel();
-        }
-    }).show();
-}
+            //Back to the dialog!
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Submit post")
+                    .setView(setNameView)
+                    .setCancelable(false)
+                    .setPositiveButton("Post", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            final String input = postTextEdit.getText().toString();
+                            final String attachment = attachmentTextEdit.getText().toString();
+                            final Object nsfw;
+                            if (NSFWcheckBox.isChecked()) {
+                                nsfw = 1;
+                            } else {
+                                nsfw = "";
+                            }
 
-@Override
-public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
+                            Map<String, Object> params = new HashMap<String, Object>();
+                            params.put("post", input);
+                            params.put("attachment", attachment);
+                            params.put("nsfw", nsfw);
+                            params.put("catcher", "");
+                            params.put("email", emailTextEdit.getText().toString());
+                            ws.emit("submit post", gson.toJson(params));
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    }).show();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
         activityMenu = menu;
-		getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.main, menu);
 
         //NSFW button
         MenuItem nsfwButton = menu.findItem(R.id.action_showNSFW);
         if (showNSFW) {
             nsfwButton.setTitle(R.string.action_hideNSFW);
-        }
-        else {
+        } else {
             nsfwButton.setTitle(R.string.action_showNSFW);
         }
-return true;
-}
+        return true;
+    }
 
-@Override
-public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_refresh) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.action_refresh) {
             page = 1;
             refresh();
-		}
-        else if (id == R.id.action_showNSFW) {
+        } else if (id == R.id.action_showNSFW) {
             if (showNSFW) {
                 showNSFW = false;
                 SharedPreferences.Editor editor = prefs.edit();
@@ -474,8 +458,7 @@ public boolean onOptionsItemSelected(MenuItem item) {
                 editor.apply();
 
                 item.setTitle(R.string.action_showNSFW);
-            }
-            else {
+            } else {
                 showNSFW = true;
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.clear();
@@ -485,40 +468,42 @@ public boolean onOptionsItemSelected(MenuItem item) {
                 item.setTitle(R.string.action_hideNSFW);
             }
             refresh();
+        } else if (id == R.id.action_search) {
+            //Display a dialog to enter the data
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("Search");
+
+            // Set up the input
+            final EditText input = new EditText(MainActivity.this);
+            // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+            input.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+            input.setHint(R.string.search_hint);
+            builder.setView(input);
+
+            // Set up the buttons
+            builder.setPositiveButton("Search", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    //Search
+                    page = 1;
+                    tag = input.getText().toString();
+                    setTitle(tag);
+                    oldLast = 0;
+                    for (int i = 0; i < list.size(); i++) {
+                        postList.collapseGroup(i);
+                    }
+                    refresh();
+                }
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+
+            builder.show();
         }
-		else if (id == R.id.action_search) {
-			//Display a dialog to enter the data
-	AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-	builder.setTitle("Search");
-
-	// Set up the input
-	final EditText input = new EditText(MainActivity.this);
-	// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-	input.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-	input.setHint(R.string.search_hint);
-	builder.setView(input);
-
-	// Set up the buttons
-	builder.setPositiveButton("Search", new DialogInterface.OnClickListener() {
-		@Override
-		public void onClick(DialogInterface dialog, int which) {
-			//Search
-            page = 1;
-            tag = input.getText().toString();
-            setTitle(tag);
-            oldLast = 0;
-            refresh();
-		}
-		});
-		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-			dialog.cancel();
-			}
-		});
-
-		builder.show();
-		}
-		return super.onOptionsItemSelected(item);
-	}
+        return super.onOptionsItemSelected(item);
+    }
 }

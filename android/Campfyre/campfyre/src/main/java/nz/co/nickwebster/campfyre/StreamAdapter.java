@@ -1,37 +1,39 @@
 package nz.co.nickwebster.campfyre;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.StrictMode;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.google.gson.Gson;
+
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 public class StreamAdapter extends BaseExpandableListAdapter {
     private final Activity context;
@@ -48,6 +50,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
     //    	String serverURI = "http://192.168.1.54:3973"; // Comment this out
     String serverURI = "http://campfyre.org:3973"; // Uncomment this
     Integer id;
+    Gson gson = new Gson();
 
     public StreamAdapter(Activity context, ArrayList<String> list, ArrayList<String> imageId, ArrayList<String> commentNums, ArrayList<String> postTimes, ArrayList<String> postScores, ArrayList<String> attachments, ArrayList<Integer> serverID, Map<Integer, List<Map<String, Object>>> commentData) {
         this.context = context;
@@ -173,7 +176,6 @@ public class StreamAdapter extends BaseExpandableListAdapter {
         stokeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Gson gson = new Gson();
                 try {
                     ws = IO.socket(serverURI);
                 } catch (Exception e) {
@@ -214,15 +216,78 @@ public class StreamAdapter extends BaseExpandableListAdapter {
         return rowView;
     }
 
-    public View getChildView(int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+    public View getChildView(final int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         LayoutInflater inflater = context.getLayoutInflater();
         View commentHolderView = inflater.inflate(R.layout.list_row_layout, null, true);
 
         TextView commentText = (TextView) commentHolderView.findViewById(R.id.postDesignC);
         final ImageView robofaceView = (ImageView) commentHolderView.findViewById(R.id.imageDesignC);
         TextView postTimeText = (TextView) commentHolderView.findViewById(R.id.postTimeC);
+        View commentBox = commentHolderView.findViewById(R.id.commentSubmitHolder);
+        Button submitCommentBtn = (Button)commentHolderView.findViewById(R.id.submitCommentBtn);
         final List<Map<String, Object>> comments = commentData.get(serverID.get(groupPosition));
+
+        if (childPosition == 0) {
+            commentBox.setVisibility(View.VISIBLE);
+            submitCommentBtn.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View view) {
+                    try {
+                        ws = IO.socket(serverURI);
+                    } catch (Exception e) {
+                        Log.e("CampfyreApp", e.toString());
+                    }
+                    ws.connect();
+
+                    View postCommentView = View.inflate(context, R.layout.write_comment, null);
+                    final EditText commentTextEdit = (EditText)postCommentView.findViewById(R.id.commentTextEdit);
+                    final TextView counter = (TextView)postCommentView.findViewById(R.id.counterTextView);
+                    final EditText emailTextEdit = (EditText)postCommentView.findViewById(R.id.subscribeTextEditC);
+
+                    //Counter
+                    final TextWatcher txwatcher = new TextWatcher() {
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                        }
+
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                            counter.setText(String.valueOf(256-s.length()));
+                        }
+
+                        public void afterTextChanged(Editable s) {
+                        }
+                    };
+                    commentTextEdit.addTextChangedListener(txwatcher);
+
+                    //Submit the comment
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                    builder.setTitle("Submit comment")
+                            .setView(postCommentView)
+                            .setCancelable(false)
+                            .setPositiveButton("Post", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    final String input = commentTextEdit.getText().toString();
+                                    final String email = emailTextEdit.getText().toString();
+
+                                    Map<String, Object> params = new HashMap<String, Object>();
+                                    params.put("comment", input);
+                                    params.put("email", email);
+                                    params.put("catcher", "");
+                                    params.put("parent", serverID.get(groupPosition));
+                                    ws.emit("submit comment", gson.toJson(params));
+                                }
+                            })
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            }).show();
+                }
+            });
+        }
+
+        View commentContentHolder = commentHolderView.findViewById(R.id.commentContentHolder);
         if (!comments.get(childPosition).get("comment").toString().equals("")) {
+            commentContentHolder.setVisibility(View.VISIBLE);
             commentText.setText(comments.get(childPosition).get("comment").toString());
             postTimeText.setText(comments.get(childPosition).get("time").toString());
 
@@ -254,6 +319,9 @@ public class StreamAdapter extends BaseExpandableListAdapter {
 
             Thread getIPThread = new Thread(getIP);
             getIPThread.start();
+        }
+        else {
+            commentContentHolder.setVisibility(View.GONE);
         }
 
         return commentHolderView;
@@ -297,7 +365,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
                 if (!commentText.toString().equals("")) {
                     return comments.size();
                 } else {
-                    return 0;
+                    return 1;
                 }
             }
         } catch (Exception e) {
