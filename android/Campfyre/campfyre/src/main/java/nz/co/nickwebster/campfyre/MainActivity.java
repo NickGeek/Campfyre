@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class MainActivity extends Activity {
     ArrayList<String> list;
@@ -308,6 +309,53 @@ public class MainActivity extends Activity {
             @Override
             public void call(Object... args) {
                 updateStokes(args[0]);
+            }
+        }).on("new comment", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                //Comment data
+                try {
+                    JSONObject commentObj = new JSONObject(args[0].toString());
+                    Map<String, Object> comment = new HashMap<String, Object>();
+                    comment.put("comment", commentObj.getString("comment"));
+                    comment.put("imageURL", commentObj.getString("ip"));
+
+                    int positionInList = idComparison.get(commentObj.getInt("parent"));
+
+                    //Time
+                    long postTimestampMilli = (long) commentObj.getInt("time") * 1000;
+                    Date now = new Date();
+                    long currentTime = now.getTime();
+                    comment.put("time", DateUtils.getRelativeTimeSpanString(postTimestampMilli, currentTime, 0).toString());
+
+                    //Add to the counter
+                    String commentCounter = commentNums.get(positionInList);
+                    String firstChar = commentCounter.split(Pattern.quote(" "))[0];
+                    Integer oldCommNum = Integer.parseInt(firstChar);
+                    oldCommNum++;
+                    String newCommStr;
+                    if (oldCommNum == 1) {
+                        newCommStr = oldCommNum+" comment";
+                    }
+                    else {
+                        newCommStr = oldCommNum+" comments";
+                    }
+
+                    List<Map<String, Object>> commentsForPost = commentData.get(commentObj.getInt("parent"));
+                    commentsForPost.add(comment);
+
+                    commentData.put(commentObj.getInt("parent"), commentsForPost);
+                    commentNums.set(positionInList, newCommStr);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            adapter.notifyDataSetChanged();
+                        }
+                    });
+                }
+                catch (Exception e) {
+                    Log.e("CampfyreApp", e.toString());
+                }
             }
         });
 
