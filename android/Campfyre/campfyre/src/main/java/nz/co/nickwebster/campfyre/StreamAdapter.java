@@ -222,7 +222,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
         final ImageView robofaceView = (ImageView) commentHolderView.findViewById(R.id.imageDesignC);
         TextView postTimeText = (TextView) commentHolderView.findViewById(R.id.postTimeC);
         final List<Map<String, Object>> comments = commentData.get(serverID.get(groupPosition));
-        if (comments.get(childPosition).get("comment").toString().equals("")) {
+        if (!comments.get(childPosition).get("comment").toString().equals("")) {
             commentText.setText(comments.get(childPosition).get("comment").toString());
             postTimeText.setText(comments.get(childPosition).get("time").toString());
 
@@ -294,7 +294,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
         try {
             Object commentText = firstComment.get("comment");
             if (commentText != null) {
-                if (commentText.toString().equals("")) {
+                if (!commentText.toString().equals("")) {
                     return comments.size();
                 } else {
                     return 0;
