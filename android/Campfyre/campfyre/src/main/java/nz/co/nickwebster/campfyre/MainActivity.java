@@ -371,57 +371,57 @@ public class MainActivity extends Activity {
 
     //Handle submit button
     public void submitPost(View view) {
-            View setNameView = View.inflate(this, R.layout.write_post, null);
-            postTextEdit = (EditText) setNameView.findViewById(R.id.postTextEdit);
-            attachmentTextEdit = (EditText) setNameView.findViewById(R.id.attachmentTextEdit);
-            counter = (TextView) setNameView.findViewById(R.id.counterTextView);
-            NSFWcheckBox = (CheckBox) setNameView.findViewById(R.id.NSFWcheckBox);
-            final EditText emailTextEdit = (EditText)setNameView.findViewById(R.id.subscribeTextEdit);
+        View setNameView = View.inflate(this, R.layout.write_post, null);
+        postTextEdit = (EditText) setNameView.findViewById(R.id.postTextEdit);
+        attachmentTextEdit = (EditText) setNameView.findViewById(R.id.attachmentTextEdit);
+        counter = (TextView) setNameView.findViewById(R.id.counterTextView);
+        NSFWcheckBox = (CheckBox) setNameView.findViewById(R.id.NSFWcheckBox);
+        final EditText emailTextEdit = (EditText) setNameView.findViewById(R.id.subscribeTextEdit);
 
-            //Counter
-            final TextWatcher txwatcher = new TextWatcher() {
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                }
+        //Counter
+        final TextWatcher txwatcher = new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    counter.setText(String.valueOf(256 - s.length()));
-                }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                counter.setText(String.valueOf(256 - s.length()));
+            }
 
-                public void afterTextChanged(Editable s) {
-                }
-            };
-            postTextEdit.addTextChangedListener(txwatcher);
+            public void afterTextChanged(Editable s) {
+            }
+        };
+        postTextEdit.addTextChangedListener(txwatcher);
 
-            //Back to the dialog!
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Submit post")
-                    .setView(setNameView)
-                    .setCancelable(false)
-                    .setPositiveButton("Post", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            final String input = postTextEdit.getText().toString();
-                            final String attachment = attachmentTextEdit.getText().toString();
-                            final Object nsfw;
-                            if (NSFWcheckBox.isChecked()) {
-                                nsfw = 1;
-                            } else {
-                                nsfw = "";
-                            }
-
-                            Map<String, Object> params = new HashMap<String, Object>();
-                            params.put("post", input);
-                            params.put("attachment", attachment);
-                            params.put("nsfw", nsfw);
-                            params.put("catcher", "");
-                            params.put("email", emailTextEdit.getText().toString());
-                            ws.emit("submit post", gson.toJson(params));
+        //Back to the dialog!
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Submit post")
+                .setView(setNameView)
+                .setCancelable(false)
+                .setPositiveButton("Post", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        final String input = postTextEdit.getText().toString();
+                        final String attachment = attachmentTextEdit.getText().toString();
+                        final Object nsfw;
+                        if (NSFWcheckBox.isChecked()) {
+                            nsfw = 1;
+                        } else {
+                            nsfw = "";
                         }
-                    })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    }).show();
+
+                        Map<String, Object> params = new HashMap<String, Object>();
+                        params.put("post", input);
+                        params.put("attachment", attachment);
+                        params.put("nsfw", nsfw);
+                        params.put("catcher", "");
+                        params.put("email", emailTextEdit.getText().toString());
+                        ws.emit("submit post", gson.toJson(params));
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                }).show();
     }
 
     @Override

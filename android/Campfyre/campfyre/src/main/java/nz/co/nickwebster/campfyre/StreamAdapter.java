@@ -224,7 +224,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
         final ImageView robofaceView = (ImageView) commentHolderView.findViewById(R.id.imageDesignC);
         TextView postTimeText = (TextView) commentHolderView.findViewById(R.id.postTimeC);
         View commentBox = commentHolderView.findViewById(R.id.commentSubmitHolder);
-        Button submitCommentBtn = (Button)commentHolderView.findViewById(R.id.submitCommentBtn);
+        Button submitCommentBtn = (Button) commentHolderView.findViewById(R.id.submitCommentBtn);
         final List<Map<String, Object>> comments = commentData.get(serverID.get(groupPosition));
 
         if (childPosition == 0) {
@@ -239,9 +239,9 @@ public class StreamAdapter extends BaseExpandableListAdapter {
                     ws.connect();
 
                     View postCommentView = View.inflate(context, R.layout.write_comment, null);
-                    final EditText commentTextEdit = (EditText)postCommentView.findViewById(R.id.commentTextEdit);
-                    final TextView counter = (TextView)postCommentView.findViewById(R.id.counterTextView);
-                    final EditText emailTextEdit = (EditText)postCommentView.findViewById(R.id.subscribeTextEditC);
+                    final EditText commentTextEdit = (EditText) postCommentView.findViewById(R.id.commentTextEdit);
+                    final TextView counter = (TextView) postCommentView.findViewById(R.id.counterTextView);
+                    final EditText emailTextEdit = (EditText) postCommentView.findViewById(R.id.subscribeTextEditC);
 
                     //Counter
                     final TextWatcher txwatcher = new TextWatcher() {
@@ -250,7 +250,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
 
                         public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-                            counter.setText(String.valueOf(256-s.length()));
+                            counter.setText(String.valueOf(256 - s.length()));
                         }
 
                         public void afterTextChanged(Editable s) {
@@ -319,8 +319,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
 
             Thread getIPThread = new Thread(getIP);
             getIPThread.start();
-        }
-        else {
+        } else {
             commentContentHolder.setVisibility(View.GONE);
         }
 
