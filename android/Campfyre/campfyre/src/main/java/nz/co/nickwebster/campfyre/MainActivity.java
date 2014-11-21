@@ -134,6 +134,11 @@ public class MainActivity extends Activity {
                 //Put in the map
                 commentTotal.add(comment);
             }
+            if (commentArr.length() == 0) {
+                Map<String, Object> comment = new HashMap<String, Object>();
+                comment.put("comment", "");
+                commentTotal.add(comment);
+            }
             commentData.put(postid, commentTotal);
 
 
