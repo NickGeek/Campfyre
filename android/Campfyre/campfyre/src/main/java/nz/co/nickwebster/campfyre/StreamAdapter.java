@@ -77,141 +77,147 @@ public class StreamAdapter extends BaseExpandableListAdapter {
         TextView commentCounter = (TextView) rowView.findViewById(R.id.commentcountTextView);
         TextView postTimeText = (TextView) rowView.findViewById(R.id.postTime);
         Button stokeBtn = (Button) rowView.findViewById(R.id.stokeButton);
-        txtTitle.setText(list.get(position));
-        commentCounter.setText(commentNums.get(position));
-        postTimeText.setText(postTimes.get(position));
-        stokeBtn.setText("STOKE (" + postScores.get(position) + ")");
-        MainActivity mainActivity = new MainActivity();
-        mainActivity.idComparison.put(serverID.get(position), position);
+        try {
+            txtTitle.setText(list.get(position));
+            commentCounter.setText(commentNums.get(position));
+            postTimeText.setText(postTimes.get(position));
+            stokeBtn.setText("STOKE (" + postScores.get(position) + ")");
+            MainActivity mainActivity = new MainActivity();
+            mainActivity.idComparison.put(serverID.get(position), position);
 
-        //Attachments
-        RelativeLayout attachmentLayout = (RelativeLayout) rowView.findViewById(R.id.attachmentLayout);
-        final View contentSeperator = rowView.findViewById(R.id.contentSeperator);
-        if (!attachments.get(position).equals("n/a")) {
-            try {
-                URL attachmentURL = new URL(attachments.get(position));
-                String hostname = attachmentURL.getHost();
-                String[] hostnameArr = hostname.split(Pattern.quote("."));
-                String domainname = hostnameArr[hostnameArr.length - 2];
-                if (domainname.equals("imgur")) {
-                    attachmentImage.setVisibility(View.VISIBLE);
-                    contentSeperator.setVisibility(View.GONE);
-                    String[] imgURL = attachments.get(position).split(Pattern.quote("/"));
-                    String imageFile = imgURL[imgURL.length - 1];
-                    try {
-                        String[] fileArr = imageFile.split(Pattern.quote("."));
-                        imageID = fileArr[0];
-                    } catch (Exception e) {
-                        imageID = imageFile;
-                    }
+            //Attachments
+            RelativeLayout attachmentLayout = (RelativeLayout) rowView.findViewById(R.id.attachmentLayout);
+            final View contentSeperator = rowView.findViewById(R.id.contentSeperator);
+            if (!attachments.get(position).equals("n/a")) {
+                try {
+                    URL attachmentURL = new URL(attachments.get(position));
+                    String hostname = attachmentURL.getHost();
+                    String[] hostnameArr = hostname.split(Pattern.quote("."));
+                    String domainname = hostnameArr[hostnameArr.length - 2];
+                    if (domainname.equals("imgur")) {
+                        attachmentImage.setVisibility(View.VISIBLE);
+                        contentSeperator.setVisibility(View.GONE);
+                        String[] imgURL = attachments.get(position).split(Pattern.quote("/"));
+                        String imageFile = imgURL[imgURL.length - 1];
+                        try {
+                            String[] fileArr = imageFile.split(Pattern.quote("."));
+                            imageID = fileArr[0];
+                        } catch (Exception e) {
+                            imageID = imageFile;
+                        }
 
-                    //Get and display image from server
-                    Runnable getImage = new Runnable() {
-                        @Override
-                        public void run() {
-                            URL url;
-                            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                            StrictMode.setThreadPolicy(policy);
-                            try {
-                                url = new URL("http://i.imgur.com/" + imageID + "l.png");
-                                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                                connection.setDoInput(true);
-                                connection.connect();
-                                InputStream input = connection.getInputStream();
-                                final Bitmap image = BitmapFactory.decodeStream(input);
-                                context.runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        //Set image
-                                        attachmentImage.setImageBitmap(image);
-                                    }
-                                });
-                            } catch (Exception e) {
-                                Log.e("CampfyreApp", e.toString());
+                        //Get and display image from server
+                        Runnable getImage = new Runnable() {
+                            @Override
+                            public void run() {
+                                URL url;
+                                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                                StrictMode.setThreadPolicy(policy);
+                                try {
+                                    url = new URL("http://i.imgur.com/" + imageID + "l.png");
+                                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                                    connection.setDoInput(true);
+                                    connection.connect();
+                                    InputStream input = connection.getInputStream();
+                                    final Bitmap image = BitmapFactory.decodeStream(input);
+                                    context.runOnUiThread(new Runnable() {
+                                        public void run() {
+                                            //Set image
+                                            attachmentImage.setImageBitmap(image);
+                                        }
+                                    });
+                                } catch (Exception e) {
+                                    Log.e("CampfyreApp", e.toString());
+                                }
                             }
-                        }
-                    };
+                        };
 
-                    Thread getImageThread = new Thread(getImage);
-                    getImageThread.start();
+                        Thread getImageThread = new Thread(getImage);
+                        getImageThread.start();
 
-                } else {
-                    attachmentBtn.setText(attachments.get(position));
-                    attachmentLayout.setVisibility(View.VISIBLE);
+                    } else {
+                        attachmentBtn.setText(attachments.get(position));
+                        attachmentLayout.setVisibility(View.VISIBLE);
+                    }
+                } catch (Exception e) {
+                    Log.e("CampfyreApp", e.toString());
                 }
-            } catch (Exception e) {
-                Log.e("CampfyreApp", e.toString());
             }
+
+            //Get and display image from server
+            Runnable getIP = new Runnable() {
+                @Override
+                public void run() {
+                    URL url;
+                    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                    StrictMode.setThreadPolicy(policy);
+                    try {
+                        url = new URL(imageId.get(position));
+                        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                        connection.setDoInput(true);
+                        connection.connect();
+                        InputStream input = connection.getInputStream();
+                        final Bitmap profilePicture = BitmapFactory.decodeStream(input);
+                        context.runOnUiThread(new Runnable() {
+                            public void run() {
+                                //Set image
+                                robofaceView.setImageBitmap(profilePicture);
+                            }
+                        });
+                    } catch (Exception e) {
+                        Log.e("CampfyreApp", e.toString());
+                    }
+                }
+            };
+
+            Thread getIPThread = new Thread(getIP);
+            getIPThread.start();
+
+            //Listeners for buttons on row
+            stokeBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    try {
+                        ws = IO.socket(serverURI);
+                    } catch (Exception e) {
+                        Log.e("CampfyreApp", e.toString());
+                    }
+                    ws.connect();
+                    Map<String, Object> params = new HashMap<String, Object>();
+                    params.put("id", serverID.get(position));
+                    ws.emit("stoke", gson.toJson(params));
+                }
+            });
+
+            attachmentImage.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View view) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(attachments.get(position)));
+                    context.startActivity(intent);
+                }
+            });
+
+            attachmentBtn.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View view) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(attachments.get(position)));
+                    context.startActivity(intent);
+                }
+            });
+
+            shareBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    intent.setType("text/plain");
+                    intent.putExtra(Intent.EXTRA_SUBJECT, list.get(position));
+                    intent.putExtra(Intent.EXTRA_TEXT, "http://campfyre.org/permalink.html?id=" + serverID.get(position));
+                    context.startActivity(intent);
+                }
+            });
+
         }
-
-        //Get and display image from server
-        Runnable getIP = new Runnable() {
-            @Override
-            public void run() {
-                URL url;
-                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                StrictMode.setThreadPolicy(policy);
-                try {
-                    url = new URL(imageId.get(position));
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                    connection.setDoInput(true);
-                    connection.connect();
-                    InputStream input = connection.getInputStream();
-                    final Bitmap profilePicture = BitmapFactory.decodeStream(input);
-                    context.runOnUiThread(new Runnable() {
-                        public void run() {
-                            //Set image
-                            robofaceView.setImageBitmap(profilePicture);
-                        }
-                    });
-                } catch (Exception e) {
-                    Log.e("CampfyreApp", e.toString());
-                }
-            }
-        };
-
-        Thread getIPThread = new Thread(getIP);
-        getIPThread.start();
-
-        //Listeners for buttons on row
-        stokeBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    ws = IO.socket(serverURI);
-                } catch (Exception e) {
-                    Log.e("CampfyreApp", e.toString());
-                }
-                ws.connect();
-                Map<String, Object> params = new HashMap<String, Object>();
-                params.put("id", serverID.get(position));
-                ws.emit("stoke", gson.toJson(params));
-            }
-        });
-
-        attachmentImage.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(attachments.get(position)));
-                context.startActivity(intent);
-            }
-        });
-
-        attachmentBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(attachments.get(position)));
-                context.startActivity(intent);
-            }
-        });
-
-        shareBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_SUBJECT, list.get(position));
-                intent.putExtra(Intent.EXTRA_TEXT, "http://campfyre.org/permalink.html?id=" + serverID.get(position));
-                context.startActivity(intent);
-            }
-        });
+        catch (Exception e) {
+            Log.e("CampfyreApp", e.toString());
+        }
 
         return rowView;
     }

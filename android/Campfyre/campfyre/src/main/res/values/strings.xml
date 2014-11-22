@@ -28,5 +28,6 @@
     <string name="title_attachment">ATTACHMENT: </string>
     <string name="title_subscribe">Subscribe to comments:</string>
     <string name="hint_subscribe">E-mail address (optional)</string>
+    <string name="action_showCredits">Credits</string>
 
 </resources>

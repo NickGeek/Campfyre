@@ -66,7 +66,6 @@ public class MainActivity extends Activity {
     boolean showNSFW;
     String tag = "";
     int page = 1;
-    public static boolean commenting = false;
 
     private void refresh() {
         list.clear();
@@ -111,7 +110,7 @@ public class MainActivity extends Activity {
             final String relativeTime = DateUtils.getRelativeTimeSpanString(postTimestampMilli, currentTime, 0).toString();
 
             //Comment data
-            List<Map<String, Object>> commentTotal = new ArrayList<Map<String, Object>>();
+            final List<Map<String, Object>> commentTotal = new ArrayList<Map<String, Object>>();
             for (int i = 0; i < commentArr.length(); i++) {
                 JSONObject commentObj = commentArr.getJSONObject(i);
                 Map<String, Object> comment = new HashMap<String, Object>();
@@ -132,8 +131,6 @@ public class MainActivity extends Activity {
                 comment.put("comment", "");
                 commentTotal.add(comment);
             }
-            commentData.put(postid, commentTotal);
-
 
             //Add the post to the list
             runOnUiThread(new Runnable() {
@@ -151,6 +148,7 @@ public class MainActivity extends Activity {
                         postTimes.add(0, relativeTime);
                         postScores.add(0, postScore);
                         attachments.add(0, attachment);
+                        commentData.put(postid, commentTotal);
                     } else {
                         list.add(content);
                         serverID.add(postid);
@@ -159,6 +157,7 @@ public class MainActivity extends Activity {
                         postTimes.add(relativeTime);
                         postScores.add(postScore);
                         attachments.add(attachment);
+                        commentData.put(postid, commentTotal);
                     }
                     adapter.notifyDataSetChanged();
                 }
@@ -382,7 +381,7 @@ public class MainActivity extends Activity {
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 int lastItem = firstVisibleItem + visibleItemCount;
-                if (lastItem == totalItemCount && lastItem != oldLast && !commenting) {
+                if (lastItem == totalItemCount && lastItem != oldLast && totalItemCount > 5) {
                     oldLast = lastItem;
                     page++;
 
