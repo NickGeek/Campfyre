@@ -28,6 +28,7 @@
     <string name="title_attachment">ATTACHMENT: </string>
     <string name="title_subscribe">Subscribe to comments:</string>
     <string name="hint_subscribe">E-mail address (optional)</string>
-    <string name="action_showCredits">Credits</string>
+    <string name="action_showCredits">About</string>
+    <string name="text_credits">Developed and run by: Nick Webster\nThanks to: Jamie McClymont\nRobofaces lovingly delivered by Robohash.org\nFork us at https://github.com/NickGeek/Campfyre\n\nCampfyre is licensed under the MPLv2.0 and provides no warranty</string>
 
 </resources>

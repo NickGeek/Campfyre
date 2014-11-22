@@ -550,6 +550,16 @@ public class MainActivity extends Activity {
             });
 
             builder.show();
+        } else if (id == R.id.action_showCredits) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("About Campfyre")
+                    .setView(View.inflate(this, R.layout.about, null))
+                    .setCancelable(false)
+                    .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    }).show();
         }
         return super.onOptionsItemSelected(item);
     }
