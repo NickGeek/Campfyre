@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.StrictMode;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -78,7 +79,12 @@ public class StreamAdapter extends BaseExpandableListAdapter {
         TextView postTimeText = (TextView) rowView.findViewById(R.id.postTime);
         Button stokeBtn = (Button) rowView.findViewById(R.id.stokeButton);
         try {
+            //Linking hashtags
             txtTitle.setText(list.get(position));
+            Pattern hashtagRegex = Pattern.compile("#([a-zA-Z]+)");
+            String searchURI = "content://nz.co.nickwebster.campfyre.MainActivity";
+            Linkify.addLinks(txtTitle, hashtagRegex, searchURI);
+
             commentCounter.setText(commentNums.get(position));
             postTimeText.setText(postTimes.get(position));
             stokeBtn.setText("STOKE (" + postScores.get(position) + ")");
