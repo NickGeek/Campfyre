@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Campfyre</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_close">Close</string>
+    <string name="title_offensiveCheckbox">This post is Offensive/NSFW</string>
+    <string name="action_showNSFW">Show offensive/NSFW posts</string>
+    <string name="action_hideNSFW">Hide offensive/NSFW posts</string>
+    <string name="action_subscribe">Subscribe to comments</string>
+    <string name="hint_comment">Comment Text</string>
+    <string name="text_charlimit">/256</string>
+    <string name="action_comment">Submit Comment</string>
+    <string name="action_post">Post</string>
+    <string name="hint_post">Post text</string>
+    <string name="text_placeholderCounter">256</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_subscribe_short">Subscribe</string>
+    <string name="text_seperator">" | "</string>
+    <string name="hint_attachment">Link to image/video (optional)</string>
+    <string name="action_search">Search</string>
+    <string name="search_hint">#hashtag</string>
+    <string name="action_stoke">STOKE</string>
+    <string name="action_share">SHARE</string>
+    <string name="title_attachment">ATTACHMENT: </string>
+    <string name="title_subscribe">Subscribe to comments:</string>
+    <string name="hint_subscribe">E-mail address (optional)</string>
+    <string name="action_showCredits">About</string>
+    <string name="text_credits">Developed and run by: Nick Webster\nThanks to: Jamie McClymont\nRobofaces lovingly delivered by Robohash.org\nFork us at https://github.com/NickGeek/Campfyre\n\nCampfyre is licensed under the MPLv2.0 and provides no warranty</string>
+
+</resources>
