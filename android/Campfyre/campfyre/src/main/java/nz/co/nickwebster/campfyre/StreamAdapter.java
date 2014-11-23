@@ -12,6 +12,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.util.Linkify;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,6 +85,10 @@ public class StreamAdapter extends BaseExpandableListAdapter {
             Pattern hashtagRegex = Pattern.compile("#([a-zA-Z]+)");
             String searchURI = "campfyre://search/";
             Linkify.addLinks(txtTitle, hashtagRegex, searchURI);
+
+            //Linking links
+            Pattern urlRegex = Patterns.WEB_URL;
+            Linkify.addLinks(txtTitle, urlRegex, null);
 
             commentCounter.setText(commentNums.get(position));
             postTimeText.setText(postTimes.get(position));
