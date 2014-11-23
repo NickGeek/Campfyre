@@ -7,8 +7,6 @@
     <string name="title_offensiveCheckbox">This post is Offensive/NSFW</string>
     <string name="action_showNSFW">Show offensive/NSFW posts</string>
     <string name="action_hideNSFW">Hide offensive/NSFW posts</string>
-    <string name="text_loadingPost">Loading post&#8230;</string>
-    <string name="text_loadingIP">Loading IP&#8230;</string>
     <string name="action_subscribe">Subscribe to comments</string>
     <string name="hint_comment">Comment Text</string>
     <string name="text_charlimit">/256</string>
@@ -18,12 +16,10 @@
     <string name="text_placeholderCounter">256</string>
     <string name="action_refresh">Refresh</string>
     <string name="action_subscribe_short">Subscribe</string>
-    <string name="text_loading">Loading&#8230;</string>
     <string name="text_seperator">" | "</string>
     <string name="hint_attachment">Link to image/video (optional)</string>
     <string name="action_search">Search</string>
     <string name="search_hint">#hashtag</string>
-    <string name="action_loadmore">Load more</string>
     <string name="action_stoke">STOKE</string>
     <string name="action_share">SHARE</string>
     <string name="title_attachment">ATTACHMENT: </string>
