@@ -10,8 +10,8 @@
     <string name="action_subscribe">コメントを　購読する</string>
     <string name="hint_comment">貴方のコメント</string>
     <string name="text_charlimit">/256</string>
-    <string name="action_comment">コメントを　投げる</string>
-    <string name="action_post">投稿を　する</string>
+    <string name="action_comment">コメント投稿する</string>
+    <string name="action_post">投稿する</string>
     <string name="hint_post">貴方の投稿</string>
     <string name="text_placeholderCounter">256</string>
     <string name="action_refresh">補充する</string>
