@@ -27,7 +27,7 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp" />
 
-            <TextView
+            <nz.co.nickwebster.campfyre.LinkifiedTextView
                 android:id="@+id/postDesign"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

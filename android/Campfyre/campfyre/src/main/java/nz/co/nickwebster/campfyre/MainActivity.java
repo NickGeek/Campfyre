@@ -360,6 +360,22 @@ public class MainActivity extends Activity {
 
         ws.connect();
 
+        try {
+            if (!getIntent().getStringExtra("tag").isEmpty()) {
+                tag = getIntent().getStringExtra("tag");
+                page = 1;
+                setTitle(tag);
+                oldLast = 0;
+                for (int i = 0; i < list.size(); i++) {
+                    postList.collapseGroup(i);
+                }
+                refresh();
+            }
+        }
+        catch (Exception e) {
+            tag = "";
+        }
+
         //Show/hide FAB based on scrolling
         postList.setOnScrollListener(new OnScrollListener() {
             private int mLastFirstVisibleItem;

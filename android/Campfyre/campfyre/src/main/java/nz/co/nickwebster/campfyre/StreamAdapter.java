@@ -70,7 +70,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
         id = serverID.get(position);
         LayoutInflater inflater = context.getLayoutInflater();
         View rowView = inflater.inflate(R.layout.post_list_row_layout, null, true);
-        TextView txtTitle = (TextView) rowView.findViewById(R.id.postDesign);
+        LinkifiedTextView txtTitle = (LinkifiedTextView) rowView.findViewById(R.id.postDesign);
         final ImageView robofaceView = (ImageView) rowView.findViewById(R.id.imageDesign);
         final ImageButton attachmentImage = (ImageButton) rowView.findViewById(R.id.attachmentImage);
         final Button attachmentBtn = (Button) rowView.findViewById(R.id.attachmentButton);
@@ -82,7 +82,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
             //Linking hashtags
             txtTitle.setText(list.get(position));
             Pattern hashtagRegex = Pattern.compile("#([a-zA-Z]+)");
-            String searchURI = "content://nz.co.nickwebster.campfyre.MainActivity";
+            String searchURI = "campfyre://search/";
             Linkify.addLinks(txtTitle, hashtagRegex, searchURI);
 
             commentCounter.setText(commentNums.get(position));
