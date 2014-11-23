@@ -68,6 +68,9 @@ public class MainActivity extends Activity {
     int page = 1;
 
     private void refresh() {
+        for (int i = 0; i < list.size(); i++) {
+            postList.collapseGroup(i);
+        }
         list.clear();
         imageId.clear();
         commentNums.clear();
@@ -457,10 +460,10 @@ public class MainActivity extends Activity {
 
         //Back to the dialog!
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Submit post")
+        builder.setTitle(getResources().getString(R.string.action_post))
                 .setView(setNameView)
                 .setCancelable(false)
-                .setPositiveButton("Post", new DialogInterface.OnClickListener() {
+                .setPositiveButton(getResources().getString(R.string.action_post), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         final String input = postTextEdit.getText().toString();
                         final String attachment = attachmentTextEdit.getText().toString();
@@ -480,7 +483,7 @@ public class MainActivity extends Activity {
                         ws.emit("submit post", gson.toJson(params));
                     }
                 })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                .setNegativeButton(getResources().getString(R.string.action_cancel), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
                     }
@@ -534,7 +537,7 @@ public class MainActivity extends Activity {
         } else if (id == R.id.action_search) {
             //Display a dialog to enter the data
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            builder.setTitle("Search");
+            builder.setTitle(getResources().getString(R.string.action_search));
 
             // Set up the input
             final EditText input = new EditText(MainActivity.this);
@@ -544,7 +547,7 @@ public class MainActivity extends Activity {
             builder.setView(input);
 
             // Set up the buttons
-            builder.setPositiveButton("Search", new DialogInterface.OnClickListener() {
+            builder.setPositiveButton(getResources().getString(R.string.action_search), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     //Search
@@ -552,13 +555,10 @@ public class MainActivity extends Activity {
                     tag = input.getText().toString();
                     setTitle(tag);
                     oldLast = 0;
-                    for (int i = 0; i < list.size(); i++) {
-                        postList.collapseGroup(i);
-                    }
                     refresh();
                 }
             });
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            builder.setNegativeButton(getResources().getString(R.string.action_cancel), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.cancel();
@@ -568,10 +568,10 @@ public class MainActivity extends Activity {
             builder.show();
         } else if (id == R.id.action_showCredits) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("About Campfyre")
+            builder.setTitle(getResources().getString(R.string.action_showCredits))
                     .setView(View.inflate(this, R.layout.about, null))
                     .setCancelable(false)
-                    .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+                    .setPositiveButton(getResources().getString(R.string.action_close), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             dialog.cancel();
                         }

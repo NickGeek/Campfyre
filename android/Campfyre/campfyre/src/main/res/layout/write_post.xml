@@ -47,7 +47,7 @@
         android:id="@+id/NSFWcheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="This post is Offensive/NSFW" />
+        android:text="@string/title_offensiveCheckbox" />
 
     <TextView
         android:layout_width="wrap_content"

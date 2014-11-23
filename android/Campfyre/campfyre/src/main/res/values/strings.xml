@@ -2,8 +2,9 @@
 <resources>
 
     <string name="app_name">Campfyre</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_close">Close</string>
+    <string name="title_offensiveCheckbox">This post is Offensive/NSFW</string>
     <string name="action_showNSFW">Show offensive/NSFW posts</string>
     <string name="action_hideNSFW">Hide offensive/NSFW posts</string>
     <string name="text_loadingPost">Loading post&#8230;</string>

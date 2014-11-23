@@ -87,7 +87,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
 
             commentCounter.setText(commentNums.get(position));
             postTimeText.setText(postTimes.get(position));
-            stokeBtn.setText("STOKE (" + postScores.get(position) + ")");
+            stokeBtn.setText(context.getResources().getString(R.string.action_stoke)+" (" + postScores.get(position) + ")");
             MainActivity mainActivity = new MainActivity();
             mainActivity.idComparison.put(serverID.get(position), position);
 
@@ -272,10 +272,10 @@ public class StreamAdapter extends BaseExpandableListAdapter {
 
                     //Submit the comment
                     AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setTitle("Submit comment")
+                    builder.setTitle(context.getResources().getString(R.string.action_comment))
                             .setView(postCommentView)
                             .setCancelable(false)
-                            .setPositiveButton("Post", new DialogInterface.OnClickListener() {
+                            .setPositiveButton(context.getResources().getString(R.string.action_comment), new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     final String input = commentTextEdit.getText().toString();
                                     final String email = emailTextEdit.getText().toString();
@@ -288,7 +288,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
                                     ws.emit("submit comment", gson.toJson(params));
                                 }
                             })
-                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            .setNegativeButton(context.getResources().getString(R.string.action_cancel), new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     dialog.cancel();
                                 }

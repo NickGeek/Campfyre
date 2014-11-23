@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">キャンプファイア</string>
+    <string name="action_cancel">取り消す</string>
+    <string name="action_close">仕舞う</string>
+    <string name="title_offensiveCheckbox">この投稿は不適切です</string>
+    <string name="action_showNSFW">投稿は不適切を　見たいです</string>
+    <string name="action_hideNSFW">投稿は不適切を 見たくないです</string>
+    <string name="action_subscribe">コメントを　購読する</string>
+    <string name="hint_comment">貴方のコメント</string>
+    <string name="text_charlimit">/256</string>
+    <string name="action_comment">コメントを　投げる</string>
+    <string name="action_post">投稿を　する</string>
+    <string name="hint_post">貴方の投稿</string>
+    <string name="text_placeholderCounter">256</string>
+    <string name="action_refresh">補充する</string>
+    <string name="action_subscribe_short">購読する</string>
+    <string name="text_seperator">" | "</string>
+    <string name="hint_attachment">添付URL (随意)</string>
+    <string name="action_search">探す</string>
+    <string name="search_hint">#hashtag</string>
+    <string name="action_stoke">ストーク</string>
+    <string name="action_share">共有</string>
+    <string name="title_attachment">添付URL: </string>
+    <string name="title_subscribe">コメントを　購読する:</string>
+    <string name="hint_subscribe">メールアドレス (随意)</string>
+    <string name="action_showCredits">キャンプファイヤに　ついて</string>
+    <string name="text_credits">Developed and run by: Nick Webster\nThanks to: Jamie McClymont\nRobofaces lovingly delivered by Robohash.org\nFork us at https://github.com/NickGeek/Campfyre\n\nCampfyre is licensed under the MPLv2.0 and provides no warranty</string>
+
+</resources>
