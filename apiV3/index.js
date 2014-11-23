@@ -194,7 +194,7 @@ function submitPost(text, attachment, email, catcher, ip, isNsfw, socket) {
 		}
 
 		//Submit the post
-		if (safeText && ip && attachment) {
+		if (text && ip && attachment) {
 			if (text.length <= 256 && !spamming) {
 				var profanity = text.match(/(cum|jizz|pussy|penis|vagina|cock|dick|cunt|porn|p0rn|tits|tities|boob\S*|sex|ballsack|twat\S*)/im);
 				if (profanity != null || isNsfw){
@@ -274,7 +274,7 @@ function submitComment(parent, text, email, catcher, ip, socket) {
 	var spamming = false;
 	if (catcher.length > 0) spamming = true;
 
-	if (safeText && ip && parent) {
+	if (text && ip && parent) {
 		if (text.length <= 256 && !spamming) {
 			con.query("INSERT INTO comments (comment, ip, parent, time) VALUES ("+safeText+", "+con.escape(ip)+", "+con.escape(parent)+", '"+time+"');", function (e) {
 				//Do emails if server is setup
