@@ -14,10 +14,10 @@
     <string name="action_post">投稿する</string>
     <string name="hint_post">貴方の投稿</string>
     <string name="text_placeholderCounter">256</string>
-    <string name="action_refresh">補充する</string>
+    <string name="action_refresh">更新</string>
     <string name="action_subscribe_short">購読する</string>
     <string name="text_seperator">" | "</string>
-    <string name="hint_attachment">添付URL (随意)</string>
+    <string name="hint_attachment">写真/画像/動画/リンクを投稿 (随意)</string>
     <string name="action_search">探す</string>
     <string name="search_hint">#hashtag</string>
     <string name="action_stoke">ストーク</string>
