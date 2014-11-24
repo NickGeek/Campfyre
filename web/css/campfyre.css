@@ -1,6 +1,14 @@
+html, body {
+	height: 100%;
+}
+html {
+	overflow-y: hidden;
+}
 body {
-	background: url(../img/bg.jpg) no-repeat center center fixed;
-	background-size: cover;
+	overflow-y: scroll;
+	background-color:#000000;
+	background: url(../img/bg.jpg) no-repeat center center;
+	background-size: 100% 100%;
 }
 .centre {
 	text-align: center;
