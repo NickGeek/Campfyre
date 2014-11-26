@@ -9,6 +9,8 @@ var mysql = require('mysql');
 var md5 = require('MD5');
 var nodemailer = require('nodemailer');
 var smtpPool = require('nodemailer-smtp-pool');
+var gcm = require('node-gcm');
+
 var dbName = process.argv[2];
 var dbUsername = process.argv[3];
 var dbPassword = process.argv[4];

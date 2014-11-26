@@ -49,8 +49,8 @@ public class StreamAdapter extends BaseExpandableListAdapter {
     private final Map<Integer, List<Map<String, Object>>> commentData;
     String imageID;
     Socket ws;
-    //    	String serverURI = "http://192.168.1.54:3973"; // Comment this out
-    String serverURI = "http://campfyre.org:3973"; // Uncomment this
+    String serverURI = "http://192.168.1.54:3973"; // Comment this out
+//    String serverURI = "http://campfyre.org:3973"; // Uncomment this
     Integer id;
     Gson gson = new Gson();
 
