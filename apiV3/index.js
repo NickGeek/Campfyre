@@ -35,9 +35,8 @@ ws.use(function(socket, next) {
 });
 
 //Setup GCM
-if (gcmAPIKey) {
+if (gcmAPIKey)
 	var gcmCon = new gcm.sender(gcmAPIKey);
-}
 
 //Connect to the email server
 if (emailPassword) {
