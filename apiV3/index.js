@@ -14,8 +14,10 @@ var gcm = require('node-gcm');
 var dbName = process.argv[2];
 var dbUsername = process.argv[3];
 var dbPassword = process.argv[4];
-var gcmAPIKey = process.argv[5];
-var emailPassword = process.argv[6];
+var admRegID = process.argv[5];
+var admClientID = process.argv[6];
+var admClientSecret = = process.argv[7];
+var emailPassword = process.argv[8];
 
 //Connect to the database
 var con = mysql.createConnection({
@@ -35,8 +37,8 @@ ws.use(function(socket, next) {
 });
 
 //Setup GCM
-if (gcmAPIKey)
-	var gcmCon = new gcm.Sender(gcmAPIKey);
+if (admRegID && admClientID && admClientSecret) {
+}
 
 //Connect to the email server
 if (emailPassword) {

@@ -71,6 +71,7 @@ hs_err_pid*
 
 
 ### Android ###
+keys.xml
 # Built application files
 *.apk
 *.ap_
