@@ -359,6 +359,11 @@ public class MainActivity extends Activity {
                     Log.e("CampfyreApp", e.toString());
                 }
             }
+        }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                ws.connect();
+            }
         });
 
         ws.connect();
@@ -433,6 +438,14 @@ public class MainActivity extends Activity {
             page = 1;
             refresh();
         }
+    }
+
+    //Reconnection
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!ws.connected())
+            ws.connect();
     }
 
     //Handle submit button
