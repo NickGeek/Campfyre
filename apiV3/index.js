@@ -14,7 +14,8 @@ var gcm = require('node-gcm');
 var dbName = process.argv[2];
 var dbUsername = process.argv[3];
 var dbPassword = process.argv[4];
-var emailPassword = process.argv[5];
+var gcmAPIKey = process.argv[5];
+var emailPassword = process.argv[6];
 
 //Connect to the database
 var con = mysql.createConnection({
@@ -32,6 +33,11 @@ ws.use(function(socket, next) {
   socket.campfyreIPAddress = socket.conn.remoteAddress;
   next();
 });
+
+//Setup GCM
+if (gcmAPIKey) {
+	var gcmCon = new gcm.sender(gcmAPIKey);
+}
 
 //Connect to the email server
 if (emailPassword) {
