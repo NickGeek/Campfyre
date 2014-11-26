@@ -23,7 +23,7 @@
     <string name="action_stoke">ストーク</string>
     <string name="action_share">共有</string>
     <string name="title_attachment">写真/画像/動画/リンクを投稿: </string>
-    <string name="title_subscribe">コメントを　購読する:</string>
+    <string name="title_subscribe">コメントを　購読する</string>
     <string name="hint_subscribe">メールアドレス (随意)</string>
     <string name="action_showCredits">キャンプファイア情報</string>
     <string name="text_credits">Developed and run by: Nick Webster\nThanks to: Jamie McClymont\nRobofaces lovingly delivered by Robohash.org\nFork us at https://github.com/NickGeek/Campfyre\n\nCampfyre is licensed under the MPLv2.0 and provides no warranty</string>

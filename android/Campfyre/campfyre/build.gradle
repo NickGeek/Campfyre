@@ -30,5 +30,5 @@ dependencies {
     compile 'com.github.nkzawa:socket.io-client:0.3.0'
     compile 'com.google.code.gson:gson:2.3'
     compile 'com.android.support:appcompat-v7:21.0.+'
-    compile "com.google.android.gms:play-services:3.1.+"
+    compile "com.google.android.gms:play-services:6.1.+"
 }

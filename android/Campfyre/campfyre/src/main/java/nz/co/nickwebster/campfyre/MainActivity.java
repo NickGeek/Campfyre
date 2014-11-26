@@ -455,7 +455,6 @@ public class MainActivity extends Activity {
         attachmentTextEdit = (EditText) setNameView.findViewById(R.id.attachmentTextEdit);
         counter = (TextView) setNameView.findViewById(R.id.counterTextView);
         NSFWcheckBox = (CheckBox) setNameView.findViewById(R.id.NSFWcheckBox);
-        final EditText emailTextEdit = (EditText) setNameView.findViewById(R.id.subscribeTextEdit);
 
         //Counter
         final TextWatcher txwatcher = new TextWatcher() {
@@ -492,7 +491,6 @@ public class MainActivity extends Activity {
                         params.put("attachment", attachment);
                         params.put("nsfw", nsfw);
                         params.put("catcher", "");
-                        params.put("email", emailTextEdit.getText().toString());
                         ws.emit("submit post", gson.toJson(params));
                     }
                 })

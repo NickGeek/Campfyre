@@ -36,18 +36,11 @@
 
     </LinearLayout>
 
-    <TextView
+    <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingLeft="5dp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+        android:id="@+id/subscribeCheckBox"
         android:text="@string/title_subscribe"/>
-
-    <EditText
-        android:id="@+id/subscribeTextEditC"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/hint_subscribe"
-        android:inputType="textEmailAddress" />
 
 </LinearLayout>

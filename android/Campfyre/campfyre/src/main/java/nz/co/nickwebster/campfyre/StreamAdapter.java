@@ -258,7 +258,6 @@ public class StreamAdapter extends BaseExpandableListAdapter {
                     View postCommentView = View.inflate(context, R.layout.write_comment, null);
                     final EditText commentTextEdit = (EditText) postCommentView.findViewById(R.id.commentTextEdit);
                     final TextView counter = (TextView) postCommentView.findViewById(R.id.counterTextView);
-                    final EditText emailTextEdit = (EditText) postCommentView.findViewById(R.id.subscribeTextEditC);
 
                     //Counter
                     final TextWatcher txwatcher = new TextWatcher() {
@@ -283,11 +282,9 @@ public class StreamAdapter extends BaseExpandableListAdapter {
                             .setPositiveButton(context.getResources().getString(R.string.action_comment), new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     final String input = commentTextEdit.getText().toString();
-                                    final String email = emailTextEdit.getText().toString();
 
                                     Map<String, Object> params = new HashMap<String, Object>();
                                     params.put("comment", input);
-                                    params.put("email", email);
                                     params.put("catcher", "");
                                     params.put("parent", serverID.get(groupPosition));
                                     ws.emit("submit comment", gson.toJson(params));
