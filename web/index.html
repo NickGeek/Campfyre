@@ -30,16 +30,7 @@
 			//Load more posts one on the bottom
 			$(window).scroll(function() {
 				if($(window).scrollTop() + $(window).height() == $(document).height() & loaded) {
-					$('#loadingMessage').show();
-					page += 1;
-					ws.emit('get posts', JSON.stringify({
-						size: '64x64',
-						search: tag,
-						startingPost: page*50-50,
-						loadBottom: true,
-						reverse: true,
-						user: userID
-					}));
+					loadMore();
 				}
 			});
 		</script>
@@ -79,7 +70,9 @@
 						size: '64x64',
 						search: tag,
 						startingPost: page*50-50,
-						loadBottom: false
+						loadBottom: true,
+						user: userID,
+						reverse: true
 					}));
 
 					return false;
@@ -148,8 +141,9 @@
 						size: '64x64',
 						search: tag,
 						startingPost: page*50-50,
-						loadBottom: false,
-						user: userID
+						loadBottom: true,
+						user: userID,
+						reverse: true
 					}));
 					nsfwToggle();
 				}
@@ -191,15 +185,16 @@
 				loadUserPage(uid)
 			}
 			else {
-				//Display the posts
+				//Display the posts on page load
 				page = 1;
 				$('#loadingMessage').show();
 				ws.emit('get posts', JSON.stringify({
 					size: '64x64',
 					search: tag,
 					startingPost: page*50-50,
-					loadBottom: false,
-					user: userID
+					loadBottom: true,
+					user: userID,
+					reverse: true
 				}));
 			}
 		</script>
@@ -226,5 +221,7 @@
 		</script>
 
 		<img id="loadingMessage" src="img/loading.gif" alt="loading..." />
+
+		<a style="text-align: center; margin: 10px;" class="btn" href="javascript:void(0);" onclick="loadMore();">Load More...</a>
 	</body>
 </html>

@@ -10,7 +10,6 @@ var currentPageFile = location.pathname.substring(1);
 
 //Display posts when they arrive
 ws.on('new post', function(postData) {
-	console.log($("#posts > section").length)
 	if (currentPageFile != "permalink.html" || $("#posts > section").length < 1) {
 		loaded = false;
 		postData = JSON.parse(postData);
@@ -47,8 +46,8 @@ ws.on('new post', function(postData) {
 
 			//Stokes and Comments
 			newHTML = newHTML + '<span id="stokeBtn'+postData.id+'"><a class="btn" href="javascript:void(0);" onclick="stoke('+postData.id+', '+postData.score+')">Stoke ('+postData.score+')</a></span>';
-			newHTML = newHTML + ' <a id="showCommentButton'+postData.id+'" class="btn" href="javascript:void(0)" onclick="showCommentForm('+postData.id+')">Load comments ('+postData.commentNum.split(" ")[0]+')</a>';
-			newHTML = newHTML + ' <a style="display: none;" id="hideCommentButton'+postData.id+'" class="btn" href="javascript:void(0)" onclick="hideCommentForm('+postData.id+')">Hide comments</a>';
+			newHTML = newHTML + ' <a id="showCommentButton'+postData.id+'" class="btn" href="javascript:void(0);" onclick="showCommentForm('+postData.id+')">Load comments ('+postData.commentNum.split(" ")[0]+')</a>';
+			newHTML = newHTML + ' <a style="display: none;" id="hideCommentButton'+postData.id+'" class="btn" href="javascript:void(0);" onclick="hideCommentForm('+postData.id+')">Hide comments</a>';
 			newHTML = newHTML + '<div style="display: none;" id="commentForm'+postData.id+'">';
 				newHTML = newHTML + '<br><br><form id="commentForm" method="post">';
 					newHTML = newHTML + '<input type="hidden" name="type" value="comment">';
@@ -315,7 +314,9 @@ function runSearch(searchQuery) {
 		size: '64x64',
 		search: tag,
 		startingPost: page*50-50,
-		loadBottom: false
+		loadBottom: true,
+		user: userID,
+		reverse: true
 	}));
 }
 
@@ -333,7 +334,9 @@ function exitSearch() {
 		size: '64x64',
 		search: tag,
 		startingPost: page*50-50,
-		loadBottom: false
+		loadBottom: true,
+		user: userID,
+		reverse: true
 	}));
 }
 
@@ -355,7 +358,21 @@ function loadUserPage(id) {
 		size: '64x64',
 		search: tag,
 		startingPost: page*50-50,
-		loadBottom: false,
+		loadBottom: true,
+		user: userID,
+		reverse: true
+	}));
+}
+
+function loadMore() {
+	$('#loadingMessage').show();
+	page += 1;
+	ws.emit('get posts', JSON.stringify({
+		size: '64x64',
+		search: tag,
+		startingPost: page*50-50,
+		loadBottom: true,
+		reverse: true,
 		user: userID
 	}));
 }
