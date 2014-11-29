@@ -22,7 +22,7 @@ ws.on('new post', function(postData) {
 
 		newHTML = newHTML + "<section id="+postData.id+" class='card'>";
 			var submitterHash = postData.ip.split("g/")[1].split(".")[0];
-			newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+submitterHash+"\")'><img src='"+postData.ip+"' /></a> says...<br></i><a href='permalink.html?id="+postData.id+"'>Permalink</a> | <span id='postTime"+postData.id+"'>"+moment(moment.unix(postData.time)).fromNow()+"</span>";
+			newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+submitterHash+"\")'><img src='"+postData.ip+"' /></a> says...<br></i><a href='permalink.html?id="+postData.id+"'>Permalink</a> | <span data-livestamp="+postData.time+" />";
 				
 				//Tags
 				switch (submitterHash) {
@@ -64,7 +64,7 @@ ws.on('new post', function(postData) {
 					for (var i = 0; i < postData.comments.length; ++i) {
 						var commenterHash = postData.comments[i].ip.split("g/")[1].split(".")[0];
 						newHTML = newHTML + '<hr />';
-						newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+postData.comments[i].ip+"' /></a> says...<br></i>"+moment(moment.unix(postData.comments[i].time)).fromNow();
+						newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+postData.comments[i].ip+"' /></a> says...<br></i><span data-livestamp="+postData.comments[i].time+" />";
 						//Tags
 						switch (commenterHash) {
 							case "21232f297a57a5a743894a0e4a801fc3":
@@ -121,7 +121,7 @@ ws.on('new comment', function(commentData) {
 	var newHTML = '';
 	var commenterHash = commentData.ip.split("g/")[1].split(".")[0];
 	newHTML = newHTML + '<hr />';
-	newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+commentData.ip+"' /></a> says...<br></i>"+moment(moment.unix(commentData.time)).fromNow();
+	newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+commentData.ip+"' /></a> says...<br></i><span data-livestamp="+commentData.time+" />";
 	//Tags
 	switch (commenterHash) {
 		case "21232f297a57a5a743894a0e4a801fc3":
