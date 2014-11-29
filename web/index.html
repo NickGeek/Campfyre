@@ -30,16 +30,7 @@
 			//Load more posts one on the bottom
 			$(window).scroll(function() {
 				if($(window).scrollTop() + $(window).height() == $(document).height() & loaded) {
-					$('#loadingMessage').show();
-					page += 1;
-					ws.emit('get posts', JSON.stringify({
-						size: '64x64',
-						search: tag,
-						startingPost: page*50-50,
-						loadBottom: true,
-						reverse: true,
-						user: userID
-					}));
+					loadMore();
 				}
 			});
 		</script>
@@ -53,7 +44,7 @@
 		  ga('send', 'pageview');
 		</script>
 	</head>
-	<body style="background-color: transparent;"><div class="actualBody">
+	<body>
 		<div id="search" class="input-append">
 			<form id="searchForm">
 				<input name="tag" type="text" class="rounded" placeholder="#hashtag" required />
@@ -79,7 +70,9 @@
 						size: '64x64',
 						search: tag,
 						startingPost: page*50-50,
-						loadBottom: false
+						loadBottom: true,
+						user: userID,
+						reverse: true
 					}));
 
 					return false;
@@ -87,7 +80,7 @@
 			</script>
 		</div>
 
-		<div class="centre">
+		<div id="pageHeader" class="centre">
 			<h1>Campfyre</h1>
 			<h2>256 characters.</h2>
 			<h2>Anonymous.</h2>
@@ -148,8 +141,9 @@
 						size: '64x64',
 						search: tag,
 						startingPost: page*50-50,
-						loadBottom: false,
-						user: userID
+						loadBottom: true,
+						user: userID,
+						reverse: true
 					}));
 					nsfwToggle();
 				}
@@ -191,15 +185,16 @@
 				loadUserPage(uid)
 			}
 			else {
-				//Display the posts
+				//Display the posts on page load
 				page = 1;
 				$('#loadingMessage').show();
 				ws.emit('get posts', JSON.stringify({
 					size: '64x64',
 					search: tag,
 					startingPost: page*50-50,
-					loadBottom: false,
-					user: userID
+					loadBottom: true,
+					user: userID,
+					reverse: true
 				}));
 			}
 		</script>
@@ -226,5 +221,7 @@
 		</script>
 
 		<img id="loadingMessage" src="img/loading.gif" alt="loading..." />
-	</div></body>
+
+		<a style="text-align: center; margin: 10px;" class="btn" href="javascript:void(0);" onclick="loadMore();">Load More...</a>
+	</body>
 </html>

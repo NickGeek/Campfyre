@@ -6,114 +6,114 @@ var page = 1;
 var lastPost = 0;
 var ws = io('ws://'+window.location.hostname+':3973');
 var userID = '';
+var currentPageFile = location.pathname.substring(1);
 
 //Display posts when they arrive
 ws.on('new post', function(postData) {
-	loaded = false;
-	postData = JSON.parse(postData);
-	var newHTML = '';
+	if (currentPageFile != "permalink.html" || $("#posts > section").length < 1) {
+		loaded = false;
+		postData = JSON.parse(postData);
+		var newHTML = '';
 
-	//Handle NSFW posts
-	if (showNSFW === 0 && postData.nsfw === 1) {
-		return;
-	}
-
-	newHTML = newHTML + "<section id="+postData.id+" class='card'>";
-		var submitterHash = postData.ip.split("g/")[1].split(".")[0];
-		newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+submitterHash+"\")'><img src='"+postData.ip+"' /></a> says...<br></i><a href='permalink.html?id="+postData.id+"'>Permalink</a> | <span id='postTime"+postData.id+"'>"+moment(moment.unix(postData.time)).fromNow()+"</span>";
-			
-			//Tags
-			switch (submitterHash) {
-				case "21232f297a57a5a743894a0e4a801fc3":
-					newHTML = newHTML + " [admin]";
-					break;
-				case "5c1055237c524ca98c243b81ba3f9e93":
-					newHTML = newHTML + " [Wellington College]";
-					break;
-				case "6285b28b64eb14ba3188048edce3356b":
-					newHTML = newHTML + " [developer]";
-					break;
-			}
-			if (postData.nsfw == 1) {
-				newHTML = newHTML + " [nsfw]";
-			}
-		newHTML = newHTML + "</p>";
-		newHTML = newHTML + '<h3 id="postText'+postData.id+'" style="text-align: left;">'+emojione.unicodeToImage(postData.post.replace(new RegExp('\r\n','g'), '<br />'))+'</h3>';
-
-		//Attachments
-		if (postData.attachment != "n/a") {
-			newHTML = newHTML + attach(postData.attachment)+"<br><br>";
+		//Handle NSFW posts
+		if (showNSFW === 0 && postData.nsfw === 1) {
+			return;
 		}
 
-		//Stokes and Comments
-		newHTML = newHTML + '<span id="stokeBtn'+postData.id+'"><a class="btn" href="javascript:void(0);" onclick="stoke('+postData.id+', '+postData.score+')">Stoke ('+postData.score+')</a></span>';
-		newHTML = newHTML + ' <a id="showCommentButton'+postData.id+'" class="btn" href="javascript:void(0)" onclick="showCommentForm('+postData.id+')">Load comments ('+postData.commentNum.split(" ")[0]+')</a>';
-		newHTML = newHTML + ' <a style="display: none;" id="hideCommentButton'+postData.id+'" class="btn" href="javascript:void(0)" onclick="hideCommentForm('+postData.id+')">Hide comments</a>';
-		newHTML = newHTML + '<div style="display: none;" id="commentForm'+postData.id+'">';
-			newHTML = newHTML + '<br><br><form id="commentForm" method="post">';
-				newHTML = newHTML + '<input type="hidden" name="type" value="comment">';
-				newHTML = newHTML + '<input type="hidden" name="parent" value="'+postData.id+'">';
-				newHTML = newHTML + '<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, '+postData.id+')" onkeyup="countChar(this, '+postData.id+')" required></textarea>';
-				newHTML = newHTML + '<div style="font-family: "Lato", serif;" id="counter'+postData.id+'">256/256</div><br />';
-				newHTML = newHTML + '<b>Subscribe to comments:</b><br />';
-				newHTML = newHTML + '<input type="text" name="catcher" style="display: none;">';
-				newHTML = newHTML + '<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />';
-				newHTML = newHTML + '<input class="btn" type="submit" name="post" value="Post">';
-			newHTML = newHTML + '</form>';
-			//Comments have been posted lets show them
-			newHTML = newHTML + '<div id="comments'+postData.id+'">';
-				for (var i = 0; i < postData.comments.length; ++i) {
-					var commenterHash = postData.comments[i].ip.split("g/")[1].split(".")[0];
-					newHTML = newHTML + '<hr />';
-					newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+postData.comments[i].ip+"' /></a> says...<br></i>"+moment(moment.unix(postData.comments[i].time)).fromNow();
-					//Tags
-					switch (commenterHash) {
-						case "21232f297a57a5a743894a0e4a801fc3":
-							newHTML = newHTML + " [admin]";
-							break;
-						case "5c1055237c524ca98c243b81ba3f9e93":
-							newHTML = newHTML + " [Wellington College]";
-							break;
-						case "6285b28b64eb14ba3188048edce3356b":
-							newHTML = newHTML + " [developer]";
-							break;
-					}
-					newHTML = newHTML + "</p>";
-					newHTML = newHTML + '<h4 id="commentText">'+emojione.unicodeToImage(postData.comments[i].comment.replace(new RegExp('\r?\n','g'), '<br />'))+'</h4>';
+		newHTML = newHTML + "<section id="+postData.id+" class='card'>";
+			var submitterHash = postData.ip.split("g/")[1].split(".")[0];
+			newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+submitterHash+"\")'><img src='"+postData.ip+"' /></a> says...<br></i><a href='permalink.html?id="+postData.id+"'>Permalink</a> | <span id='postTime"+postData.id+"'>"+moment(moment.unix(postData.time)).fromNow()+"</span>";
+				
+				//Tags
+				switch (submitterHash) {
+					case "21232f297a57a5a743894a0e4a801fc3":
+						newHTML = newHTML + " [admin]";
+						break;
+					case "5c1055237c524ca98c243b81ba3f9e93":
+						newHTML = newHTML + " [Wellington College]";
+						break;
 				}
+				if (postData.nsfw == 1) {
+					newHTML = newHTML + " [nsfw]";
+				}
+			newHTML = newHTML + "</p>";
+			newHTML = newHTML + '<h3 id="postText'+postData.id+'" style="text-align: left;">'+emojione.unicodeToImage(postData.post.replace(new RegExp('\r\n','g'), '<br />'))+'</h3>';
+
+			//Attachments
+			if (postData.attachment != "n/a") {
+				newHTML = newHTML + attach(postData.attachment)+"<br><br>";
+			}
+
+			//Stokes and Comments
+			newHTML = newHTML + '<span id="stokeBtn'+postData.id+'"><a class="btn" href="javascript:void(0);" onclick="stoke('+postData.id+', '+postData.score+')">Stoke ('+postData.score+')</a></span>';
+			newHTML = newHTML + ' <a id="showCommentButton'+postData.id+'" class="btn" href="javascript:void(0);" onclick="showCommentForm('+postData.id+')">Load comments ('+postData.commentNum.split(" ")[0]+')</a>';
+			newHTML = newHTML + ' <a style="display: none;" id="hideCommentButton'+postData.id+'" class="btn" href="javascript:void(0);" onclick="hideCommentForm('+postData.id+')">Hide comments</a>';
+			newHTML = newHTML + '<div style="display: none;" id="commentForm'+postData.id+'">';
+				newHTML = newHTML + '<br><br><form id="commentForm" method="post">';
+					newHTML = newHTML + '<input type="hidden" name="type" value="comment">';
+					newHTML = newHTML + '<input type="hidden" name="parent" value="'+postData.id+'">';
+					newHTML = newHTML + '<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, '+postData.id+')" onkeyup="countChar(this, '+postData.id+')" required></textarea>';
+					newHTML = newHTML + '<div style="font-family: "Lato", serif;" id="counter'+postData.id+'">256/256</div><br />';
+					newHTML = newHTML + '<b>Subscribe to comments:</b><br />';
+					newHTML = newHTML + '<input type="text" name="catcher" style="display: none;">';
+					newHTML = newHTML + '<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />';
+					newHTML = newHTML + '<input class="btn" type="submit" name="post" value="Post">';
+				newHTML = newHTML + '</form>';
+				//Comments have been posted lets show them
+				newHTML = newHTML + '<div id="comments'+postData.id+'">';
+					for (var i = 0; i < postData.comments.length; ++i) {
+						var commenterHash = postData.comments[i].ip.split("g/")[1].split(".")[0];
+						newHTML = newHTML + '<hr />';
+						newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+postData.comments[i].ip+"' /></a> says...<br></i>"+moment(moment.unix(postData.comments[i].time)).fromNow();
+						//Tags
+						switch (commenterHash) {
+							case "21232f297a57a5a743894a0e4a801fc3":
+								newHTML = newHTML + " [admin]";
+								break;
+							case "5c1055237c524ca98c243b81ba3f9e93":
+								newHTML = newHTML + " [Wellington College]";
+								break;
+							case "6285b28b64eb14ba3188048edce3356b":
+								newHTML = newHTML + " [developer]";
+								break;
+						}
+						newHTML = newHTML + "</p>";
+						newHTML = newHTML + '<h4 id="commentText">'+emojione.unicodeToImage(postData.comments[i].comment.replace(new RegExp('\r?\n','g'), '<br />'))+'</h4>';
+					}
+				newHTML = newHTML + '</div>';
 			newHTML = newHTML + '</div>';
-		newHTML = newHTML + '</div>';
-	newHTML = newHTML + "</section>";
+		newHTML = newHTML + "</section>";
 
-	var posts = document.getElementById('posts');
-	if (postData.loadBottom) {
-		posts.innerHTML = posts.innerHTML + newHTML;
-	}
-	else {
-		posts.innerHTML = newHTML + posts.innerHTML;
-	}
+		var posts = document.getElementById('posts');
+		if (postData.loadBottom) {
+			posts.innerHTML = posts.innerHTML + newHTML;
+		}
+		else {
+			posts.innerHTML = newHTML + posts.innerHTML;
+		}
 
-	//Submit a comment
-	$('#posts').off('submit');
-	$('#posts').on('submit','#commentForm',function(e){
-		e.preventDefault();
-		
-		ws.emit('submit comment', JSON.stringify({
-			comment: $(this).find('textarea[name="postText"]').val(),
-			email: $(this).find('input[name="email"]').val(),
-			catcher: $(this).find('input[name="catcher"]').val(),
-			parent: $(this).find('input[name="parent"]').val()
-		}));
+		//Submit a comment
+		$('#posts').off('submit');
+		$('#posts').on('submit','#commentForm',function(e){
+			e.preventDefault();
+			
+			ws.emit('submit comment', JSON.stringify({
+				comment: $(this).find('textarea[name="postText"]').val(),
+				email: $(this).find('input[name="email"]').val(),
+				catcher: $(this).find('input[name="catcher"]').val(),
+				parent: $(this).find('input[name="parent"]').val()
+			}));
 
-		$(this)[0].reset();
-		return false;
-	});
+			$(this)[0].reset();
+			return false;
+		});
 
-	//Link #tags/URLs
-	highlighter(postData.id);
+		//Link #tags/URLs
+		highlighter(postData.id);
 
-	loaded = true;
-	$('#loadingMessage').hide();
+		loaded = true;
+		$('#loadingMessage').hide();
+}
 });
 
 ws.on('new comment', function(commentData) {
@@ -314,7 +314,9 @@ function runSearch(searchQuery) {
 		size: '64x64',
 		search: tag,
 		startingPost: page*50-50,
-		loadBottom: false
+		loadBottom: true,
+		user: userID,
+		reverse: true
 	}));
 }
 
@@ -332,7 +334,9 @@ function exitSearch() {
 		size: '64x64',
 		search: tag,
 		startingPost: page*50-50,
-		loadBottom: false
+		loadBottom: true,
+		user: userID,
+		reverse: true
 	}));
 }
 
@@ -354,7 +358,21 @@ function loadUserPage(id) {
 		size: '64x64',
 		search: tag,
 		startingPost: page*50-50,
-		loadBottom: false,
+		loadBottom: true,
+		user: userID,
+		reverse: true
+	}));
+}
+
+function loadMore() {
+	$('#loadingMessage').show();
+	page += 1;
+	ws.emit('get posts', JSON.stringify({
+		size: '64x64',
+		search: tag,
+		startingPost: page*50-50,
+		loadBottom: true,
+		reverse: true,
 		user: userID
 	}));
 }

@@ -6,7 +6,7 @@ html {
 }
 body {
 	overflow-y: scroll;
-	background-color:#000000;
+	background-color: transparent;
 	background: url(../img/bg.jpg) no-repeat center center;
 	background-size: 100% 100%;
 }
@@ -39,6 +39,10 @@ h4 {
 	font-weight:100;
 	font-family: 'Lato', serif;
 	padding-left: 10px;
+}
+
+#pageHeader {
+	margin-top: -5%;
 }
 
 .emojione {
