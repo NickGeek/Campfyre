@@ -86,7 +86,8 @@ public class MainActivity extends Activity {
         params.put("size", size.toString() + "x" + size.toString());
         params.put("search", tag);
         params.put("startingPost", page * 50 - 50);
-        params.put("loadBottom", false);
+        params.put("loadBottom", true);
+        params.put("reverse", true);
         ws.emit("get posts", gson.toJson(params));
     }
 
@@ -264,7 +265,8 @@ public class MainActivity extends Activity {
                 params.put("size", size.toString() + "x" + size.toString());
                 params.put("search", tag);
                 params.put("startingPost", page * 50 - 50);
-                params.put("loadBottom", false);
+                params.put("loadBottom", true);
+                params.put("reverse", true);
                 ws.emit("get posts", gson.toJson(params));
             }
         }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
