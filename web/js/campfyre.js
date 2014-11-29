@@ -30,9 +30,6 @@ ws.on('new post', function(postData) {
 				case "5c1055237c524ca98c243b81ba3f9e93":
 					newHTML = newHTML + " [Wellington College]";
 					break;
-				case "6285b28b64eb14ba3188048edce3356b":
-					newHTML = newHTML + " [developer]";
-					break;
 			}
 			if (postData.nsfw == 1) {
 				newHTML = newHTML + " [nsfw]";
