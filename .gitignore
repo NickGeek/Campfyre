@@ -333,3 +333,6 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+
+#Bower
+bower_components/
