@@ -50,7 +50,7 @@ ws.on('new post', function(postData) {
 
 			//Attachments
 			if (postData.attachment != "n/a") {
-				newHTML = newHTML + attach(postData.attachment)+"<br><br>";
+				newHTML = newHTML + attach(postData.attachment)+"<br>";
 			}
 
 			//Stokes and Comments
@@ -181,10 +181,10 @@ if (sitename != null) {
 			imgid = imgid[imgid.length-1];
 			imgid = imgid.split(".");
 			imgid = imgid[0];
-			attachCode = '<a target="_blank" href="http://i.imgur.com/'+imgid+'.png"><img style="max-height: 30em;" src="http://i.imgur.com/'+imgid+'.png" /></a>';
+			attachCode = '<a class="imgContainer" target="_blank" href="http://i.imgur.com/'+imgid+'.png"><img src="http://i.imgur.com/'+imgid+'.png" /></a>';
 			break;
 		case "sharepic.tk":
-			attachCode = '<a target="_blank" href="'+url+'"><img style="max-height: 30em;" src="'+url+'" /></a>';
+			attachCode = '<a class="imgContainer" target="_blank" href="'+url+'"><img src="'+url+'" /></a>';
 			break;
 		default:
 			attachCode = 'Attached URL: <a target="_blank" href="'+url+'">'+url+'</a>';
