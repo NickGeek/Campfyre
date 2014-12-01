@@ -376,3 +376,14 @@ function loadMore() {
 		user: userID
 	}));
 }
+
+$(document).ready(function() {
+	$('#submit').popup({
+		transition: 'all 0.3s'
+	});
+
+	$('#closeSubmitPopup').click(function() {
+		console.log('close');
+		$('#submit').popup('hide');
+	});
+});

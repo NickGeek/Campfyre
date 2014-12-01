@@ -132,3 +132,11 @@ a:active {
 	text-align: center;
 	margin-top: 1%;
 }
+
+#submit {
+	transform: scale(0.8);
+}
+
+.popup_visible #submit {
+	transform: scale(1);
+}
