@@ -31,7 +31,7 @@ ws.on('new post', function(postData) {
 		newHTML = newHTML + "<section id="+postData.id+" class='card'>";
 		newHTML = newHTML + '<paper-shadow z="3"></paper-shadow>';
 			var submitterHash = postData.ip.split("g/")[1].split(".")[0];
-			newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+submitterHash+"\")'><img src='"+postData.ip+"' /></a> says...<br></i><a href='permalink.html?id="+postData.id+"'>Permalink</a> | <span data-livestamp="+postData.time+" />";
+			newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+submitterHash+"\")'><img src='"+postData.ip+"' /></a> says...<br></i><a href='permalink.html?id="+postData.id+"'>Permalink</a> | <span data-livestamp="+postData.time+"></span>";
 				
 				//Tags
 				switch (submitterHash) {
