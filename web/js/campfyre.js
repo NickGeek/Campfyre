@@ -1,5 +1,4 @@
 //Setting up variables
-var showNSFW = 0;
 var tag = "";
 var loaded = false;
 var page = 1;
@@ -7,6 +6,15 @@ var lastPost = 0;
 var ws = io('ws://'+window.location.hostname+':3973');
 var userID = '';
 var currentPageFile = location.pathname.substring(1);
+
+//NSFW posts
+if (store.get('showNSFW')) {
+	var showNSFW = store.get('showNSFW');
+}
+else {
+	store.set('showNSFW', 0);
+	var showNSFW = store.get('showNSFW');
+}
 
 //Display posts when they arrive
 ws.on('new post', function(postData) {
@@ -388,3 +396,22 @@ $(document).ready(function() {
 		$('#submit').popup('hide');
 	});
 });
+
+function refresh(nsfw) {
+	if (nsfw === 0 || nsfw === 1){
+		showNSFW = nsfw;
+		store.set('showNSFW', nsfw)
+	}
+	page = 1;
+	$('#posts').html('');
+	$('#loadingMessage').show();
+	ws.emit('get posts', JSON.stringify({
+		size: '64x64',
+		search: tag,
+		startingPost: page*50-50,
+		loadBottom: true,
+		user: userID,
+		reverse: true
+	}));
+	nsfwToggle();
+}

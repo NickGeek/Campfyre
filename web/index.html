@@ -29,6 +29,7 @@
 		<script src="http://cdn.jsdelivr.net/emojione/1.3.0/lib/js/emojione.min.js"></script>
 		<script src="js/livestamp.min.js"></script>
 		<script src="js/popupoverlay.js"></script>
+		<script src="js/store.min.js"></script>
 		<script src="js/campfyre.js"></script>
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -107,25 +108,6 @@
 			</script>
 		</div></div><br />
 		<div style="text-align: center;" id="options">
-			<script>
-				function refresh(nsfw) {
-					if (nsfw === 0 || nsfw === 1){
-						showNSFW = nsfw;
-					}
-					page = 1;
-					$('#posts').html('');
-					$('#loadingMessage').show();
-					ws.emit('get posts', JSON.stringify({
-						size: '64x64',
-						search: tag,
-						startingPost: page*50-50,
-						loadBottom: true,
-						user: userID,
-						reverse: true
-					}));
-					nsfwToggle();
-				}
-			</script>
 			<h4>
 			<script>
 				document.write('<div style="display: inline;" id="goBack"><a href="javascript:void(0);" onclick="exitSearch()"><< Go Back</a> | </div>');
