@@ -335,4 +335,4 @@ UpgradeLog*.htm
 FakesAssemblies/
 
 #Bower
-bower_components
+web/bower_components
