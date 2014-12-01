@@ -87,7 +87,7 @@ h4 {
 	}
 	.submit_open {
 		position: fixed;
-		bottom: 2em;
+		bottom: 0.5em;
 		right: 15%;
 		margin: 0.3em;
 		-webkit-tap-highlight-color: rgba(255, 255, 255, 0); 
