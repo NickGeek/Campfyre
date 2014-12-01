@@ -160,7 +160,7 @@ URLbits.href = url;
 
 //Get hostname
 var hostname = URLbits.hostname;
-var sitename = hostname.match(/(youtube|youtu.be|imgur.com|sharepic.tk)/i);
+var sitename = hostname.match(/(youtube|youtu.be|imgur.com|sharepic.tk|puu.sh)/i);
 
 //Create attachement code depending on site
 if (sitename != null) {
@@ -185,6 +185,10 @@ if (sitename != null) {
 			break;
 		case "sharepic.tk":
 			attachCode = '<a class="imgContainer" target="_blank" href="'+url+'"><img src="'+url+'" /></a>';
+			break;
+		case "puu.sh":
+			var imgid = url.split("http://puu.sh/")[1].split(".")[0];
+			attachCode = '<a class="imgContainer" target="_blank" href="http://puu.sh/'+imgid+'.png"><img src="http://puu.sh/'+imgid+'.png" /></a>';
 			break;
 		default:
 			attachCode = 'Attached URL: <a target="_blank" href="'+url+'">'+url+'</a>';
