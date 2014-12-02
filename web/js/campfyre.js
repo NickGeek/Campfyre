@@ -396,7 +396,6 @@ $(document).ready(function() {
 	});
 
 	$('#closeSubmitPopup').click(function() {
-		console.log('close');
 		$('#submit').popup('hide');
 	});
 });

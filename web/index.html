@@ -76,7 +76,25 @@
 					return false;
 				});
 			</script>
-		</div>
+		</div><div id="adholder" style="width: 234px; height: 60px;"></div>
+		<script>
+			//Advertisment
+			var random = Math.floor(Math.random()*(6 - 1))+1;
+			if  (random > 4) {
+				$('#adholder').html('<p id="textAdReplacement"><strong style="color: #5C5858;">Thanks for supporting Campfyre!</strong><br><span style="color: #333;">If you feel that our ads are intrusive please let us know '+emojione.shortnameToImage(':wink:')+'</span></p>');
+			}
+			else if (random === 1 || random === 2) {
+				$('#adholder').html('<iframe scrolling="no" style="border: 0; width: 234px; height: 60px;" src="//coinurl.com/get.php?id=32018"></iframe>');
+			}
+			else if (random === 3 || random === 4) {
+				$('#adholder').html('<ins class="adsbygoogle" style="display:inline-block;width:234px;height:60px" data-ad-client="ca-pub-9765350019261709" data-ad-slot="8440394098"></ins>');
+				$.getScript('http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js', function() {
+				        $('.adsbygoogle').each(function() {
+				                (adsbygoogle = window.adsbygoogle || []).push({});
+				        });
+				});
+			}
+		</script>
 
 		<div id="pageHeader" class="centre">
 			<h1>Campfyre</h1>
@@ -89,25 +107,8 @@
 		<div class="campaigns">
 		<a href="https://play.google.com/store/apps/details?id=nz.co.nickwebster.campfyre">
 		  <img style="height: 45px; width: auto;" alt="Android app on Google Play" src="http://developer.android.com/images/brand/en_app_rgb_wo_60.png" />
-		</a>
+		</a></div>
 
-		<br /><br /><div id="donate">
-			<script src="http://coinwidget.com/widget/coin.js"></script>
-			<script>
-			CoinWidgetCom.go({
-				wallet_address: "17F8D5ZjfPu94ndWQbjhLCgaxgtPWMk5Kb"
-				, currency: "bitcoin"
-				, counter: "count"
-				, alignment: "bl"
-				, qrcode: true
-				, auto_show: false
-				, lbl_button: "Donate"
-				, lbl_address: "Bitcoin Address:"
-				, lbl_count: "donations"
-				, lbl_amount: "Bitcoins"
-			});
-			</script>
-		</div></div><br />
 		<div style="text-align: center;" id="options">
 			<h4>
 			<script>
