@@ -398,6 +398,11 @@ $(document).ready(function() {
 	$('#closeSubmitPopup').click(function() {
 		$('#submit').popup('hide');
 	});
+
+	if ($('#adholder').filter(':visible').length == 0) {
+		//If ads aren't displaying (prob adblock) tell the user it's their fault, because it is.
+		alert("Because you're not displaying ads the layout may be a bit wibly-wobly. No hard feelings though :-).");
+	}
 });
 
 function refresh(nsfw) {
