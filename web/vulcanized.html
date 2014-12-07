@@ -8701,25 +8701,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					var searchQuery = $('#searchForm').find('input[name="tag"]').val();
 					//Clear the form
 					$('#searchForm')[0].reset();
-					$('#posts').html('');
-					$('#loadingMessage').show();
-
-					//Re-arange the site
-					tag = searchQuery;
-					$('#submit').hide();
-					$('#searchTitle').html('<h2>Results for: '+tag+'</h2>');
-					$('#goBack').show();
-
-					page = 1;
-					ws.emit('get posts', JSON.stringify({
-						size: '64x64',
-						search: tag,
-						startingPost: page*50-50,
-						loadBottom: true,
-						user: userID,
-						reverse: true
-					}));
-
+					runSearch(searchQuery);
 					return false;
 				});
 			</script>
@@ -8755,6 +8737,47 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		<a href="https://play.google.com/store/apps/details?id=nz.co.nickwebster.campfyre">
 		  <img style="height: 45px; width: auto;" alt="Android app on Google Play" src="http://developer.android.com/images/brand/en_app_rgb_wo_60.png">
 		</a></div>
+
+		<section id="submit" class="card">
+			<paper-shadow z="3"></paper-shadow>
+			<h2 style="text-align: left;">Write a post</h2>
+			<form id="postForm" method="post">
+				<input type="hidden" name="type" value="post">
+				<textarea id="postText" name="postText" placeholder="Post text" class="rounded" rows="5" onkeydown="countChar(this, -1)" onkeyup="countChar(this, -1)" required=""></textarea>
+				<div style="font-family: 'Lato', serif;" id="counter-1">256/256</div>
+				<input type="url" name="attachment" class="rounded" placeholder="Link to image/video (optional)">
+				<input type="text" name="catcher" style="display: none;">
+				<div class="checkbox">
+					<label>
+						<input name="nsfw" value="1" type="checkbox"> This post is Offensive/NSFW
+					</label>
+				  </div><br>
+				<b>Subscribe to comments:</b><br>
+				<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br>
+				<input class="btn" type="submit" name="post" value="Post"> <button id="closeSubmitPopup" type="button" class="btn">Cancel</button> <a href="rules.html">Read the rules</a> | <a href="formatting.html">Formatting</a>
+			</form>
+		</section>
+		<script>
+			$('#postForm').submit(function(event) {
+				if ($('#postForm').find('input[name="nsfw"]').is(':checked')) {
+					var nsfwCheckbox = 1;
+				}
+				else {
+					var nsfwCheckbox = '';
+				}
+
+				ws.emit('submit post', JSON.stringify({
+					post: $('#postForm').find('textarea[name="postText"]').val(),
+					attachment: $('#postForm').find('input[name="attachment"]').val(),
+					email: $('#postForm').find('input[name="email"]').val(),
+					nsfw: nsfwCheckbox,
+					catcher: $('#postForm').find('input[name="catcher"]').val()
+				}));
+				$('#postForm')[0].reset();
+				$('#submit').popup('hide');
+				return false;
+			});
+		</script>
 
 		<div style="text-align: center;" id="options">
 			<h4>
@@ -8806,47 +8829,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					reverse: true
 				}));
 			}
-		</script>
-
-		<section id="submit" class="card">
-			<paper-shadow z="3"></paper-shadow>
-			<h2 style="text-align: left;">Write a post</h2>
-			<form id="postForm" method="post">
-				<input type="hidden" name="type" value="post">
-				<textarea id="postText" name="postText" placeholder="Post text" class="rounded" rows="5" onkeydown="countChar(this, -1)" onkeyup="countChar(this, -1)" required=""></textarea>
-				<div style="font-family: 'Lato', serif;" id="counter-1">256/256</div>
-				<input type="url" name="attachment" class="rounded" placeholder="Link to image/video (optional)">
-				<input type="text" name="catcher" style="display: none;">
-				<div class="checkbox">
-					<label>
-						<input name="nsfw" value="1" type="checkbox"> This post is Offensive/NSFW
-					</label>
-				  </div><br>
-				<b>Subscribe to comments:</b><br>
-				<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br>
-				<input class="btn" type="submit" name="post" value="Post"> <button id="closeSubmitPopup" type="button" class="btn">Cancel</button> <a href="rules.html">Read the rules</a> | <a href="formatting.html">Formatting</a>
-			</form>
-		</section>
-		<script>
-			$('#postForm').submit(function(event) {
-				if ($('#postForm').find('input[name="nsfw"]').is(':checked')) {
-					var nsfwCheckbox = 1;
-				}
-				else {
-					var nsfwCheckbox = '';
-				}
-
-				ws.emit('submit post', JSON.stringify({
-					post: $('#postForm').find('textarea[name="postText"]').val(),
-					attachment: $('#postForm').find('input[name="attachment"]').val(),
-					email: $('#postForm').find('input[name="email"]').val(),
-					nsfw: nsfwCheckbox,
-					catcher: $('#postForm').find('input[name="catcher"]').val()
-				}));
-				$('#postForm')[0].reset();
-				$('#submit').popup('hide');
-				return false;
-			});
 		</script>
 
 		<img id="loadingMessage" src="img/loading.gif" alt="loading...">

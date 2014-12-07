@@ -174,7 +174,7 @@ if (sitename != null) {
 
 			var width = '95%';
 			var height = '420';
-			attachCode = '<br /><object width="'+width+'" height="'+height+'"><param name="movie" value="http://www.youtube.com/v/'+videoid+'&amp;hl=en_US&amp;fs=1?rel=0"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/'+videoid+'&amp;hl=en_US&amp;fs=1?rel=0" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="'+width+'" height="'+height+'"></embed></object>';
+			attachCode = '<br /><iframe width="'+width+'" height="'+height+'" src="http://youtube.com/embed/'+videoid+'" frameborder="0" allowfullscreen></iframe>';
 			break;
 		case "imgur.com":
 			var imgid = url.split("/");
