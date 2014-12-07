@@ -146,7 +146,42 @@ public class StreamAdapter extends BaseExpandableListAdapter {
                         Thread getImageThread = new Thread(getImage);
                         getImageThread.start();
 
-                    } else {
+                    }
+                    else if (domainname.equals("puu")) {
+                        attachmentImage.setVisibility(View.VISIBLE);
+                        contentSeperator.setVisibility(View.GONE);
+                        String[] imgURL = attachments.get(position).split(Pattern.quote("/"));
+                        final String imageFile = imgURL[imgURL.length - 2]+"/"+imgURL[imgURL.length - 1].split(Pattern.quote("."))[0];
+                        //Get and display image from server
+                        Runnable getImage = new Runnable() {
+                            @Override
+                            public void run() {
+                                URL url;
+                                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                                StrictMode.setThreadPolicy(policy);
+                                try {
+                                    url = new URL("http://puu.sh//" + imageFile + ".png");
+                                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                                    connection.setDoInput(true);
+                                    connection.connect();
+                                    InputStream input = connection.getInputStream();
+                                    final Bitmap image = BitmapFactory.decodeStream(input);
+                                    context.runOnUiThread(new Runnable() {
+                                        public void run() {
+                                            //Set image
+                                            attachmentImage.setImageBitmap(image);
+                                        }
+                                    });
+                                } catch (Exception e) {
+                                    Log.e("CampfyreApp", e.toString());
+                                }
+                            }
+                        };
+
+                        Thread getImageThread = new Thread(getImage);
+                        getImageThread.start();
+                    }
+                    else {
                         attachmentBtn.setText(attachments.get(position));
                         attachmentLayout.setVisibility(View.VISIBLE);
                     }

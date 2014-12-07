@@ -9,14 +9,14 @@ var mysql = require('mysql');
 var md5 = require('MD5');
 var nodemailer = require('nodemailer');
 var smtpPool = require('nodemailer-smtp-pool');
-var gcm = require('node-gcm');
+var gcm = require('node-adm');
 
 var dbName = process.argv[2];
 var dbUsername = process.argv[3];
 var dbPassword = process.argv[4];
 var admRegID = process.argv[5];
 var admClientID = process.argv[6];
-var admClientSecret = = process.argv[7];
+var admClientSecret = process.argv[7];
 var emailPassword = process.argv[8];
 
 //Connect to the database
@@ -36,7 +36,7 @@ ws.use(function(socket, next) {
   next();
 });
 
-//Setup GCM
+//Setup ADM
 if (admRegID && admClientID && admClientSecret) {
 }
 
