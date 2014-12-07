@@ -20,20 +20,19 @@
 		<link rel="stylesheet" href="http://cdn.jsdelivr.net/emojione/1.3.0/assets/css/emojione.min.css" />
 		<link rel="stylesheet" href="css/campfyre.css">
 
+		<!-- Webcomponents -->
+		<script src="bower_components/webcomponentsjs/webcomponents.js"></script>
+		<link rel="import" href="bower_components/paper-elements/paper-elements.html">
+		<link rel="import" href="bower_components/core-icons/core-icons.html">
+
 		<script src="http://code.jquery.com/jquery.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 		<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
 		<script src="js/moment.js"></script>
-		<script src="http://cdn.jsdelivr.net/emojione/1.3.0/lib/js/emojione.min.js"></script>
+		<script src="js/livestamp.min.js"></script>
+		<script src="js/popupoverlay.js"></script>
+		<script src="js/store.min.js"></script>
 		<script src="js/campfyre.js"></script>
-		<script>
-			//Load more posts one on the bottom
-			$(window).scroll(function() {
-				if($(window).scrollTop() + $(window).height() == $(document).height() & loaded) {
-					loadMore();
-				}
-			});
-		</script>
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -56,61 +55,45 @@
 					var searchQuery = $('#searchForm').find('input[name="tag"]').val();
 					//Clear the form
 					$('#searchForm')[0].reset();
-					$('#posts').html('');
-					$('#loadingMessage').show();
-
-					//Re-arange the site
-					tag = searchQuery;
-					$('#submit').hide();
-					$('#searchTitle').html('<h2>Results for: '+tag+'</h2>');
-					$('#goBack').show();
-
-					page = 1;
-					ws.emit('get posts', JSON.stringify({
-						size: '64x64',
-						search: tag,
-						startingPost: page*50-50,
-						loadBottom: true,
-						user: userID,
-						reverse: true
-					}));
-
+					runSearch(searchQuery);
 					return false;
 				});
 			</script>
-		</div>
+		</div><div id="stickyholder" style="width: 234px; height: 60px;"></div>
+		<script>
+			//Advertisment
+			var random = Math.floor(Math.random()*(6 - 1))+1;
+			if  (random > 4) {
+				$('#stickyholder').html('<span id="adholder"><p id="textAdReplacement"><strong style="color: #5C5858;">Thanks for supporting Campfyre!</strong><br><span style="color: #333;">If you feel that our ads are intrusive please let us know '+emojione.shortnameToImage(':wink:')+'</span></p></span>');
+			}
+			else if (random === 1 || random === 2) {
+				$('#stickyholder').html('<iframe scrolling="no" style="border: 0; width: 234px; height: 60px;" src="//coinurl.com/get.php?id=32018"></iframe>');
+			}
+			else if (random === 3 || random === 4) {
+				$('#stickyholder').html('<ins class="adsbygoogle" style="display:inline-block;width:234px;height:60px" data-ad-client="ca-pub-9765350019261709" data-ad-slot="8440394098"></ins>');
+				$.getScript('http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js', function() {
+				        $('.adsbygoogle').each(function() {
+				                (adsbygoogle = window.adsbygoogle || []).push({});
+				        });
+				});
+			}
+		</script>
 
 		<div id="pageHeader" class="centre">
 			<h1>Campfyre</h1>
 			<h2>256 characters.</h2>
 			<h2>Anonymous.</h2>
 			<h2>Have fun.</h2>
+			
 		</div>
 
 		<div class="campaigns">
 		<a href="https://play.google.com/store/apps/details?id=nz.co.nickwebster.campfyre">
 		  <img style="height: 45px; width: auto;" alt="Android app on Google Play" src="http://developer.android.com/images/brand/en_app_rgb_wo_60.png" />
-		</a>
-
-		<br /><br /><div id="donate">
-			<script src="http://coinwidget.com/widget/coin.js"></script>
-			<script>
-			CoinWidgetCom.go({
-				wallet_address: "17F8D5ZjfPu94ndWQbjhLCgaxgtPWMk5Kb"
-				, currency: "bitcoin"
-				, counter: "count"
-				, alignment: "bl"
-				, qrcode: true
-				, auto_show: false
-				, lbl_button: "Donate"
-				, lbl_address: "Bitcoin Address:"
-				, lbl_count: "donations"
-				, lbl_amount: "Bitcoins"
-			});
-			</script>
-		</div></div><br />
+		</a></div>
 
 		<section id="submit" class="card">
+			<paper-shadow z="3"></paper-shadow>
 			<h2 style="text-align: left;">Write a post</h2>
 			<form id='postForm' method="post">
 				<input type="hidden" name="type" value="post">
@@ -125,36 +108,39 @@
 				  </div><br />
 				<b>Subscribe to comments:</b><br />
 				<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />
-				<input class="btn" type="submit" name="post" value="Post"> <a href="rules.html">Read the rules</a> | <a href="formatting.html">Formatting</a>
+				<input class="btn" type="submit" name="post" value="Post"> <button id="closeSubmitPopup" type="button" class="btn">Cancel</button> <a href="rules.html">Read the rules</a> | <a href="formatting.html">Formatting</a>
 			</form>
 		</section>
-		<div style="text-align: center;" id="options">
-			<script>
-				function refresh(nsfw) {
-					if (nsfw === 0 || nsfw === 1){
-						showNSFW = nsfw;
-					}
-					page = 1;
-					$('#posts').html('');
-					$('#loadingMessage').show();
-					ws.emit('get posts', JSON.stringify({
-						size: '64x64',
-						search: tag,
-						startingPost: page*50-50,
-						loadBottom: true,
-						user: userID,
-						reverse: true
-					}));
-					nsfwToggle();
+		<script>
+			$('#postForm').submit(function(event) {
+				if ($('#postForm').find('input[name="nsfw"]').is(':checked')) {
+					var nsfwCheckbox = 1;
 				}
-			</script>
-			<p>
+				else {
+					var nsfwCheckbox = '';
+				}
+
+				ws.emit('submit post', JSON.stringify({
+					post: $('#postForm').find('textarea[name="postText"]').val(),
+					attachment: $('#postForm').find('input[name="attachment"]').val(),
+					email: $('#postForm').find('input[name="email"]').val(),
+					nsfw: nsfwCheckbox,
+					catcher: $('#postForm').find('input[name="catcher"]').val()
+				}));
+				$('#postForm')[0].reset();
+				$('#submit').popup('hide');
+				return false;
+			});
+		</script>
+
+		<div style="text-align: center;" id="options">
+			<h4>
 			<script>
-				document.write('<div style="display: inline;" id="goBack"><a href="javascript:void()" onclick="exitSearch()"><< Go Back</a> | </div>');
+				document.write('<div style="display: inline;" id="goBack"><a href="javascript:void(0);" onclick="exitSearch()"><< Go Back</a> | </div>');
 				$('#goBack').hide();
 			</script>
 			<a href="javascript:void(0);" onclick="refresh()">Refresh</a> | 
-			<span id="nsfwOption"></span><br><a href="https://github.com/NickGeek/Campfyre">Fork Campfyre on GitHub</a> | Robofaces lovingly delivered by <a target="_blank" href="http://robohash.org">Robohash.org</a><br>Written and run by <a href="http://nickwebster.co.nz">Nick Webster</a></p>
+			<span id="nsfwOption"></span><br><a href="https://github.com/NickGeek/Campfyre">Fork Campfyre on GitHub</a> | Robofaces lovingly delivered by <a target="_blank" href="http://robohash.org">Robohash.org</a><br>Written and run by <a href="http://nickwebster.co.nz">Nick Webster</a></h4>
 			<script>
 				function nsfwToggle() {
 					var verb = "";
@@ -166,7 +152,7 @@
 					else {
 						verb = "Hide ";
 					}
-					$('#nsfwOption').html('<a href="javascript:void(0)" onclick="refresh('+newOption+')">'+verb+'Offensive/NSFW posts</a>');
+					$('#nsfwOption').html('<a href="javascript:void(0);" onclick="refresh('+newOption+')">'+verb+'Offensive/NSFW posts</a>');
 				}
 				nsfwToggle();
 			</script>
@@ -199,29 +185,9 @@
 			}
 		</script>
 
-		<script>
-			$('#postForm').submit(function(event) {
-				if ($('#postForm').find('input[name="nsfw"]').is(':checked')) {
-					var nsfwCheckbox = 1;
-				}
-				else {
-					var nsfwCheckbox = '';
-				}
-
-				ws.emit('submit post', JSON.stringify({
-					post: $('#postForm').find('textarea[name="postText"]').val(),
-					attachment: $('#postForm').find('input[name="attachment"]').val(),
-					email: $('#postForm').find('input[name="email"]').val(),
-					nsfw: nsfwCheckbox,
-					catcher: $('#postForm').find('input[name="catcher"]').val()
-				}));
-				$('#postForm')[0].reset();
-				return false;
-			});
-		</script>
-
 		<img id="loadingMessage" src="img/loading.gif" alt="loading..." />
 
 		<a style="text-align: center; margin: 10px;" class="btn" href="javascript:void(0);" onclick="loadMore();">Load More...</a>
+		<paper-fab id="submitFAB" icon="create" class="submit_open"></paper-fab>
 	</body>
 </html>

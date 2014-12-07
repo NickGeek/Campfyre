@@ -1,5 +1,4 @@
 //Setting up variables
-var showNSFW = 0;
 var tag = "";
 var loaded = false;
 var page = 1;
@@ -7,6 +6,15 @@ var lastPost = 0;
 var ws = io('ws://'+window.location.hostname+':3973');
 var userID = '';
 var currentPageFile = location.pathname.substring(1);
+
+//NSFW posts
+if (store.get('showNSFW')) {
+	var showNSFW = store.get('showNSFW');
+}
+else {
+	store.set('showNSFW', 0);
+	var showNSFW = store.get('showNSFW');
+}
 
 //Display posts when they arrive
 ws.on('new post', function(postData) {
@@ -21,8 +29,9 @@ ws.on('new post', function(postData) {
 		}
 
 		newHTML = newHTML + "<section id="+postData.id+" class='card'>";
+		newHTML = newHTML + '<paper-shadow z="3"></paper-shadow>';
 			var submitterHash = postData.ip.split("g/")[1].split(".")[0];
-			newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+submitterHash+"\")'><img src='"+postData.ip+"' /></a> says...<br></i><a href='permalink.html?id="+postData.id+"'>Permalink</a> | <span id='postTime"+postData.id+"'>"+moment(moment.unix(postData.time)).fromNow()+"</span>";
+			newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+submitterHash+"\")'><img src='"+postData.ip+"' /></a> says...<br></i><a href='permalink.html?id="+postData.id+"'>Permalink</a> | <span data-livestamp="+postData.time+"></span>";
 				
 				//Tags
 				switch (submitterHash) {
@@ -37,11 +46,11 @@ ws.on('new post', function(postData) {
 					newHTML = newHTML + " [nsfw]";
 				}
 			newHTML = newHTML + "</p>";
-			newHTML = newHTML + '<h3 id="postText'+postData.id+'" style="text-align: left;">'+emojione.unicodeToImage(postData.post.replace(new RegExp('\r\n','g'), '<br />'))+'</h3>';
+			newHTML = newHTML + '<h3 id="postText'+postData.id+'" style="text-align: left;">'+postData.post.replace(new RegExp('\r\n','g'), '<br />')+'</h3>';
 
 			//Attachments
 			if (postData.attachment != "n/a") {
-				newHTML = newHTML + attach(postData.attachment)+"<br><br>";
+				newHTML = newHTML + attach(postData.attachment)+"<br>";
 			}
 
 			//Stokes and Comments
@@ -64,7 +73,7 @@ ws.on('new post', function(postData) {
 					for (var i = 0; i < postData.comments.length; ++i) {
 						var commenterHash = postData.comments[i].ip.split("g/")[1].split(".")[0];
 						newHTML = newHTML + '<hr />';
-						newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+postData.comments[i].ip+"' /></a> says...<br></i>"+moment(moment.unix(postData.comments[i].time)).fromNow();
+						newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+postData.comments[i].ip+"' /></a> says...<br></i><span data-livestamp="+postData.comments[i].time+" />";
 						//Tags
 						switch (commenterHash) {
 							case "21232f297a57a5a743894a0e4a801fc3":
@@ -78,7 +87,7 @@ ws.on('new post', function(postData) {
 								break;
 						}
 						newHTML = newHTML + "</p>";
-						newHTML = newHTML + '<h4 id="commentText">'+emojione.unicodeToImage(postData.comments[i].comment.replace(new RegExp('\r?\n','g'), '<br />'))+'</h4>';
+						newHTML = newHTML + '<h4 id="commentText">'+postData.comments[i].comment.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
 					}
 				newHTML = newHTML + '</div>';
 			newHTML = newHTML + '</div>';
@@ -121,7 +130,7 @@ ws.on('new comment', function(commentData) {
 	var newHTML = '';
 	var commenterHash = commentData.ip.split("g/")[1].split(".")[0];
 	newHTML = newHTML + '<hr />';
-	newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+commentData.ip+"' /></a> says...<br></i>"+moment(moment.unix(commentData.time)).fromNow();
+	newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+commentData.ip+"' /></a> says...<br></i><span data-livestamp="+commentData.time+" />";
 	//Tags
 	switch (commenterHash) {
 		case "21232f297a57a5a743894a0e4a801fc3":
@@ -132,7 +141,7 @@ ws.on('new comment', function(commentData) {
 			break;
 	}
 	newHTML = newHTML + "</p>";
-	newHTML = newHTML + '<h4 id="commentText">'+emojione.unicodeToImage(commentData.comment.replace(new RegExp('\r?\n','g'), '<br />'))+'</h4>';
+	newHTML = newHTML + '<h4 id="commentText">'+commentData.comment.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
 
 	//Insert the comment
 	var comments = document.getElementById('comments'+commentData.parent);
@@ -151,7 +160,7 @@ URLbits.href = url;
 
 //Get hostname
 var hostname = URLbits.hostname;
-var sitename = hostname.match(/(youtube|youtu.be|imgur.com|sharepic.tk)/i);
+var sitename = hostname.match(/(youtube|youtu.be|imgur.com|sharepic.tk|puu.sh)/i);
 
 //Create attachement code depending on site
 if (sitename != null) {
@@ -165,17 +174,21 @@ if (sitename != null) {
 
 			var width = '95%';
 			var height = '420';
-			attachCode = '<br /><object width="'+width+'" height="'+height+'"><param name="movie" value="http://www.youtube.com/v/'+videoid+'&amp;hl=en_US&amp;fs=1?rel=0"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/'+videoid+'&amp;hl=en_US&amp;fs=1?rel=0" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="'+width+'" height="'+height+'"></embed></object>';
+			attachCode = '<br /><iframe width="'+width+'" height="'+height+'" src="http://youtube.com/embed/'+videoid+'" frameborder="0" allowfullscreen></iframe>';
 			break;
 		case "imgur.com":
 			var imgid = url.split("/");
 			imgid = imgid[imgid.length-1];
 			imgid = imgid.split(".");
 			imgid = imgid[0];
-			attachCode = '<a target="_blank" href="http://i.imgur.com/'+imgid+'.png"><img style="max-height: 30em;" src="http://i.imgur.com/'+imgid+'.png" /></a>';
+			attachCode = '<a class="imgContainer" target="_blank" href="http://i.imgur.com/'+imgid+'.png"><img src="http://i.imgur.com/'+imgid+'.png" /></a>';
 			break;
 		case "sharepic.tk":
-			attachCode = '<a target="_blank" href="'+url+'"><img style="max-height: 30em;" src="'+url+'" /></a>';
+			attachCode = '<a class="imgContainer" target="_blank" href="'+url+'"><img src="'+url+'" /></a>';
+			break;
+		case "puu.sh":
+			var imgid = url.split("http://puu.sh/")[1].split(".")[0];
+			attachCode = '<a class="imgContainer" target="_blank" href="http://puu.sh/'+imgid+'.png"><img src="http://puu.sh/'+imgid+'.png" /></a>';
 			break;
 		default:
 			attachCode = 'Attached URL: <a target="_blank" href="'+url+'">'+url+'</a>';
@@ -243,12 +256,13 @@ findHashtags(id);
 }
 
 //#YOLOSWAG - thanks to http://stackoverflow.com/questions/4913555/find-twitter-hashtags-using-jquery-and-apply-a-link
-hashtag_regexp = /#([a-zA-Z]+)/g;
+// var hashtag_regexp = /(#\w+)/ug;
+var hashtag_regexp = /(#(.+?)(?=[\s.,:,!,?,]|$))/g;
 
 function linkHashtags(text) {
 return text.replace(
 	hashtag_regexp,
-	'<a href="javascript:void(0);" onclick="runSearch(\'#$1\')">#$1</a>'
+	'<a href="javascript:void(0);" onclick="runSearch(\'$1\')">$1</a>'
 );
 }
 
@@ -308,6 +322,7 @@ function runSearch(searchQuery) {
 	$('#goBack').show();
 	$('#posts').html('');
 	$('#loadingMessage').show();
+	$('#submitFAB').hide();
 
 	page = 1;
 	ws.emit('get posts', JSON.stringify({
@@ -327,6 +342,7 @@ function exitSearch() {
 	$('#searchTitle').html('');
 	$('#goBack').hide();
 	$('#loadingMessage').show();
+	$('#submitFAB').show();
 
 	$('#posts').html('');
 	page = 1;
@@ -348,6 +364,7 @@ function loadUserPage(id) {
 	$('#goBack').show();
 	$('#posts').html('');
 	$('#loadingMessage').show();
+	$('#submitFAB').hide();
 
 	ws.emit('get total score', JSON.stringify({
 		id: userID
@@ -375,4 +392,33 @@ function loadMore() {
 		reverse: true,
 		user: userID
 	}));
+}
+
+$(document).ready(function() {
+	$('#submit').popup({
+		transition: 'all 0.3s'
+	});
+
+	$('#closeSubmitPopup').click(function() {
+		$('#submit').popup('hide');
+	});
+});
+
+function refresh(nsfw) {
+	if (nsfw === 0 || nsfw === 1){
+		showNSFW = nsfw;
+		store.set('showNSFW', nsfw)
+	}
+	page = 1;
+	$('#posts').html('');
+	$('#loadingMessage').show();
+	ws.emit('get posts', JSON.stringify({
+		size: '64x64',
+		search: tag,
+		startingPost: page*50-50,
+		loadBottom: true,
+		user: userID,
+		reverse: true
+	}));
+	nsfwToggle();
 }
