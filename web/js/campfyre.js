@@ -321,6 +321,7 @@ function runSearch(searchQuery) {
 	$('#goBack').show();
 	$('#posts').html('');
 	$('#loadingMessage').show();
+	$('#submitFAB').hide();
 
 	page = 1;
 	ws.emit('get posts', JSON.stringify({
@@ -340,6 +341,7 @@ function exitSearch() {
 	$('#searchTitle').html('');
 	$('#goBack').hide();
 	$('#loadingMessage').show();
+	$('#submitFAB').show();
 
 	$('#posts').html('');
 	page = 1;
@@ -361,6 +363,7 @@ function loadUserPage(id) {
 	$('#goBack').show();
 	$('#posts').html('');
 	$('#loadingMessage').show();
+	$('#submitFAB').hide();
 
 	ws.emit('get total score', JSON.stringify({
 		id: userID
