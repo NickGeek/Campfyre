@@ -46,7 +46,7 @@ ws.on('new post', function(postData) {
 					newHTML = newHTML + " [nsfw]";
 				}
 			newHTML = newHTML + "</p>";
-			newHTML = newHTML + '<h3 id="postText'+postData.id+'" style="text-align: left;">'+emojione.unicodeToImage(postData.post.replace(new RegExp('\r\n','g'), '<br />'))+'</h3>';
+			newHTML = newHTML + '<h3 id="postText'+postData.id+'" style="text-align: left;">'+postData.post.replace(new RegExp('\r\n','g'), '<br />')+'</h3>';
 
 			//Attachments
 			if (postData.attachment != "n/a") {
@@ -87,7 +87,7 @@ ws.on('new post', function(postData) {
 								break;
 						}
 						newHTML = newHTML + "</p>";
-						newHTML = newHTML + '<h4 id="commentText">'+emojione.unicodeToImage(postData.comments[i].comment.replace(new RegExp('\r?\n','g'), '<br />'))+'</h4>';
+						newHTML = newHTML + '<h4 id="commentText">'+postData.comments[i].comment.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
 					}
 				newHTML = newHTML + '</div>';
 			newHTML = newHTML + '</div>';
@@ -141,7 +141,7 @@ ws.on('new comment', function(commentData) {
 			break;
 	}
 	newHTML = newHTML + "</p>";
-	newHTML = newHTML + '<h4 id="commentText">'+emojione.unicodeToImage(commentData.comment.replace(new RegExp('\r?\n','g'), '<br />'))+'</h4>';
+	newHTML = newHTML + '<h4 id="commentText">'+commentData.comment.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
 
 	//Insert the comment
 	var comments = document.getElementById('comments'+commentData.parent);
