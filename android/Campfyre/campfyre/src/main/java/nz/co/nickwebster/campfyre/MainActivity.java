@@ -338,15 +338,28 @@ public class MainActivity extends Activity {
                     Integer oldCommNum = Integer.parseInt(firstChar);
                     oldCommNum++;
                     String newCommStr;
+
                     if (oldCommNum == 1) {
                         newCommStr = oldCommNum+" comment";
+                        commentData.remove(commentObj.getInt("parent"));
                     }
                     else {
                         newCommStr = oldCommNum+" comments";
                     }
 
-                    List<Map<String, Object>> commentsForPost = commentData.get(commentObj.getInt("parent"));
-                    commentsForPost.add(comment);
+                    List<Map<String, Object>> commentsForPost = new ArrayList<Map<String, Object>>();
+                    try {
+                        if (commentData.get(commentObj.getInt("parent")) != null) {
+                            commentsForPost = commentData.get(commentObj.getInt("parent"));
+                            commentsForPost.add(comment);
+                        }
+                        else {
+                            commentsForPost.add(comment);
+                        }
+                    }
+                    catch (Exception e) {
+                        commentsForPost.add(comment);
+                    }
 
                     commentData.put(commentObj.getInt("parent"), commentsForPost);
                     commentNums.set(positionInList, newCommStr);
