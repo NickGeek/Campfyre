@@ -49,7 +49,8 @@ function getPosts(size, search, startingPost, loadBottom, socket, reverse, user,
 	//Get the posts from the database
 	if (search) {
 		search = addslashes(search);
-		var query = "SELECT * FROM posts WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% "+search+" %' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '% "+search+"' OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) LIKE '"+search+" %' or REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`post`, '?' , '' ), '!' , '' ), '-' , '' ), '.' , '' ), ':' , '' ) = '"+search+"' ORDER BY id DESC LIMIT "+con.escape(startingPost)+", 100";
+		if (search.substr(0, 1) == "#") search = search.substr(1, search.length);
+		var query = "SELECT * FROM posts WHERE LOWER(`post`) REGEXP '[[:<:]]"+search+"[[:>:]]' ORDER BY id DESC LIMIT "+con.escape(startingPost)+", 50;";
 	}
 	else {
 		if (user) {
