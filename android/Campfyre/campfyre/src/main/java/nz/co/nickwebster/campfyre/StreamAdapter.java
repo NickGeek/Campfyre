@@ -82,7 +82,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
         try {
             //Linking hashtags
             txtTitle.setText(list.get(position));
-            Pattern hashtagRegex = Pattern.compile("#([a-zA-Z]+)");
+            Pattern hashtagRegex = Pattern.compile("(#(.+?)(?=[\\s.,:,!,?,]|$))");
             String searchURI = "campfyre://search/";
             Linkify.addLinks(txtTitle, hashtagRegex, searchURI);
 
