@@ -49,8 +49,12 @@ function getPosts(size, search, startingPost, loadBottom, socket, reverse, user,
 	//Get the posts from the database
 	if (search) {
 		search = addslashes(search);
-		if (search.substr(0, 1) == "#") search = search.substr(1, search.length);
-		var query = "SELECT * FROM posts WHERE LOWER(`post`) REGEXP '[[:<:]]"+search+"[[:>:]]' ORDER BY id DESC LIMIT "+con.escape(startingPost)+", 50;";
+		var extraChar = "";
+		if (search.substr(0, 1) == "#") {
+			search = search.substr(1, search.length);
+			extraChar = "#";
+		}
+		var query = "SELECT * FROM posts WHERE LOWER(`post`) REGEXP '"+extraChar+"[[:<:]]"+search+"[[:>:]]' ORDER BY id DESC LIMIT "+con.escape(startingPost)+", 50;";
 	}
 	else {
 		if (user) {
