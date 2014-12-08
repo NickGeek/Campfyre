@@ -490,7 +490,10 @@ public class MainActivity extends Activity {
 
                     if (oldCommNum == 1) {
                         newCommStr = oldCommNum+" comment";
-                        commentData.remove(commentObj.getInt("parent"));
+                        List<Map<String, Object>> currentComment = commentData.get(commentObj.getInt("parent"));
+                        if (currentComment.get(0).get("comment").equals("")) {
+                            commentData.remove(commentObj.getInt("parent"));
+                        }
                     }
                     else {
                         newCommStr = oldCommNum+" comments";
