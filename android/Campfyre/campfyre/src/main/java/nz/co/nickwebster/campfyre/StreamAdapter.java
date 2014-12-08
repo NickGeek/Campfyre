@@ -87,7 +87,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
             Linkify.addLinks(txtTitle, hashtagRegex, searchURI);
 
             //Linking links
-            Pattern urlRegex = Patterns.WEB_URL;
+            Pattern urlRegex = Pattern.compile("((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\\+\\$,\\w]+@)[A-Za-z0-9.-]+)((?:\\/[\\+~%\\/.\\w-_]*)?\\??(?:[-\\+=&;%@.\\w_]*)#?(?:[\\w]*))?)");
             Linkify.addLinks(txtTitle, urlRegex, null);
 
             commentCounter.setText(commentNums.get(position));
