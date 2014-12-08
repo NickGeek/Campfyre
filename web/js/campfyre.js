@@ -257,7 +257,7 @@ findHashtags(id);
 
 //#YOLOSWAG - thanks to http://stackoverflow.com/questions/4913555/find-twitter-hashtags-using-jquery-and-apply-a-link
 // var hashtag_regexp = /(#\w+)/ug;
-var hashtag_regexp = /(#(.+?)(?=[\s.,:,!,?,<br>,]|$))/g;
+var hashtag_regexp = /(#(.+?)(?=[\s.,:,!,?,<>,]|$))/g;
 
 function linkHashtags(text) {
 return text.replace(
