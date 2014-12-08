@@ -3,13 +3,19 @@ package nz.co.nickwebster.campfyre;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.format.DateUtils;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
@@ -32,6 +38,14 @@ import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -59,10 +73,13 @@ public class MainActivity extends Activity {
     public static Map<Integer, Integer> idComparison = new HashMap<Integer, Integer>();
     Map<Integer, List<Map<String, Object>>> commentData = new HashMap<Integer, List<Map<String, Object>>>();
     ExpandableListView postList;
+    String intentType;
+    String action;
+
 
     Socket ws;
-    String serverURI = "http://192.168.1.54:3973"; // Comment this out
-//    String serverURI = "http://campfyre.org:3973"; // Uncomment this
+//    String serverURI = "http://192.168.1.54:3973"; // Comment this out
+    String serverURI = "http://campfyre.org:3973"; // Uncomment this
     boolean showNSFW;
     String tag = "";
     int page = 1;
@@ -219,6 +236,113 @@ public class MainActivity extends Activity {
         //Set NSFW
         prefs = getSharedPreferences("CampfyreApp", MODE_PRIVATE);
         showNSFW = prefs.getBoolean("showNSFW", false);
+
+        //Intent from sharing to Campfyre
+        try {
+            Intent intent = getIntent();
+            String action = intent.getAction();
+            String intentType = intent.getType();
+
+            if (action.equals(Intent.ACTION_SEND)) {
+                View setNameView = View.inflate(this, R.layout.write_post, null);
+                postTextEdit = (EditText) setNameView.findViewById(R.id.postTextEdit);
+                attachmentTextEdit = (EditText) setNameView.findViewById(R.id.attachmentTextEdit);
+                counter = (TextView) setNameView.findViewById(R.id.counterTextView);
+                NSFWcheckBox = (CheckBox) setNameView.findViewById(R.id.NSFWcheckBox);
+
+                if (intentType.startsWith("text/")) {
+                    postTextEdit.setText(intent.getStringExtra(Intent.EXTRA_TEXT));
+                    counter.setText(String.valueOf(256 - intent.getStringExtra(Intent.EXTRA_TEXT).length()));
+                }
+
+                if (intentType.startsWith("image/")) {
+                    attachmentTextEdit.setText("Uploading, please wait...");
+                    Uri attachedImageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    try {
+                        Bitmap attachedImageBM = MediaStore.Images.Media.getBitmap(this.getContentResolver(), attachedImageUri);
+                        attachedImageBM.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                        final URL imgur = new URL("http://api.imgur.com/2/upload");
+                        final String params = URLEncoder.encode("image", "UTF-8") + "=" + URLEncoder.encode(Base64.encode(byteArrayOutputStream.toByteArray(), Base64.DEFAULT).toString(), "UTF-8") + "&" + URLEncoder.encode("key", "UTF-8") + "=" + URLEncoder.encode("16d7fa3d6041992", "UTF-8");
+                        Runnable thread = new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    URLConnection urlConnection = imgur.openConnection();
+                                    urlConnection.setDoOutput(true);
+                                    OutputStreamWriter streamWriter = new OutputStreamWriter(urlConnection.getOutputStream());
+                                    streamWriter.write(params);
+                                    streamWriter.flush();
+
+                                    BufferedReader input = new BufferedReader(new InputStreamReader((urlConnection.getInputStream())));
+                                    String serverResponse;
+                                    while ((serverResponse = input.readLine()) != null) {
+                                        Log.d("ca", serverResponse);
+                                    }
+                                    input.close();
+                                } catch (IOException e) {
+                                    Toast.makeText(getApplicationContext(), "Image failed to upload :-(", Toast.LENGTH_SHORT).show();
+                                    attachmentTextEdit.setText("");
+                                }
+                            }
+                        };
+                        Thread uploadT = new Thread(thread);
+                        uploadT.start();
+                    } catch (Exception e) {
+                        Toast.makeText(getApplicationContext(), "Image failed to upload :-(", Toast.LENGTH_SHORT).show();
+                        attachmentTextEdit.setText("");
+                    }
+                }
+
+                //Counter
+                final TextWatcher txwatcher = new TextWatcher() {
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                        counter.setText(String.valueOf(256 - s.length()));
+                    }
+
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        counter.setText(String.valueOf(256 - s.length()));
+                    }
+
+                    public void afterTextChanged(Editable s) {
+                    }
+                };
+                postTextEdit.addTextChangedListener(txwatcher);
+
+                //Back to the dialog!
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(getResources().getString(R.string.action_post))
+                        .setView(setNameView)
+                        .setCancelable(false)
+                        .setPositiveButton(getResources().getString(R.string.action_post), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                final String input = postTextEdit.getText().toString();
+                                final String attachment = attachmentTextEdit.getText().toString();
+                                final Object nsfw;
+                                if (NSFWcheckBox.isChecked()) {
+                                    nsfw = 1;
+                                } else {
+                                    nsfw = "";
+                                }
+
+                                Map<String, Object> params = new HashMap<String, Object>();
+                                params.put("post", input);
+                                params.put("attachment", attachment);
+                                params.put("nsfw", nsfw);
+                                params.put("catcher", "");
+                                ws.emit("submit post", gson.toJson(params));
+                            }
+                        })
+                        .setNegativeButton(getResources().getString(R.string.action_cancel), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        }).show();
+            }
+        }
+        catch (Exception e) {
+            Log.e("CampfyreApp", e.toString());
+        }
 
         //Floating action button - https://github.com/FaizMalkani/FloatingActionButton
         final Fab submitButton = (Fab) findViewById(R.id.submitButton);
@@ -461,6 +585,15 @@ public class MainActivity extends Activity {
         super.onResume();
         if (!ws.connected())
             ws.connect();
+            refresh();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (!ws.connected())
+            ws.connect();
+            refresh();
     }
 
     //Handle submit button

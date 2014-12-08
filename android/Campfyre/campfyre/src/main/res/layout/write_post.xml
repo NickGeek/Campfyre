@@ -35,7 +35,7 @@
             android:text="@string/text_charlimit" />
 
     </LinearLayout>
-    
+
     <EditText
         android:id="@+id/attachmentTextEdit"
         android:layout_width="match_parent"
@@ -49,12 +49,12 @@
         android:layout_height="wrap_content"
         android:text="@string/title_offensiveCheckbox" />
 
-    <CheckBox
+   <!-- <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingLeft="5dp"
         android:id="@+id/subscribeCheckBox"
         android:checked="true"
-        android:text="@string/title_subscribe"/>
+        android:text="@string/title_subscribe"/> -->
 
 </LinearLayout>
