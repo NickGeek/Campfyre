@@ -97,7 +97,7 @@ h4 {
 		-webkit-tap-highlight-color: transparent
 	}
 	#pageBody {
-		position: relative;
+		position: static;
 	}
 	#search {
 		position: absolute;
