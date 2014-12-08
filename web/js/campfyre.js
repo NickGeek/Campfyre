@@ -50,7 +50,7 @@ ws.on('new post', function(postData) {
 
 			//Attachments
 			if (postData.attachment != "n/a") {
-				newHTML = newHTML + attach(postData.attachment)+"<br>";
+				newHTML = newHTML + attach(postData.attachment)+"<br><br>";
 			}
 
 			//Stokes and Comments
