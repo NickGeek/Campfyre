@@ -44,6 +44,7 @@
 		</script>
 	</head>
 	<body>
+		<div id="sidebar">
 		<div id="search" class="input-append">
 			<form id="searchForm" style="max-width: 234px;">
 				<input name="tag" type="text" class="rounded" placeholder="#hashtag" required />
@@ -59,13 +60,13 @@
 					return false;
 				});
 			</script>
+			</div>
 			<div id="stickyholder" style="width: 234px; height: 60px;"></div>
-		</div>
 		<script>
 			//Advertisment
 			var random = Math.floor(Math.random()*(6 - 1))+1;
 			if  (random > 4) {
-				$('#stickyholder').html('<span id="adholder"><p id="textAdReplacement"><strong style="color: #5C5858;">Thanks for supporting Campfyre!</strong><br><span style="color: #333;">If you feel that our ads are intrusive please let us know 😊</span></p></span>');
+				$('#stickyholder').html('<p id="textAdReplacement"><strong style="color: #5C5858;">Thanks for supporting Campfyre!</strong><br><span style="color: #333;">If you feel that our ads are intrusive please let us know :-)</span></p>');
 			}
 			else if (random === 1 || random === 2) {
 				$('#stickyholder').html('<iframe scrolling="no" style="border: 0; width: 234px; height: 60px;" src="//coinurl.com/get.php?id=32018"></iframe>');
@@ -79,6 +80,7 @@
 				});
 			}
 		</script>
+		</div>
 
 		<div id="pageBody">
 		<div id="pageHeader" class="centre">
