@@ -98,7 +98,7 @@ h4 {
 		-webkit-tap-highlight-color: transparent
 	}
 	#sidebar {
-		position: absolute;
+		position: fixed;
 		margin-top: 15px;
 		margin-left: 15px;
 	}
