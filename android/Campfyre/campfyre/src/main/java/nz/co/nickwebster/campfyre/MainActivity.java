@@ -35,6 +35,14 @@ import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.google.gson.Gson;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -255,45 +263,6 @@ public class MainActivity extends Activity {
                     counter.setText(String.valueOf(256 - intent.getStringExtra(Intent.EXTRA_TEXT).length()));
                 }
 
-                if (intentType.startsWith("image/")) {
-                    attachmentTextEdit.setText("Uploading, please wait...");
-                    Uri attachedImageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
-                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                    try {
-                        Bitmap attachedImageBM = MediaStore.Images.Media.getBitmap(this.getContentResolver(), attachedImageUri);
-                        attachedImageBM.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-                        final URL imgur = new URL("http://api.imgur.com/2/upload");
-                        final String params = URLEncoder.encode("image", "UTF-8") + "=" + URLEncoder.encode(Base64.encode(byteArrayOutputStream.toByteArray(), Base64.DEFAULT).toString(), "UTF-8") + "&" + URLEncoder.encode("key", "UTF-8") + "=" + URLEncoder.encode("16d7fa3d6041992", "UTF-8");
-                        Runnable thread = new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    URLConnection urlConnection = imgur.openConnection();
-                                    urlConnection.setDoOutput(true);
-                                    OutputStreamWriter streamWriter = new OutputStreamWriter(urlConnection.getOutputStream());
-                                    streamWriter.write(params);
-                                    streamWriter.flush();
-
-                                    BufferedReader input = new BufferedReader(new InputStreamReader((urlConnection.getInputStream())));
-                                    String serverResponse;
-                                    while ((serverResponse = input.readLine()) != null) {
-                                        Log.d("ca", serverResponse);
-                                    }
-                                    input.close();
-                                } catch (IOException e) {
-                                    Toast.makeText(getApplicationContext(), "Image failed to upload :-(", Toast.LENGTH_SHORT).show();
-                                    attachmentTextEdit.setText("");
-                                }
-                            }
-                        };
-                        Thread uploadT = new Thread(thread);
-                        uploadT.start();
-                    } catch (Exception e) {
-                        Toast.makeText(getApplicationContext(), "Image failed to upload :-(", Toast.LENGTH_SHORT).show();
-                        attachmentTextEdit.setText("");
-                    }
-                }
-
                 //Counter
                 final TextWatcher txwatcher = new TextWatcher() {
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -338,6 +307,62 @@ public class MainActivity extends Activity {
                                 dialog.cancel();
                             }
                         }).show();
+
+                if (intentType.startsWith("image/")) {
+                    attachmentTextEdit.setText("Uploading, please wait...");
+                    Uri attachedImageUri = (Uri)intent.getParcelableExtra(Intent.EXTRA_STREAM);
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    Bitmap attachedImageBM = MediaStore.Images.Media.getBitmap(this.getContentResolver(), attachedImageUri);
+                    attachedImageBM.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                    final byte[] byteArray = byteArrayOutputStream .toByteArray();
+                    try {
+                        Runnable thread = new Runnable() {
+                            @Override
+                            public void run() {
+                                //Convert image into base64 and upload to imgur
+                                String b64img = Base64.encodeToString(byteArray, Base64.DEFAULT);
+                                HttpClient httpClient = new DefaultHttpClient();
+                                HttpPost httpPost = new HttpPost("https://api.imgur.com/3/upload.json");
+                                List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+                                nameValuePairs.add(new BasicNameValuePair("image", b64img));
+                                try {
+                                    httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+                                    httpPost.setHeader("Authorization", "Client-ID 16d7fa3d6041992");
+
+                                    HttpResponse response = httpClient.execute(httpPost);
+                                    String responseStr = EntityUtils.toString(response.getEntity());
+                                    JSONObject jsonObject = new JSONObject(responseStr);
+                                    JSONObject data = jsonObject.getJSONObject("data");
+                                    final String imgurLink = data.getString("link");
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            attachmentTextEdit.setText(imgurLink);
+                                        }
+                                    });
+                                }
+                                catch (Exception e) {
+                                    Log.e("CampfyreApp", e.toString());
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            attachmentTextEdit.setText("Image failed to upload :-(");
+                                        }
+                                    });
+                                }
+                            }
+                        };
+                        Thread uploadT = new Thread(thread);
+                        uploadT.start();
+                    } catch (Exception e) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                attachmentTextEdit.setText("Image failed to upload :-(");
+                            }
+                        });
+                    }
+                }
             }
         }
         catch (Exception e) {
