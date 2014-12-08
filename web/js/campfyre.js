@@ -46,7 +46,7 @@ ws.on('new post', function(postData) {
 					newHTML = newHTML + " [nsfw]";
 				}
 			newHTML = newHTML + "</p>";
-			newHTML = newHTML + '<h3 id="postText'+postData.id+'" style="text-align: left;">'+postData.post.replace(new RegExp('\r\n','g'), '<br />')+'</h3>';
+			newHTML = newHTML + '<h3 id="postText'+postData.id+'" style="text-align: left;">'+postData.post.replace(new RegExp('\n','g'), '<br />')+'</h3>';
 
 			//Attachments
 			if (postData.attachment != "n/a") {
@@ -141,7 +141,7 @@ ws.on('new comment', function(commentData) {
 			break;
 	}
 	newHTML = newHTML + "</p>";
-	newHTML = newHTML + '<h4 id="commentText">'+commentData.comment.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
+	newHTML = newHTML + '<h4 id="commentText">'+commentData.comment.replace(new RegExp('\n','g'), '<br />')+'</h4>';
 
 	//Insert the comment
 	var comments = document.getElementById('comments'+commentData.parent);
@@ -257,7 +257,7 @@ findHashtags(id);
 
 //#YOLOSWAG - thanks to http://stackoverflow.com/questions/4913555/find-twitter-hashtags-using-jquery-and-apply-a-link
 // var hashtag_regexp = /(#\w+)/ug;
-var hashtag_regexp = /(#(.+?)(?=[\s.,:,!,?,]|$))/g;
+var hashtag_regexp = /(#(.+?)(?=[\s.,:,!,?,<br>,]|$))/g;
 
 function linkHashtags(text) {
 return text.replace(
