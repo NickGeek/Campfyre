@@ -72,7 +72,7 @@ ws.on('new post', function(postData) {
 				newHTML = newHTML + '<div id="comments'+postData.id+'">';
 					for (var i = 0; i < postData.comments.length; ++i) {
 						var commenterHash = postData.comments[i].ip.split("g/")[1].split(".")[0];
-						newHTML = newHTML + '<div style="margin-left: 0px;" id="comment'+postData.comments[i].id+'">';
+						newHTML = newHTML + '<div style="padding-left: 0px;" id="comment'+postData.comments[i].id+'">';
 						newHTML = newHTML + '<hr />';
 						newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+postData.comments[i].ip+"' /></a> says...<br></i><span data-livestamp="+postData.comments[i].time+" />";
 						//Tags
@@ -89,7 +89,8 @@ ws.on('new post', function(postData) {
 						}
 						newHTML = newHTML + "</p>";
 						newHTML = newHTML + '<h4 id="commentText">'+postData.comments[i].comment.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
-						newHTML = newHTML + '<div style="margin-left: 10px;" id="replies'+postData.comments[i].id+'">';
+						newHTML = newHTML + '<button class="btn" onclick="replyToComment('+postData.id+', '+postData.comments[i].id+');">Reply</button>';
+						newHTML = newHTML + '<div style="padding-left: 20px;" id="replies'+postData.comments[i].id+'">';
 						newHTML = newHTML + '</div>';
 						newHTML = newHTML + '</div>';
 					}
@@ -107,7 +108,7 @@ ws.on('new post', function(postData) {
 
 		//Submit a comment
 		$('#posts').off('submit');
-		$('#posts').on('submit','#commentForm',function(e){
+		$('#posts').on('submit','#commentForm',function(e) {
 			e.preventDefault();
 			
 			ws.emit('submit comment', JSON.stringify({
@@ -137,9 +138,10 @@ ws.on('new post', function(postData) {
 
 ws.on('new comment', function(commentData) {
 	var commentData = JSON.parse(commentData);
+	console.log(commentData);
 	var newHTML = '';
 	var commenterHash = commentData.ip.split("g/")[1].split(".")[0];
-	newHTML = newHTML + '<div style="margin-left: 0px;" id="comment'+commentData.id+'">';
+	newHTML = newHTML + '<div style="padding-left: 0px;" id="comment'+commentData.id+'">';
 	newHTML = newHTML + '<hr />';
 	newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+commentData.ip+"' /></a> says...<br></i><span data-livestamp="+commentData.time+" />";
 	//Tags
@@ -152,8 +154,14 @@ ws.on('new comment', function(commentData) {
 			break;
 	}
 	newHTML = newHTML + "</p>";
-	newHTML = newHTML + '<h4 id="commentText">'+commentData.comment.replace(new RegExp('\n','g'), '<br />')+'</h4>';
-	newHTML = newHTML + '<div style="margin-left: 10px;" id="replies'+commentData.id+'">';
+	if ($('#comment'+commentData.parentComment).parents().length >= 13) {
+		newHTML = newHTML + '<h4 id="commentText">"'+$('#comment'+commentData.parentComment).find('h4[name="commentText"]').val()+'"<br><br>'+commentData.comment.replace(new RegExp('\n','g'), '<br />')+'</h4>';
+	}
+	else {
+		newHTML = newHTML + '<h4 id="commentText">'+commentData.comment.replace(new RegExp('\n','g'), '<br />')+'</h4>';
+	}
+	newHTML = newHTML + '<button class="btn" onclick="replyToComment('+commentData.parent+', '+commentData.id+');">Reply</button>';
+	newHTML = newHTML + '<div style="padding-left: 20px;" id="replies'+commentData.id+'">';
 	newHTML = newHTML + '</div>';
 	newHTML = newHTML + "</div>";
 
@@ -166,11 +174,23 @@ ws.on('new comment', function(commentData) {
 	document.getElementById('showCommentButton'+commentData.parent).innerHTML = 'Load comments ('+newCommNum+')';
 
 	//Sort the comment replies
-	for (var i = 0; i < commentData.length; ++i) if (commentData.parentComment) {
+	if (commentData.parentComment) {
 		//Put the comment in the comment replies div for its parent comment
-		$('#comment'+commentData.id).appendTo('#replies'+commentData.parentComment);
+		if ($('#comment'+commentData.parentComment).parents().length < 13) $('#comment'+commentData.id).appendTo('#replies'+commentData.parentComment);
 	}
 });
+
+//Comment Replies
+function replyToComment(postParent, commentParent) {
+	var comment = prompt("Comment reply:");
+
+	ws.emit('submit comment', JSON.stringify({
+		comment: comment,
+		parent: postParent,
+		commentParent: commentParent,
+		catcher: ''
+	}));
+}
 
 //Attachments
 function attach(url) {

@@ -276,7 +276,7 @@ function submitComment(parent, text, email, catcher, ip, commentParent, socket) 
 	var time = Math.floor(Date.now() / 1000) - 5;
 	text = text.replace(/(<([^>]+)>)/ig,"");
 	safeText = con.escape(text);
-	email = addslashes(email);
+	if (email) email = addslashes(email);
 	var spamming = false;
 	if (catcher.length > 0) spamming = true;
 	if (!commentParent) commentParent = null;
@@ -316,14 +316,23 @@ function submitComment(parent, text, email, catcher, ip, commentParent, socket) 
 
 				//Tell the user and show the comment
 				socket.emit('success message', JSON.stringify({title: 'Comment submitted', body: ''}));
-				ws.emit('new comment', JSON.stringify({
-					parent: parent,
-					comment: text,
-					time: time,
-					ip: 'http://robohash.org/'+md5(ip)+'.png?set=set3&size=64x64'
-				}));
+
+				con.query("SELECT * FROM comments WHERE `comment` = "+safeText+" AND `ip` = '"+ip+"' AND `time` = '"+time+"';", function (e, commentData) {
+					var commentData = commentData[commentData.length-1];
+					commentData.ip = 'http://robohash.org/'+md5(commentData.ip)+'.png?set=set3&size=64x64'
+					ws.emit('new comment', JSON.stringify(commentData));
+				});
 			})	
 		}
+		else if (spamming) {
+			socket.emit('error message', JSON.stringify({title: 'Post not submitted', body: "You've posted too much recently"}));
+		}
+		else {
+			socket.emit('error message', JSON.stringify({title: 'Post not submitted', body: 'Your post is too long'}));
+		}
+	}
+	else {
+		socket.emit('error message', JSON.stringify({title: 'Post not submitted', body: 'No data was received'}));
 	}
 }
 
