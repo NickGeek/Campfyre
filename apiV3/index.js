@@ -283,7 +283,7 @@ function submitComment(parent, text, email, catcher, ip, commentParent, socket) 
 
 	if (text && ip && parent) {
 		if (text.length <= 256 && !spamming) {
-			con.query("INSERT INTO comments (comment, ip, parent, commentParent, time) VALUES ("+safeText+", "+con.escape(ip)+", "+con.escape(parent)+", "+con.escape(commentParent)+" '"+time+"');", function (e) {
+			con.query("INSERT INTO comments (comment, ip, parent, parentComment, time) VALUES ("+safeText+", "+con.escape(ip)+", "+con.escape(parent)+", "+con.escape(commentParent)+", '"+time+"');", function (e) {
 				//Do emails if server is setup
 				if (emailPassword) {
 					con.query("SELECT `emails` FROM posts WHERE id = "+con.escape(parent)+";", function(e, addresses) {
@@ -313,8 +313,6 @@ function submitComment(parent, text, email, catcher, ip, commentParent, socket) 
 						if (email) subscribe(parent, email);
 					});
 				}
-
-				console.log(safeText);
 
 				//Tell the user and show the comment
 				socket.emit('success message', JSON.stringify({title: 'Comment submitted', body: ''}));
