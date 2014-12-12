@@ -89,7 +89,7 @@ ws.on('new post', function(postData) {
 						}
 						newHTML = newHTML + "</p>";
 						newHTML = newHTML + '<h4 id="commentText">'+postData.comments[i].comment.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
-						newHTML = newHTML + '<div id="replies'+postData.comments[i].id+'">';
+						newHTML = newHTML + '<div style="margin-left: 10px;" id="replies'+postData.comments[i].id+'">';
 						newHTML = newHTML + '</div>';
 						newHTML = newHTML + '</div>';
 					}
@@ -128,11 +128,6 @@ ws.on('new post', function(postData) {
 		for (var i = 0; i < postData.comments.length; ++i) if (postData.comments[i].parentComment) {
 			//Put the comment in the comment replies div for its parent comment
 			$('#comment'+postData.comments[i].id).appendTo('#replies'+postData.comments[i].parentComment);
-
-			//Give it a margin to show it's a layer deep
-			var newMargin = parseInt($('#comment'+postData.comments[i].parentComment).css("marginLeft"));
-			newMargin += 10;
-			$('#comment'+postData.comments[i].id).animate({marginLeft: '+='+newMargin+"px"}, 0);
 		}
 
 		loaded = true;
@@ -158,7 +153,7 @@ ws.on('new comment', function(commentData) {
 	}
 	newHTML = newHTML + "</p>";
 	newHTML = newHTML + '<h4 id="commentText">'+commentData.comment.replace(new RegExp('\n','g'), '<br />')+'</h4>';
-	newHTML = newHTML + '<div id="replies'+commentData.id+'">';
+	newHTML = newHTML + '<div style="margin-left: 10px;" id="replies'+commentData.id+'">';
 	newHTML = newHTML + '</div>';
 	newHTML = newHTML + "</div>";
 
@@ -174,9 +169,6 @@ ws.on('new comment', function(commentData) {
 	for (var i = 0; i < commentData.length; ++i) if (commentData.parentComment) {
 		//Put the comment in the comment replies div for its parent comment
 		$('#comment'+commentData.id).appendTo('#replies'+commentData.parentComment);
-
-		//Give it a margin to show it's a layer deep
-		$('#comment'+commentData.id).animate({marginLeft: '+='+parseInt($('#comment'+commentData.parentComment).css("marginLeft")+10)+"px"}, 0);
 	}
 });
 
