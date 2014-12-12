@@ -314,6 +314,8 @@ function submitComment(parent, text, email, catcher, ip, commentParent, socket) 
 					});
 				}
 
+				console.log(safeText);
+
 				//Tell the user and show the comment
 				socket.emit('success message', JSON.stringify({title: 'Comment submitted', body: ''}));
 				ws.emit('new comment', JSON.stringify({
@@ -396,7 +398,7 @@ ws.on('connection', function(socket) {
 		try {
 			params = JSON.parse(params);
 			var ip = socket.campfyreIPAddress;
-			submitComment(params.parent, params.comment, params.email, params.catcher, ip, params.commentParent socket);
+			submitComment(params.parent, params.comment, params.email, params.catcher, ip, params.commentParent, socket);
 		} catch(e) { }
 	});
 	socket.on('get post', function(params) {

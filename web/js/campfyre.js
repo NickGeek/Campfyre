@@ -70,10 +70,9 @@ ws.on('new post', function(postData) {
 				newHTML = newHTML + '</form>';
 				//Comments have been posted lets show them
 				newHTML = newHTML + '<div id="comments'+postData.id+'">';
-					console.log(postData.comments);
 					for (var i = 0; i < postData.comments.length; ++i) {
 						var commenterHash = postData.comments[i].ip.split("g/")[1].split(".")[0];
-						newHTML = newHTML + '<div id="comment'+postData.comments[i].id+'">';
+						newHTML = newHTML + '<div style="margin-left: 0px;" id="comment'+postData.comments[i].id+'">';
 						newHTML = newHTML + '<hr />';
 						newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+postData.comments[i].ip+"' /></a> says...<br></i><span data-livestamp="+postData.comments[i].time+" />";
 						//Tags
@@ -126,7 +125,15 @@ ws.on('new post', function(postData) {
 		highlighter(postData.id);
 
 		//Sort the comment replies
-		for (var i = 0; i < postData.comments.length; ++i) if (postData.comments[i].parentComment) $('#comment'+postData.comments[i].id).appendTo('#replies'+postData.comments[i].parentComment);
+		for (var i = 0; i < postData.comments.length; ++i) if (postData.comments[i].parentComment) {
+			//Put the comment in the comment replies div for its parent comment
+			$('#comment'+postData.comments[i].id).appendTo('#replies'+postData.comments[i].parentComment);
+
+			//Give it a margin to show it's a layer deep
+			var newMargin = parseInt($('#comment'+postData.comments[i].parentComment).css("marginLeft"));
+			newMargin += 10;
+			$('#comment'+postData.comments[i].id).animate({marginLeft: '+='+newMargin+"px"}, 0);
+		}
 
 		loaded = true;
 		$('#loadingMessage').hide();
@@ -137,7 +144,7 @@ ws.on('new comment', function(commentData) {
 	var commentData = JSON.parse(commentData);
 	var newHTML = '';
 	var commenterHash = commentData.ip.split("g/")[1].split(".")[0];
-	newHTML = newHTML + '<div id="comment'+commentData.id+'">';
+	newHTML = newHTML + '<div style="margin-left: 0px;" id="comment'+commentData.id+'">';
 	newHTML = newHTML + '<hr />';
 	newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+commentData.ip+"' /></a> says...<br></i><span data-livestamp="+commentData.time+" />";
 	//Tags
@@ -151,7 +158,7 @@ ws.on('new comment', function(commentData) {
 	}
 	newHTML = newHTML + "</p>";
 	newHTML = newHTML + '<h4 id="commentText">'+commentData.comment.replace(new RegExp('\n','g'), '<br />')+'</h4>';
-	newHTML = newHTML + '<div id="replies'+postData.comments[i].id+'">';
+	newHTML = newHTML + '<div id="replies'+commentData.id+'">';
 	newHTML = newHTML + '</div>';
 	newHTML = newHTML + "</div>";
 
@@ -162,6 +169,15 @@ ws.on('new comment', function(commentData) {
 	//Increment the number on the counter
 	var newCommNum = parseInt(+document.getElementById('showCommentButton'+commentData.parent).innerHTML.split('(')[1].split(')')[0])+1;
 	document.getElementById('showCommentButton'+commentData.parent).innerHTML = 'Load comments ('+newCommNum+')';
+
+	//Sort the comment replies
+	for (var i = 0; i < commentData.length; ++i) if (commentData.parentComment) {
+		//Put the comment in the comment replies div for its parent comment
+		$('#comment'+commentData.id).appendTo('#replies'+commentData.parentComment);
+
+		//Give it a margin to show it's a layer deep
+		$('#comment'+commentData.id).animate({marginLeft: '+='+parseInt($('#comment'+commentData.parentComment).css("marginLeft")+10)+"px"}, 0);
+	}
 });
 
 //Attachments
