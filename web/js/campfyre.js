@@ -70,8 +70,10 @@ ws.on('new post', function(postData) {
 				newHTML = newHTML + '</form>';
 				//Comments have been posted lets show them
 				newHTML = newHTML + '<div id="comments'+postData.id+'">';
+					console.log(postData.comments);
 					for (var i = 0; i < postData.comments.length; ++i) {
 						var commenterHash = postData.comments[i].ip.split("g/")[1].split(".")[0];
+						newHTML = newHTML + '<div id="comment'+postData.comments[i].id+'">';
 						newHTML = newHTML + '<hr />';
 						newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+postData.comments[i].ip+"' /></a> says...<br></i><span data-livestamp="+postData.comments[i].time+" />";
 						//Tags
@@ -88,6 +90,9 @@ ws.on('new post', function(postData) {
 						}
 						newHTML = newHTML + "</p>";
 						newHTML = newHTML + '<h4 id="commentText">'+postData.comments[i].comment.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
+						newHTML = newHTML + '<div id="replies'+postData.comments[i].id+'">';
+						newHTML = newHTML + '</div>';
+						newHTML = newHTML + '</div>';
 					}
 				newHTML = newHTML + '</div>';
 			newHTML = newHTML + '</div>';
@@ -120,6 +125,9 @@ ws.on('new post', function(postData) {
 		//Link #tags/URLs
 		highlighter(postData.id);
 
+		//Sort the comment replies
+		for (var i = 0; i < postData.comments.length; ++i) if (postData.comments[i].parentComment) $('#comment'+postData.comments[i].id).appendTo('#replies'+postData.comments[i].parentComment);
+
 		loaded = true;
 		$('#loadingMessage').hide();
 }
@@ -129,6 +137,7 @@ ws.on('new comment', function(commentData) {
 	var commentData = JSON.parse(commentData);
 	var newHTML = '';
 	var commenterHash = commentData.ip.split("g/")[1].split(".")[0];
+	newHTML = newHTML + '<div id="comment'+commentData.id+'">';
 	newHTML = newHTML + '<hr />';
 	newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+commentData.ip+"' /></a> says...<br></i><span data-livestamp="+commentData.time+" />";
 	//Tags
@@ -142,6 +151,9 @@ ws.on('new comment', function(commentData) {
 	}
 	newHTML = newHTML + "</p>";
 	newHTML = newHTML + '<h4 id="commentText">'+commentData.comment.replace(new RegExp('\n','g'), '<br />')+'</h4>';
+	newHTML = newHTML + '<div id="replies'+postData.comments[i].id+'">';
+	newHTML = newHTML + '</div>';
+	newHTML = newHTML + "</div>";
 
 	//Insert the comment
 	var comments = document.getElementById('comments'+commentData.parent);

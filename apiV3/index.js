@@ -272,17 +272,18 @@ function subscribe(parent, email) {
 	}
 }
 
-function submitComment(parent, text, email, catcher, ip, socket) {
+function submitComment(parent, text, email, catcher, ip, commentParent, socket) {
 	var time = Math.floor(Date.now() / 1000) - 5;
 	text = text.replace(/(<([^>]+)>)/ig,"");
 	safeText = con.escape(text);
 	email = addslashes(email);
 	var spamming = false;
 	if (catcher.length > 0) spamming = true;
+	if (!commentParent) commentParent = null;
 
 	if (text && ip && parent) {
 		if (text.length <= 256 && !spamming) {
-			con.query("INSERT INTO comments (comment, ip, parent, time) VALUES ("+safeText+", "+con.escape(ip)+", "+con.escape(parent)+", '"+time+"');", function (e) {
+			con.query("INSERT INTO comments (comment, ip, parent, commentParent, time) VALUES ("+safeText+", "+con.escape(ip)+", "+con.escape(parent)+", "+con.escape(commentParent)+" '"+time+"');", function (e) {
 				//Do emails if server is setup
 				if (emailPassword) {
 					con.query("SELECT `emails` FROM posts WHERE id = "+con.escape(parent)+";", function(e, addresses) {
@@ -395,7 +396,7 @@ ws.on('connection', function(socket) {
 		try {
 			params = JSON.parse(params);
 			var ip = socket.campfyreIPAddress;
-			submitComment(params.parent, params.comment, params.email, params.catcher, ip, socket);
+			submitComment(params.parent, params.comment, params.email, params.catcher, ip, params.commentParent socket);
 		} catch(e) { }
 	});
 	socket.on('get post', function(params) {
