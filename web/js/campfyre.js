@@ -135,7 +135,7 @@ ws.on('new post', function(postData) {
 				$('#comment'+postData.comments[i].id).remove();
 			}
 			if ($('#comment'+postData.comments[i].id).parents().length == 13) {
-				$('#commentAction'+postData.comments[i].id).html('<button class="btn" onclick="loadCommentThread('+postData.comments[i].parentComment+');">Continue thread >></button>');
+				$('#commentAction'+postData.comments[i].id).html('<button class="btn" onclick="loadCommentThread('+postData.comments[i].id+');">Continue thread >></button>');
 			}
 			else {
 				$('#commentAction'+postData.comments[i].id).html('<button class="btn" onclick="replyToComment('+postData.id+', '+postData.comments[i].id+');">Reply</button>');
@@ -167,14 +167,14 @@ ws.on('new comment', function(commentData) {
 	}
 	newHTML = newHTML + "</p>";
 	if ($('#comment'+commentData.parentComment).parents().length >= 13) {
-		loadCommentThread(commentData.parentComment);
+		loadCommentThread(commentData.id);
 		return;
 	}
 	else {
 		newHTML = newHTML + '<h4 id="commentText">'+commentData.comment.replace(new RegExp('\n','g'), '<br />')+'</h4>';
 	}
-	if ($('#comment'+commentData.id).parents().length == 11) {
-		newHTML = newHTML + '<button class="btn" onclick="loadCommentThread('+commentData.parentComment+');">Continue thread >></button>';
+	if ($('#comment'+commentData.id).parents().length == 13) {
+		newHTML = newHTML + '<button class="btn" onclick="loadCommentThread('+commentData.id+');">Continue thread >></button>';
 	}
 	else {
 		newHTML = newHTML + '<button class="btn" onclick="replyToComment('+commentData.parent+', '+commentData.id+');">Reply</button>';
