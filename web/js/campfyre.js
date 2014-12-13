@@ -68,6 +68,7 @@ ws.on('new post', function(postData) {
 					newHTML = newHTML + '<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />';
 					newHTML = newHTML + '<input class="btn" type="submit" name="post" value="Post">';
 				newHTML = newHTML + '</form>';
+				newHTML = newHTML + '<a id="goBackCommentBtn'+postData.id+'" style="display: none;" href="javascript:void(0);" onclick="exitThread('+postData.id+');"><< Go Back</a>';
 				//Comments have been posted lets show them
 				newHTML = newHTML + '<div id="comments'+postData.id+'">';
 					for (var i = 0; i < postData.comments.length; ++i) {
@@ -89,7 +90,8 @@ ws.on('new post', function(postData) {
 						}
 						newHTML = newHTML + "</p>";
 						newHTML = newHTML + '<h4 id="commentText">'+postData.comments[i].comment.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
-						newHTML = newHTML + '<span id="commentAction'+postData.comments[i].id+'"><button class="btn" onclick="replyToComment('+postData.id+', '+postData.comments[i].id+');">Reply</button></span>';
+						newHTML = newHTML + '<button class="btn" onclick="replyToComment('+postData.id+', '+postData.comments[i].id+');">Reply</button>';
+						newHTML = newHTML + ' <button style="display: none;" id="continueThreadBtn'+postData.comments[i].id+'" class="btn" onclick="loadCommentThread('+postData.comments[i].id+', '+postData.id+');">Continue thread >></button>'
 						newHTML = newHTML + '<div style="padding-left: 20px;" id="replies'+postData.comments[i].id+'">';
 						newHTML = newHTML + '</div>';
 						newHTML = newHTML + '</div>';
@@ -135,10 +137,7 @@ ws.on('new post', function(postData) {
 				$('#comment'+postData.comments[i].id).remove();
 			}
 			if ($('#comment'+postData.comments[i].id).parents().length == 13) {
-				$('#commentAction'+postData.comments[i].id).html('<button class="btn" onclick="loadCommentThread('+postData.comments[i].id+');">Continue thread >></button>');
-			}
-			else {
-				$('#commentAction'+postData.comments[i].id).html('<button class="btn" onclick="replyToComment('+postData.id+', '+postData.comments[i].id+');">Reply</button>');
+				$('#continueThreadBtn'+postData.comments[i].id).show();
 			}
 		}
 
@@ -150,7 +149,6 @@ ws.on('new post', function(postData) {
 
 ws.on('new comment', function(commentData) {
 	var commentData = JSON.parse(commentData);
-	console.log(commentData);
 	var newHTML = '';
 	var commenterHash = commentData.ip.split("g/")[1].split(".")[0];
 	newHTML = newHTML + '<div style="padding-left: 0px;" id="comment'+commentData.id+'">';
@@ -167,17 +165,14 @@ ws.on('new comment', function(commentData) {
 	}
 	newHTML = newHTML + "</p>";
 	if ($('#comment'+commentData.parentComment).parents().length >= 13) {
-		loadCommentThread(commentData.id);
 		return;
 	}
 	else {
 		newHTML = newHTML + '<h4 id="commentText">'+commentData.comment.replace(new RegExp('\n','g'), '<br />')+'</h4>';
 	}
+	newHTML = newHTML + '<button class="btn" onclick="replyToComment('+commentData.parent+', '+commentData.id+');">Reply</button>';
 	if ($('#comment'+commentData.id).parents().length == 13) {
-		newHTML = newHTML + '<button class="btn" onclick="loadCommentThread('+commentData.id+');">Continue thread >></button>';
-	}
-	else {
-		newHTML = newHTML + '<button class="btn" onclick="replyToComment('+commentData.parent+', '+commentData.id+');">Reply</button>';
+		newHTML = newHTML + ' <button class="btn" onclick="loadCommentThread('+commentData.id+', '+commentData.parent+');">Continue thread >></button>';
 	}
 	newHTML = newHTML + '<div style="padding-left: 20px;" id="replies'+commentData.id+'">';
 	newHTML = newHTML + '</div>';
@@ -196,6 +191,12 @@ ws.on('new comment', function(commentData) {
 		//Put the comment in the comment replies div for its parent comment
 		$('#comment'+commentData.id).appendTo('#replies'+commentData.parentComment);
 	}
+
+	if (commentData.getChildren) {
+		ws.emit('get comment thread', JSON.stringify({
+			parent: commentData.id
+		}));
+	}
 });
 
 //Comment Replies
@@ -208,6 +209,21 @@ function replyToComment(postParent, commentParent) {
 		commentParent: commentParent,
 		catcher: ''
 	}));
+}
+
+//Load into a thread
+function loadCommentThread(parent, post) {	
+	//Empty the current comments
+	$('#comments'+post).empty();
+
+	//Show a go back button
+	$('#goBackCommentBtn'+post).show();
+
+	//API call to get all comments with our parent
+	ws.emit('get comment thread', JSON.stringify({
+		parent: parent
+	}));
+
 }
 
 //Attachments

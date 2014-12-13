@@ -317,7 +317,7 @@ function submitComment(parent, text, email, catcher, ip, commentParent, socket) 
 				//Tell the user and show the comment
 				socket.emit('success message', JSON.stringify({title: 'Comment submitted', body: ''}));
 
-				con.query("SELECT * FROM comments WHERE `comment` = "+safeText+" AND `ip` = '"+ip+"' AND `time` = '"+time+"';", function (e, commentData) {
+				con.query("SELECT * FROM comments WHERE `comment` = "+safeText+" AND `ip` = '"+ip+"' AND `time` = '"+time+"';", function(e, commentData) {
 					var commentData = commentData[commentData.length-1];
 					commentData.ip = 'http://robohash.org/'+md5(commentData.ip)+'.png?set=set3&size=64x64'
 					ws.emit('new comment', JSON.stringify(commentData));
@@ -334,6 +334,18 @@ function submitComment(parent, text, email, catcher, ip, commentParent, socket) 
 	else {
 		socket.emit('error message', JSON.stringify({title: 'Post not submitted', body: 'No data was received'}));
 	}
+}
+
+function getCommentThread(parent, socket) {
+	con.query("SELECT * FROM `comments` WHERE `parentComment` = "+con.escape(parent)+";", function(e, comments) {
+		if (e) throw e;
+
+		for (var i = 0; i < comments.length; ++i) {
+			comments[i].ip = 'http://robohash.org/'+md5(comments[i].ip)+'.png?set=set3&size=64x64';
+			comments[i].getChildren = true;
+			socket.emit('new comment', JSON.stringify(comments[i]));
+		}
+	});
 }
 
 function getPost(size, id, socket) {
@@ -407,6 +419,13 @@ ws.on('connection', function(socket) {
 			var ip = socket.campfyreIPAddress;
 			submitComment(params.parent, params.comment, params.email, params.catcher, ip, params.commentParent, socket);
 		} catch(e) { }
+	});
+	socket.on('get comment thread', function(params) {
+		try {
+			params = JSON.parse(params);
+			getCommentThread(params.parent, socket);
+		}
+		catch (e) {}
 	});
 	socket.on('get post', function(params) {
 		try {
