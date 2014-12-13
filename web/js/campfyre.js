@@ -89,7 +89,7 @@ ws.on('new post', function(postData) {
 						}
 						newHTML = newHTML + "</p>";
 						newHTML = newHTML + '<h4 id="commentText">'+postData.comments[i].comment.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
-						newHTML = newHTML + '<button class="btn" onclick="replyToComment('+postData.id+', '+postData.comments[i].id+');">Reply</button>';
+						newHTML = newHTML + '<span id="commentAction'+postData.comments[i].id+'"><button class="btn" onclick="replyToComment('+postData.id+', '+postData.comments[i].id+');">Reply</button></span>';
 						newHTML = newHTML + '<div style="padding-left: 20px;" id="replies'+postData.comments[i].id+'">';
 						newHTML = newHTML + '</div>';
 						newHTML = newHTML + '</div>';
@@ -129,7 +129,19 @@ ws.on('new post', function(postData) {
 		for (var i = 0; i < postData.comments.length; ++i) if (postData.comments[i].parentComment) {
 			//Put the comment in the comment replies div for its parent comment
 			$('#comment'+postData.comments[i].id).appendTo('#replies'+postData.comments[i].parentComment);
+
+			//Remove comments too deep and make continue thread buttons
+			if ($('#comment'+postData.comments[i].parentComment).parents().length >= 13) {
+				$('#comment'+postData.comments[i].id).remove();
+			}
+			if ($('#comment'+postData.comments[i].id).parents().length == 13) {
+				$('#commentAction'+postData.comments[i].id).html('<button class="btn" onclick="loadCommentThread('+postData.comments[i].parentComment+');">Continue thread >></button>');
+			}
+			else {
+				$('#commentAction'+postData.comments[i].id).html('<button class="btn" onclick="replyToComment('+postData.id+', '+postData.comments[i].id+');">Reply</button>');
+			}
 		}
+
 
 		loaded = true;
 		$('#loadingMessage').hide();
@@ -155,12 +167,18 @@ ws.on('new comment', function(commentData) {
 	}
 	newHTML = newHTML + "</p>";
 	if ($('#comment'+commentData.parentComment).parents().length >= 13) {
-		newHTML = newHTML + '<h4 id="commentText">"'+$('#comment'+commentData.parentComment).find('h4[name="commentText"]').val()+'"<br><br>'+commentData.comment.replace(new RegExp('\n','g'), '<br />')+'</h4>';
+		loadCommentThread(commentData.parentComment);
+		return;
 	}
 	else {
 		newHTML = newHTML + '<h4 id="commentText">'+commentData.comment.replace(new RegExp('\n','g'), '<br />')+'</h4>';
 	}
-	newHTML = newHTML + '<button class="btn" onclick="replyToComment('+commentData.parent+', '+commentData.id+');">Reply</button>';
+	if ($('#comment'+commentData.id).parents().length == 11) {
+		newHTML = newHTML + '<button class="btn" onclick="loadCommentThread('+commentData.parentComment+');">Continue thread >></button>';
+	}
+	else {
+		newHTML = newHTML + '<button class="btn" onclick="replyToComment('+commentData.parent+', '+commentData.id+');">Reply</button>';
+	}
 	newHTML = newHTML + '<div style="padding-left: 20px;" id="replies'+commentData.id+'">';
 	newHTML = newHTML + '</div>';
 	newHTML = newHTML + "</div>";
@@ -176,7 +194,7 @@ ws.on('new comment', function(commentData) {
 	//Sort the comment replies
 	if (commentData.parentComment) {
 		//Put the comment in the comment replies div for its parent comment
-		if ($('#comment'+commentData.parentComment).parents().length < 13) $('#comment'+commentData.id).appendTo('#replies'+commentData.parentComment);
+		$('#comment'+commentData.id).appendTo('#replies'+commentData.parentComment);
 	}
 });
 
