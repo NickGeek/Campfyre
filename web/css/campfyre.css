@@ -68,7 +68,7 @@ h4 {
 		-webkit-tap-highlight-color: transparent
 	}
 	.imgContainer img {
-		width: 100%;
+		width: auto;
 		max-height: 30em;
 	}
 	#sidebar {
