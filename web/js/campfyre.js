@@ -208,14 +208,9 @@ ws.on('new comment', function(commentData) {
 
 //Comment Replies
 function replyToComment(postParent, commentParent) {
-	var comment = prompt("Comment reply:");
-
-	ws.emit('submit comment', JSON.stringify({
-		comment: comment,
-		parent: postParent,
-		commentParent: commentParent,
-		catcher: ''
-	}));
+	$('#commentForm').find('input[name="parent"]').val(postParent);
+	$('#commentForm').find('input[name="commentParent"]').val(commentParent);
+	$('#submitComment').popup('show');
 }
 
 //Load into a thread
@@ -488,8 +483,13 @@ $(document).ready(function() {
 		transition: 'all 0.3s'
 	});
 
+	$('#submitComment').popup({
+		transition: 'all 0.3s'
+	});
+
 	$('#closeSubmitPopup').click(function() {
 		$('#submit').popup('hide');
+		$('#submitComment').popup('hide');
 	});
 });
 
