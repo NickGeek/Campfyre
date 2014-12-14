@@ -150,10 +150,12 @@ ws.on('new post', function(postData) {
 ws.on('new comment', function(commentData) {
 	
 	var commentData = JSON.parse(commentData);
-	
+
 	//Increment the number on the counter
-	var newCommNum = parseInt(+document.getElementById('showCommentButton'+commentData.parent).innerHTML.split('(')[1].split(')')[0])+1;
-	document.getElementById('showCommentButton'+commentData.parent).innerHTML = 'Load comments ('+newCommNum+')';
+	if (!commentData.getChildren) {
+		var newCommNum = parseInt(+document.getElementById('showCommentButton'+commentData.parent).innerHTML.split('(')[1].split(')')[0])+1;
+		document.getElementById('showCommentButton'+commentData.parent).innerHTML = 'Load comments ('+newCommNum+')';
+	}
 
 	var newHTML = '';
 	var commenterHash = commentData.ip.split("g/")[1].split(".")[0];
