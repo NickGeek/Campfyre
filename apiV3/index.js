@@ -343,6 +343,7 @@ function getCommentThread(parent, socket) {
 		for (var i = 0; i < comments.length; ++i) {
 			comments[i].ip = 'http://robohash.org/'+md5(comments[i].ip)+'.png?set=set3&size=64x64';
 			comments[i].getChildren = true;
+			comments[i].dontCount = true;
 			socket.emit('new comment', JSON.stringify(comments[i]));
 		}
 	});
@@ -354,6 +355,7 @@ function getBulkComments(parent, socket) {
 
 		for (var i = 0; i < comments.length; ++i) {
 			comments[i].ip = 'http://robohash.org/'+md5(comments[i].ip)+'.png?set=set3&size=64x64';
+			comments[i].dontCount = true;
 			socket.emit('new comment', JSON.stringify(comments[i]));
 		}
 	});

@@ -152,7 +152,7 @@ ws.on('new comment', function(commentData) {
 	var commentData = JSON.parse(commentData);
 
 	//Increment the number on the counter
-	if (!commentData.getChildren) {
+	if (!commentData.dontCount) {
 		var newCommNum = parseInt(+document.getElementById('showCommentButton'+commentData.parent).innerHTML.split('(')[1].split(')')[0])+1;
 		document.getElementById('showCommentButton'+commentData.parent).innerHTML = 'Load comments ('+newCommNum+')';
 	}
