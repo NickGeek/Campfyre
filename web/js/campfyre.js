@@ -148,6 +148,10 @@ ws.on('new post', function(postData) {
 });
 
 ws.on('new comment', function(commentData) {
+	//Increment the number on the counter
+	var newCommNum = parseInt(+document.getElementById('showCommentButton'+commentData.parent).innerHTML.split('(')[1].split(')')[0])+1;
+	document.getElementById('showCommentButton'+commentData.parent).innerHTML = 'Load comments ('+newCommNum+')';
+	
 	var commentData = JSON.parse(commentData);
 	var newHTML = '';
 	var commenterHash = commentData.ip.split("g/")[1].split(".")[0];
@@ -180,9 +184,6 @@ ws.on('new comment', function(commentData) {
 	var comments = document.getElementById('comments'+commentData.parent);
 	comments.innerHTML = comments.innerHTML + newHTML;
 
-	//Increment the number on the counter
-	var newCommNum = parseInt(+document.getElementById('showCommentButton'+commentData.parent).innerHTML.split('(')[1].split(')')[0])+1;
-	document.getElementById('showCommentButton'+commentData.parent).innerHTML = 'Load comments ('+newCommNum+')';
 
 	//Sort the comment replies
 	if (commentData.parentComment) {
