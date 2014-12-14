@@ -64,7 +64,7 @@
 			//Advertisment
 			var random = Math.floor(Math.random()*(6 - 1))+1;
 			if  (random > 4) {
-				$('#stickyholder').html('<p id="textAdReplacement"><strong style="color: #5C5858;">Thanks for supporting Campfyre!</strong><br><span style="color: #333;">If you feel that our ads are intrusive please let us know :-)</span></p>');
+				$('#stickyholder').html('<p class="adsbygoogle" id="stickyNote"><strong style="color: #5C5858;">Thanks for supporting Campfyre!</strong><br><span style="color: #333;">If you feel that our ads are intrusive please let us know :-)</span></p>');
 			}
 			else if (random === 1 || random === 2) {
 				$('#stickyholder').html('<iframe scrolling="no" style="border: 0; width: 234px; height: 60px;" src="//coinurl.com/get.php?id=32018"></iframe>');
@@ -77,6 +77,13 @@
 				        });
 				});
 			}
+
+			$.ajax({
+				url: "js/advertisment.js",
+				dataType: "script"
+			}).fail(function() {
+				$('#stickyholder').html('<p id="stickyNote"><strong style="color: #5C5858;">Campfyre <3 you, but...</strong><br><span style="color: #333;">It\'d be really cool if you could whitelist us so one unobtrusive ad can be here.</span></p>');
+			});
 		</script>
 		</div>
 
