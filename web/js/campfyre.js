@@ -225,7 +225,15 @@ function loadCommentThread(parent, post) {
 	ws.emit('get comment thread', JSON.stringify({
 		parent: parent
 	}));
+}
 
+function exitThread(parent) {
+	$('#comments'+parent).empty();
+	$('#goBackCommentBtn'+parent).hide();
+
+	ws.emit('get bulk comments', JSON.stringify({
+		parent: parent
+	}));
 }
 
 //Attachments

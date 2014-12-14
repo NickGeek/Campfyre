@@ -348,6 +348,17 @@ function getCommentThread(parent, socket) {
 	});
 }
 
+function getBulkComments(parent, socket) {
+	con.query("SELECT * FROM `comments` WHERE `parent` = "+con.escape(parent)+";", function(e, comments) {
+		if (e) throw e;
+
+		for (var i = 0; i < comments.length; ++i) {
+			comments[i].ip = 'http://robohash.org/'+md5(comments[i].ip)+'.png?set=set3&size=64x64';
+			socket.emit('new comment', JSON.stringify(comments[i]));
+		}
+	});
+}
+
 function getPost(size, id, socket) {
 	con.query("SELECT * FROM `posts` WHERE `id` = "+con.escape(id)+";", function(e, post) {
 		post = post[0];
@@ -424,6 +435,13 @@ ws.on('connection', function(socket) {
 		try {
 			params = JSON.parse(params);
 			getCommentThread(params.parent, socket);
+		}
+		catch (e) {}
+	});
+	socket.on('get bulk comments', function(params) {
+		try {
+			params = JSON.parse(params);
+			getBulkComments(params.parent, socket);
 		}
 		catch (e) {}
 	});
