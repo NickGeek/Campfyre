@@ -8788,6 +8788,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			});
 		</script>
 
+		<section id="submitComment" class="card">
+			<paper-shadow z="3"></paper-shadow>
+			<h2 style="text-align: left;">Write a comment</h2>
+			<form id="commentForm" method="post">
+				<input type="hidden" name="type" value="comment">
+				<input type="hidden" name="parent">
+				<input type="hidden" name="commentParent">
+				<textarea id="postText" name="postText" placeholder="Post text" class="rounded" rows="5" onkeydown="countChar(this, -1)" onkeyup="countChar(this, -1)" required=""></textarea>
+				<div style="font-family: 'Lato', serif;" id="counter-1">256/256</div>
+				<input type="text" name="catcher" style="display: none;">
+				<input class="btn" type="submit" name="post" value="Post"> <button id="closeSubmitPopup" type="button" class="btn">Cancel</button> <a href="rules.html">Read the rules</a>
+			</form>
+		</section>
+		<script>
+			$('#commentForm').submit(function(event) {
+				ws.emit('submit comment', JSON.stringify({
+					comment: $('#commentForm').find('textarea[name="postText"]').val(),
+					parent: $('#commentForm').find('input[name="parent"]').val(),
+					commentParent: $('#commentForm').find('input[name="commentParent"]').val(),
+					catcher: $('#commentForm').find('input[name="catcher"]').val()
+				}));
+
+				$('#commentForm')[0].reset();
+				$('#submitComment').popup('hide');
+				return false;
+			});
+		</script>
+
 		<div style="text-align: center;" id="options">
 			<h4>
 			<script>
