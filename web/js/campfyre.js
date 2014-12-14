@@ -171,9 +171,7 @@ ws.on('new comment', function(commentData) {
 		newHTML = newHTML + '<h4 id="commentText">'+commentData.comment.replace(new RegExp('\n','g'), '<br />')+'</h4>';
 	}
 	newHTML = newHTML + '<button class="btn" onclick="replyToComment('+commentData.parent+', '+commentData.id+');">Reply</button>';
-	if ($('#comment'+commentData.id).parents().length == 13) {
-		newHTML = newHTML + ' <button class="btn" onclick="loadCommentThread('+commentData.id+', '+commentData.parent+');">Continue thread >></button>';
-	}
+	newHTML = newHTML + ' <button style="display: none;" id="continueThreadBtn'+commentData.id+'" class="btn" onclick="loadCommentThread('+commentData.id+', '+commentData.parent+');">Continue thread >></button>';
 	newHTML = newHTML + '<div style="padding-left: 20px;" id="replies'+commentData.id+'">';
 	newHTML = newHTML + '</div>';
 	newHTML = newHTML + "</div>";
@@ -190,6 +188,10 @@ ws.on('new comment', function(commentData) {
 	if (commentData.parentComment) {
 		//Put the comment in the comment replies div for its parent comment
 		$('#comment'+commentData.id).appendTo('#replies'+commentData.parentComment);
+	}
+
+	if ($('#comment'+commentData.id).parents().length == 13) {
+		$('#continueThreadBtn'+commentData.id).show();
 	}
 
 	if (commentData.getChildren) {
