@@ -133,7 +133,7 @@ ws.on('new post', function(postData) {
 			$('#comment'+postData.comments[i].id).appendTo('#replies'+postData.comments[i].parentComment);
 
 			//Remove comments too deep and make continue thread buttons
-			if ($('#comment'+postData.comments[i].parentComment).parents().length >= 13) {
+			if ($('#comment'+postData.comments[i].parentComment).parents().length >= 13 || !$('#comment'+postData.comments[i].parentComment).parents().length) {
 				$('#comment'+postData.comments[i].id).remove();
 			}
 			if ($('#comment'+postData.comments[i].id).parents().length == 13) {
@@ -148,8 +148,7 @@ ws.on('new post', function(postData) {
 });
 
 ws.on('new comment', function(commentData) {
-	
-	var commentData = JSON.parse(commentData);
+	commentData = JSON.parse(commentData);
 
 	//Increment the number on the counter
 	if (!commentData.dontCount) {
@@ -174,6 +173,14 @@ ws.on('new comment', function(commentData) {
 	newHTML = newHTML + "</p>";
 	if ($('#comment'+commentData.parentComment).parents().length >= 13) {
 		return;
+	}
+	else if ($('#comment'+commentData.parentComment).length === 0) {
+		if (commentData.parentComment && !commentData.getChildren) {
+			return;
+		}
+		else {
+			newHTML = newHTML + '<h4 id="commentText">'+commentData.comment.replace(new RegExp('\n','g'), '<br />')+'</h4>';
+		}
 	}
 	else {
 		newHTML = newHTML + '<h4 id="commentText">'+commentData.comment.replace(new RegExp('\n','g'), '<br />')+'</h4>';
