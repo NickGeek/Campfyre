@@ -496,6 +496,9 @@ $(document).ready(function() {
 
 	$('#closeSubmitPopup').click(function() {
 		$('#submit').popup('hide');
+	});
+
+	$('#closeCommentPopup').click(function() {
 		$('#submitComment').popup('hide');
 	});
 });
