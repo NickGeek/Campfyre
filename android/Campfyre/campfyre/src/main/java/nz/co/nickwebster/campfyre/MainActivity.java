@@ -92,16 +92,32 @@ public class MainActivity extends Activity {
     String tag = "";
     int page = 1;
 
-    private void refresh() {
-        for (int i = 0; i < list.size(); i++) {
-            postList.collapseGroup(i);
-        }
+    private void cleanUp(Boolean keepPagination) {
+        //Clean out Maps/Lists/Vars
         list.clear();
         imageId.clear();
         commentNums.clear();
         postTimes.clear();
         postScores.clear();
         attachments.clear();
+        commentData.clear();
+        idComparison.clear();
+        serverID.clear();
+        oldLast = 0;
+        if (!keepPagination) page = 1;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                adapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+    private void refresh(Boolean keepPagination) {
+        for (int i = 0; i < list.size(); i++) {
+            postList.collapseGroup(i);
+        }
+        cleanUp(keepPagination);
 
         //Convert 50dp into px for the image
         DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
@@ -402,12 +418,7 @@ public class MainActivity extends Activity {
                 //Convert 50dp into px for the image
                 DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
                 final Integer size = 50 * (displayData.densityDpi / 160);
-                list.clear();
-                imageId.clear();
-                commentNums.clear();
-                postTimes.clear();
-                postScores.clear();
-                attachments.clear();
+                cleanUp(false);
 
                 page = 1;
                 Map<String, Object> params = new HashMap<String, Object>();
@@ -417,11 +428,6 @@ public class MainActivity extends Activity {
                 params.put("loadBottom", true);
                 params.put("reverse", true);
                 ws.emit("get posts", gson.toJson(params));
-            }
-        }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                ws.connect();
             }
         }).on("new post", new Emitter.Listener() {
             @Override
@@ -455,7 +461,7 @@ public class MainActivity extends Activity {
                             nsfwButton.setTitle(R.string.action_hideNSFW);
                         }
                     });
-                    refresh();
+                    refresh(false);
                 }
             }
         }).on("post stoked", new Emitter.Listener() {
@@ -526,30 +532,7 @@ public class MainActivity extends Activity {
                     Log.e("CampfyreApp", e.toString());
                 }
             }
-        }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                ws.connect();
-            }
         });
-
-        ws.connect();
-
-        try {
-            if (!getIntent().getStringExtra("tag").isEmpty()) {
-                tag = getIntent().getStringExtra("tag");
-                page = 1;
-                setTitle(tag);
-                oldLast = 0;
-                for (int i = 0; i < list.size(); i++) {
-                    postList.collapseGroup(i);
-                }
-                refresh();
-            }
-        }
-        catch (Exception e) {
-            tag = "";
-        }
 
         //Show/hide FAB based on scrolling
         postList.setOnScrollListener(new OnScrollListener() {
@@ -602,8 +585,9 @@ public class MainActivity extends Activity {
         } else {
             tag = "";
             setTitle(R.string.app_name);
-            page = 1;
-            refresh();
+            ws.disconnect();
+            cleanUp(false);
+            ws.connect();
         }
     }
 
@@ -611,17 +595,29 @@ public class MainActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-        if (!ws.connected())
+        try {
+            if (!getIntent().getStringExtra("tag").isEmpty()) {
+                tag = getIntent().getStringExtra("tag");
+                page = 1;
+                setTitle(tag);
+                oldLast = 0;
+                for (int i = 0; i < list.size(); i++) {
+                    postList.collapseGroup(i);
+                }
+                refresh(false);
+            }
+            else {
+                ws.disconnect();
+                cleanUp(false);
+                ws.connect();
+            }
+        }
+        catch (Exception e) {
+            tag = "";
+            ws.disconnect();
+            cleanUp(false);
             ws.connect();
-            refresh();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (!ws.connected())
-            ws.connect();
-            refresh();
+        }
     }
 
     //Handle submit button
@@ -700,8 +696,9 @@ public class MainActivity extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            page = 1;
-            refresh();
+            ws.disconnect();
+            cleanUp(false);
+            ws.connect();
         } else if (id == R.id.action_showNSFW) {
             if (showNSFW) {
                 showNSFW = false;
@@ -720,7 +717,7 @@ public class MainActivity extends Activity {
 
                 item.setTitle(R.string.action_hideNSFW);
             }
-            refresh();
+            refresh(false);
         } else if (id == R.id.action_search) {
             //Display a dialog to enter the data
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -742,7 +739,7 @@ public class MainActivity extends Activity {
                     tag = input.getText().toString();
                     setTitle(tag);
                     oldLast = 0;
-                    refresh();
+                    refresh(false);
                 }
             });
             builder.setNegativeButton(getResources().getString(R.string.action_cancel), new DialogInterface.OnClickListener() {
