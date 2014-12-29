@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -11,6 +12,7 @@ import android.os.StrictMode;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.util.Linkify;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -21,6 +23,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -87,7 +90,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
             Linkify.addLinks(txtTitle, hashtagRegex, searchURI);
 
             //Linking links
-            Pattern urlRegex = Pattern.compile("((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\\+\\$,\\w]+@)[A-Za-z0-9.-]+)((?:\\/[\\+~%\\/.\\w-_]*)?\\??(?:[-\\+=&;%@.\\w_]*)#?(?:[\\w]*))?)");
+            Pattern urlRegex = Pattern.compile("((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\\+\\$,\\w]+@)[A-Za-z0-9.-]+)((?:\\/[\\+~%\\/.\\w_]*)?\\??(?:[-\\+=&;%@.\\w_]*)#?(?:[\\w]*))?)");
             Linkify.addLinks(txtTitle, urlRegex, null);
 
             commentCounter.setText(commentNums.get(position));
@@ -187,6 +190,19 @@ public class StreamAdapter extends BaseExpandableListAdapter {
                     }
                 } catch (Exception e) {
                     Log.e("CampfyreApp", e.toString());
+                }
+            }
+
+            //If there is an image expand it
+            if (isExpanded) {
+                if (attachmentImage.getVisibility() == View.VISIBLE) {
+                    attachmentImage.getLayoutParams().height = LinearLayout.LayoutParams.WRAP_CONTENT;
+                }
+            }
+            else {
+                if (attachmentImage.getVisibility() == View.VISIBLE) {
+                    DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
+                    attachmentImage.getLayoutParams().height = 150 * (displayData.densityDpi / 160);
                 }
             }
 
