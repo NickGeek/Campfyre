@@ -607,12 +607,14 @@ public class MainActivity extends Activity {
                 refresh(false);
             }
             else {
+                setTitle(R.string.app_name);
                 ws.disconnect();
                 cleanUp(false);
                 ws.connect();
             }
         }
         catch (Exception e) {
+            setTitle(R.string.app_name);
             tag = "";
             ws.disconnect();
             cleanUp(false);
@@ -696,6 +698,7 @@ public class MainActivity extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
+            setTitle(R.string.app_name);
             ws.disconnect();
             cleanUp(false);
             ws.connect();
