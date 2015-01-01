@@ -606,7 +606,7 @@ public class MainActivity extends Activity {
                 }
                 refresh(false);
             }
-            else {
+            else if (!ws.connected()) {
                 setTitle(R.string.app_name);
                 ws.disconnect();
                 cleanUp(false);
@@ -614,11 +614,13 @@ public class MainActivity extends Activity {
             }
         }
         catch (Exception e) {
-            setTitle(R.string.app_name);
-            tag = "";
-            ws.disconnect();
-            cleanUp(false);
-            ws.connect();
+            if (!ws.connected()) {
+                setTitle(R.string.app_name);
+                tag = "";
+                ws.disconnect();
+                cleanUp(false);
+                ws.connect();
+            }
         }
     }
 
