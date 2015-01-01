@@ -21,11 +21,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -114,6 +116,15 @@ public class MainActivity extends Activity {
     }
 
     private void refresh(Boolean keepPagination) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ProgressBar loadingSpinner = (ProgressBar)findViewById(R.id.loadingSpinner);
+                loadingSpinner.setVisibility(View.VISIBLE);
+                postList.setVisibility(View.GONE);
+            }
+        });
+
         for (int i = 0; i < list.size(); i++) {
             postList.collapseGroup(i);
         }
@@ -205,6 +216,9 @@ public class MainActivity extends Activity {
                         commentData.put(postid, commentTotal);
                     }
                     adapter.notifyDataSetChanged();
+                    ProgressBar loadingSpinner = (ProgressBar)findViewById(R.id.loadingSpinner);
+                    loadingSpinner.setVisibility(View.GONE);
+                    postList.setVisibility(View.VISIBLE);
                 }
             });
         } catch (Exception e) {
@@ -415,6 +429,15 @@ public class MainActivity extends Activity {
         ws.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ProgressBar loadingSpinner = (ProgressBar)findViewById(R.id.loadingSpinner);
+                        loadingSpinner.setVisibility(View.VISIBLE);
+                        postList.setVisibility(View.GONE);
+                    }
+                });
+
                 //Convert 50dp into px for the image
                 DisplayMetrics displayData = Resources.getSystem().getDisplayMetrics();
                 final Integer size = 50 * (displayData.densityDpi / 160);

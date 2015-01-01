@@ -21,6 +21,7 @@
 		android:background="#e5e5e5" >
 
         <ExpandableListView
+        android:visibility="gone"
         android:id="@+id/postExpListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -30,7 +31,15 @@
 		android:paddingLeft="16dp"
 		android:paddingRight="16dp"
         android:groupIndicator="@null"/>
-    </LinearLayout>      
+
+        <ProgressBar
+            android:id="@+id/loadingSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_vertical|center_horizontal"/>
+
+    </LinearLayout>
 
      <com.faizmalkani.floatingactionbutton.Fab
          android:id="@+id/submitButton"
