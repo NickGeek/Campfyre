@@ -606,6 +606,7 @@ public class MainActivity extends Activity {
         if (tag.equals("")) {
             super.onBackPressed();
         } else {
+            getIntent().removeExtra("tag");
             tag = "";
             setTitle(R.string.app_name);
             ws.disconnect();
@@ -723,6 +724,7 @@ public class MainActivity extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
+            getIntent().removeExtra("tag");
             setTitle(R.string.app_name);
             ws.disconnect();
             cleanUp(false);
