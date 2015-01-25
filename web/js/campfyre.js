@@ -295,14 +295,14 @@ return attachCode;
 
 //Character counter
 function countChar(val, id) {
-var counterDiv = "#counter"+id
-var len = val.value.length;
-if (len >= 256) {
-	$(counterDiv).text("0/256");
-	val.value = val.value.substring(0, 256);
-} else {
-	$(counterDiv).text(256 - len+"/256");
-}
+	var counterDiv = "#counter"+id
+	var len = val.value.length;
+	if (len >= 256) {
+		$(counterDiv).text("0/256");
+		val.value = val.value.substring(0, 256);
+	} else {
+		$(counterDiv).text(256 - len+"/256");
+	}
 };
 
 //Comment form
