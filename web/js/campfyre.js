@@ -35,11 +35,8 @@ ws.on('new post', function(postData) {
 				
 				//Tags
 				switch (submitterHash) {
-					case "21232f297a57a5a743894a0e4a801fc3":
+					case "324411d31d789ba374008ab7960dfa2f":
 						newHTML = newHTML + " [admin]";
-						break;
-					case "5c1055237c524ca98c243b81ba3f9e93":
-						newHTML = newHTML + " [Wellington College]";
 						break;
 				}
 				if (postData.nsfw == 1) {
@@ -78,14 +75,8 @@ ws.on('new post', function(postData) {
 						newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+postData.comments[i].ip+"' /></a> says...<br></i><span data-livestamp="+postData.comments[i].time+" />";
 						//Tags
 						switch (commenterHash) {
-							case "21232f297a57a5a743894a0e4a801fc3":
+							case "324411d31d789ba374008ab7960dfa2f":
 								newHTML = newHTML + " [admin]";
-								break;
-							case "5c1055237c524ca98c243b81ba3f9e93":
-								newHTML = newHTML + " [Wellington College]";
-								break;
-							case "6285b28b64eb14ba3188048edce3356b":
-								newHTML = newHTML + " [developer]";
 								break;
 						}
 						newHTML = newHTML + "</p>";
@@ -163,11 +154,8 @@ ws.on('new comment', function(commentData) {
 	newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+commentData.ip+"' /></a> says...<br></i><span data-livestamp="+commentData.time+" />";
 	//Tags
 	switch (commenterHash) {
-		case "21232f297a57a5a743894a0e4a801fc3":
+		case "324411d31d789ba374008ab7960dfa2f":
 			newHTML = newHTML + " [admin]";
-			break;
-		case "5c1055237c524ca98c243b81ba3f9e93":
-			newHTML = newHTML + " [Wellington College]";
 			break;
 	}
 	newHTML = newHTML + "</p>";

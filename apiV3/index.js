@@ -12,7 +12,8 @@ var smtpPool = require('nodemailer-smtp-pool');
 var dbName = process.argv[2];
 var dbUsername = process.argv[3];
 var dbPassword = process.argv[4];
-var emailPassword = process.argv[5];
+var salt = process.argv[5];
+var emailPassword = process.argv[6];
 
 //Connect to the database
 var con = mysql.createConnection({
@@ -58,7 +59,7 @@ function getPosts(size, search, startingPost, loadBottom, socket, reverse, user,
 	}
 	else {
 		if (user) {
-			var query = "SELECT * FROM posts WHERE `post` NOT LIKE '%#bonfyre%' AND md5(`ip`) = "+con.escape(user)+" ORDER BY id DESC LIMIT "+con.escape(startingPost)+", 50;";
+			var query = "SELECT * FROM posts WHERE `post` NOT LIKE '%#bonfyre%' AND md5(CONCAT("+salt+", `ip`)) = "+con.escape(user)+" ORDER BY id DESC LIMIT "+con.escape(startingPost)+", 50;";
 		}
 		else {
 			var query = "SELECT * FROM posts WHERE `post` NOT LIKE '%#bonfyre%' ORDER BY id DESC LIMIT "+con.escape(startingPost)+", 50;";
@@ -83,12 +84,12 @@ function getPosts(size, search, startingPost, loadBottom, socket, reverse, user,
 					}
 
 					for (var j = 0; j < comments.length; ++j) {
-						comments[j].ip = 'http://robohash.org/'+md5(comments[j].ip)+'.png?set=set3&size='+size;
+						comments[j].ip = 'http://robohash.org/'+md5(salt+comments[j].ip)+'.png?set=set3&size='+size;
 					}
 
 					post.comments = comments;
 
-					post.ip = 'http://robohash.org/'+md5(post.ip)+'.png?set=set3&size='+size;
+					post.ip = 'http://robohash.org/'+md5(salt+post.ip)+'.png?set=set3&size='+size;
 
 					if (loadBottom) {
 						post.loadBottom = true;
@@ -115,12 +116,12 @@ function getPosts(size, search, startingPost, loadBottom, socket, reverse, user,
 					}
 
 					for (var j = 0; j < comments.length; ++j) {
-						comments[j].ip = 'http://robohash.org/'+md5(comments[j].ip)+'.png?set=set3&size='+size;
+						comments[j].ip = 'http://robohash.org/'+md5(salt+comments[j].ip)+'.png?set=set3&size='+size;
 					}
 
 					post.comments = comments;
 
-					post.ip = 'http://robohash.org/'+md5(post.ip)+'.png?set=set3&size='+size;
+					post.ip = 'http://robohash.org/'+md5(salt+post.ip)+'.png?set=set3&size='+size;
 
 					if (loadBottom) {
 						post.loadBottom = true;
@@ -229,12 +230,12 @@ function submitPost(text, attachment, email, catcher, ip, isNsfw, socket) {
 								}
 
 								for (var j = 0; j < comments.length; ++j) {
-									comments[j].ip = 'http://robohash.org/'+md5(comments[j].ip)+'.png?set=set3&size=64x64';
+									comments[j].ip = 'http://robohash.org/'+md5(salt+comments[j].ip)+'.png?set=set3&size=64x64';
 								}
 
 								post.comments = comments;
 
-								post.ip = 'http://robohash.org/'+md5(post.ip)+'.png?set=set3&size=64x64';
+								post.ip = 'http://robohash.org/'+md5(salt+post.ip)+'.png?set=set3&size=64x64';
 								post.loadBottom = false;
 								ws.emit('new post', JSON.stringify(post));
 								socket.emit('success message', JSON.stringify({title: 'Post submitted', body: ''}));
@@ -305,7 +306,7 @@ function submitComment(parent, text, email, catcher, ip, commentParent, socket) 
 									from: 'notify@campfyre.org',
 									to: addresses[i],
 									subject: 'New comment on post - Campfyre',
-									html: "<img src='http://robohash.org/"+md5(ip)+".png?set=set3&size=100x100' /> says:<br /><h3>"+text.replace(new RegExp('\r\n','g'))+"</h3><a href='http://campfyre.org/permalink.html?id="+parent+"'>View post on Campfyre.</a>",
+									html: "<img src='http://robohash.org/"+md5(salt+ip)+".png?set=set3&size=100x100' /> says:<br /><h3>"+text.replace(new RegExp('\r\n','g'))+"</h3><a href='http://campfyre.org/permalink.html?id="+parent+"'>View post on Campfyre.</a>",
 								});
 							}
 						}
@@ -319,7 +320,7 @@ function submitComment(parent, text, email, catcher, ip, commentParent, socket) 
 
 				con.query("SELECT * FROM comments WHERE `comment` = "+safeText+" AND `ip` = '"+ip+"' AND `time` = '"+time+"';", function(e, commentData) {
 					var commentData = commentData[commentData.length-1];
-					commentData.ip = 'http://robohash.org/'+md5(commentData.ip)+'.png?set=set3&size=64x64'
+					commentData.ip = 'http://robohash.org/'+md5(salt+commentData.ip)+'.png?set=set3&size=64x64'
 					ws.emit('new comment', JSON.stringify(commentData));
 				});
 			})	
@@ -341,7 +342,7 @@ function getCommentThread(parent, socket) {
 		if (e) throw e;
 
 		for (var i = 0; i < comments.length; ++i) {
-			comments[i].ip = 'http://robohash.org/'+md5(comments[i].ip)+'.png?set=set3&size=64x64';
+			comments[i].ip = 'http://robohash.org/'+md5(salt+comments[i].ip)+'.png?set=set3&size=64x64';
 			comments[i].getChildren = true;
 			comments[i].dontCount = true;
 			socket.emit('new comment', JSON.stringify(comments[i]));
@@ -354,7 +355,7 @@ function getBulkComments(parent, socket) {
 		if (e) throw e;
 
 		for (var i = 0; i < comments.length; ++i) {
-			comments[i].ip = 'http://robohash.org/'+md5(comments[i].ip)+'.png?set=set3&size=64x64';
+			comments[i].ip = 'http://robohash.org/'+md5(salt+comments[i].ip)+'.png?set=set3&size=64x64';
 			comments[i].dontCount = true;
 			socket.emit('new comment', JSON.stringify(comments[i]));
 		}
@@ -375,12 +376,12 @@ function getPost(size, id, socket) {
 			}
 
 			for (var j = 0; j < comments.length; ++j) {
-				comments[j].ip = 'http://robohash.org/'+md5(comments[j].ip)+'.png?set=set3&size='+size;
+				comments[j].ip = 'http://robohash.org/'+md5(salt+comments[j].ip)+'.png?set=set3&size='+size;
 			}
 
 			post.comments = comments;
 
-			post.ip = 'http://robohash.org/'+md5(post.ip)+'.png?set=set3&size='+size;
+			post.ip = 'http://robohash.org/'+md5(salt+post.ip)+'.png?set=set3&size='+size;
 			post.loadBottom = false;
 
 			socket.emit('new post', JSON.stringify(post));
@@ -389,7 +390,7 @@ function getPost(size, id, socket) {
 }
 
 function getStokeCount(id, socket) {
-	con.query("SELECT `score` FROM `posts` WHERE md5(`ip`) = "+con.escape(id)+";", function(e, results) {
+	con.query("SELECT `score` FROM `posts` WHERE md5(CONCAT("+salt+",`ip`)) = "+con.escape(id)+";", function(e, results) {
 		totalScore = 0;
 		for (var l = 0; l < results.length; ++l) {
 			totalScore += results[l].score;
