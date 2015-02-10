@@ -19,11 +19,6 @@
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
 		<link rel="stylesheet" href="css/campfyre.css">
 
-		<!-- Webcomponents -->
-		<script src="bower_components/webcomponentsjs/webcomponents.js"></script>
-		<link rel="import" href="bower_components/paper-elements/paper-elements.html">
-		<link rel="import" href="bower_components/core-icons/core-icons.html">
-
 		<script src="http://code.jquery.com/jquery.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 		<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
@@ -102,7 +97,6 @@
 		</a></div>
 
 		<section id="submit" class="card">
-			<paper-shadow z="3"></paper-shadow>
 			<h2 style="text-align: left;">Write a post</h2>
 			<form id='postForm' method="post">
 				<input type="hidden" name="type" value="post">
@@ -143,7 +137,6 @@
 		</script>
 
 		<section id="submitComment" class="card">
-			<paper-shadow z="3"></paper-shadow>
 			<h2 style="text-align: left;">Write a comment</h2>
 			<form id='commentForm' method="post">
 				<input type="hidden" name="type" value="comment">
@@ -225,7 +218,6 @@
 		<img id="loadingMessage" src="img/loading.gif" alt="loading..." />
 
 		<a style="text-align: center; margin: 10px;" class="btn" href="javascript:void(0);" onclick="loadMore();">Load More...</a>
-		<paper-fab id="submitFAB" icon="create" class="submit_open"></paper-fab>
 		</div>
 	</body>
 </html>
