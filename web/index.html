@@ -39,47 +39,47 @@
 	</head>
 	<body>
 		<div id="sidebar">
-		<div id="search">
-			<form id="searchForm" style="max-width: 234px;">
-				<input name="tag" type="text" class="rounded" placeholder="Search" required />
-			</form>
+			<div id="search">
+				<form id="searchForm" style="max-width: 234px;">
+					<input name="tag" type="text" class="rounded" placeholder="Search" required />
+				</form>
+				<script>
+					$('#searchForm').submit(function(event) {
+						event.preventDefault();
+						var searchQuery = $('#searchForm').find('input[name="tag"]').val();
+						//Clear the form
+						$('#searchForm')[0].reset();
+						runSearch(searchQuery);
+						return false;
+					});
+				</script>
+				</div>
+				<div id="stickyholder" style="width: 234px; height: 60px;"></div>
 			<script>
-				$('#searchForm').submit(function(event) {
-					event.preventDefault();
-					var searchQuery = $('#searchForm').find('input[name="tag"]').val();
-					//Clear the form
-					$('#searchForm')[0].reset();
-					runSearch(searchQuery);
-					return false;
+				//Advertisment
+				var random = Math.floor(Math.random()*(6 - 1))+1;
+				if  (random > 4) {
+					$('#stickyholder').html('<p class="adsbygoogle" id="stickyNote"><strong style="color: #5C5858;">Thanks for supporting Campfyre!</strong><br><span style="color: #333;">If you feel that our ads are intrusive please let us know :-)</span></p>');
+				}
+				else if (random === 1) {
+					$('#stickyholder').html('<iframe scrolling="no" style="border: 0; width: 234px; height: 60px;" src="//coinurl.com/get.php?id=32018"></iframe>');
+				}
+				else if (random === 2 || random === 3 || random === 4) {
+					$('#stickyholder').html('<ins class="adsbygoogle" style="display:inline-block;width:234px;height:60px" data-ad-client="ca-pub-9765350019261709" data-ad-slot="8440394098"></ins>');
+					$.getScript('http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js', function() {
+					        $('.adsbygoogle').each(function() {
+					                (adsbygoogle = window.adsbygoogle || []).push({});
+					        });
+					});
+				}
+
+				$.ajax({
+					url: "js/advertisment.js",
+					dataType: "script"
+				}).fail(function() {
+					$('#stickyholder').html('<p id="stickyNote"><strong style="color: #5C5858;">Campfyre <3 you, but...</strong><br><span style="color: #333;">It\'d be really cool if you could whitelist us so one unobtrusive ad can be here.</span></p>');
 				});
 			</script>
-			</div>
-			<div id="stickyholder" style="width: 234px; height: 60px;"></div>
-		<script>
-			//Advertisment
-			var random = Math.floor(Math.random()*(6 - 1))+1;
-			if  (random > 4) {
-				$('#stickyholder').html('<p class="adsbygoogle" id="stickyNote"><strong style="color: #5C5858;">Thanks for supporting Campfyre!</strong><br><span style="color: #333;">If you feel that our ads are intrusive please let us know :-)</span></p>');
-			}
-			else if (random === 1) {
-				$('#stickyholder').html('<iframe scrolling="no" style="border: 0; width: 234px; height: 60px;" src="//coinurl.com/get.php?id=32018"></iframe>');
-			}
-			else if (random === 2 || random === 3 || random === 4) {
-				$('#stickyholder').html('<ins class="adsbygoogle" style="display:inline-block;width:234px;height:60px" data-ad-client="ca-pub-9765350019261709" data-ad-slot="8440394098"></ins>');
-				$.getScript('http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js', function() {
-				        $('.adsbygoogle').each(function() {
-				                (adsbygoogle = window.adsbygoogle || []).push({});
-				        });
-				});
-			}
-
-			$.ajax({
-				url: "js/advertisment.js",
-				dataType: "script"
-			}).fail(function() {
-				$('#stickyholder').html('<p id="stickyNote"><strong style="color: #5C5858;">Campfyre <3 you, but...</strong><br><span style="color: #333;">It\'d be really cool if you could whitelist us so one unobtrusive ad can be here.</span></p>');
-			});
-		</script>
 		</div>
 
 		<div id="pageBody">
