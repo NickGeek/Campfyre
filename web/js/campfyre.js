@@ -6,6 +6,7 @@ var lastPost = 0;
 var ws = io('ws://'+window.location.hostname+':3973');
 var userID = '';
 var currentPageFile = location.pathname.substring(1);
+var topics = ['clamminess', 'Nick', 'Bitcoin', 'your mum', 'homework', 'procrastination', 'tautology', 'anything', 'spiderman', 'The Doctor', '&#26085;&#26412;', 'a = &Delta;v/&Delta;t', 'The Sims', 'CHIM', 'life', 'stuff', 'the weather', 'python', 'COBOL', 'campfires', 'Google Buzz', 'emoji', 'Totoro', 'Constantine', 'ideas', 'GitHub', 'Android', 'iOS', 'GNU/Linux', 'Arch Linux', 'Ubuntu', 'xkcd', 'tents'];
 
 //NSFW posts
 if (store.get('showNSFW')) {
@@ -489,6 +490,8 @@ $(document).ready(function() {
 	$('#closeCommentPopup').click(function() {
 		$('#submitComment').popup('hide');
 	});
+
+	$('.submit_open').html('WRITE A POST about '+topics[Math.floor(Math.random() * topics.length)]);
 });
 
 function refresh(nsfw) {
@@ -509,3 +512,8 @@ function refresh(nsfw) {
 	}));
 	nsfwToggle();
 }
+
+window.setInterval(function(){
+	//Put a topic in the write a post button every 2 seconds
+	$('.submit_open').html('WRITE A POST about '+topics[Math.floor(Math.random() * topics.length)]);
+}, 2000);
