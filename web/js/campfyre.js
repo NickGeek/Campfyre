@@ -6,7 +6,7 @@ var lastPost = 0;
 var ws = io('ws://'+window.location.hostname+':3973');
 var userID = '';
 var currentPageFile = location.pathname.substring(1);
-var topics = ['clamminess', 'Nick', 'Bitcoin', 'your mum', 'homework', 'procrastination', 'tautology', 'anything', 'spiderman', 'The Doctor', '&#26085;&#26412;', 'a = &Delta;v/&Delta;t', 'The Sims', 'CHIM', 'life', 'stuff', 'the weather', 'python', 'COBOL', 'campfires', 'Google Buzz', 'emoji', 'Totoro', 'Constantine', 'ideas', 'GitHub', 'Android', 'iOS', 'GNU/Linux', 'Arch Linux', 'Ubuntu', 'xkcd', 'tents', 'creeps', 'corn crisps', '#rebellion', 'Briggleybear'];
+var topics = ['clamminess', 'Nick', 'Bitcoin', 'your mum', 'homework', 'procrastination', 'tautology', 'anything', 'spiderman', 'The Doctor', '&#26085;&#26412;', 'a = &Delta;v/&Delta;t', 'The Sims', 'CHIM', 'life', 'stuff', 'the weather', 'python', 'COBOL', 'campfires', 'Google Buzz', 'emoji', 'Totoro', 'Constantine', 'ideas', 'GitHub', 'Android', 'iOS', 'GNU/Linux', 'Arch Linux', 'Ubuntu', 'xkcd', 'tents', 'creeps', 'corn crisps', '#rebellion', 'Briggleybear', 'Dragonborns', 'wabbajacks', '&#3232;_&#3232;', 'ISIL/ISIS', 'women', 'men', 'Google', 'Apple', 'apples', 'kiwifruit'];
 
 //NSFW posts
 if (store.get('showNSFW')) {
