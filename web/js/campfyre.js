@@ -55,6 +55,7 @@ ws.on('new post', function(postData) {
 			newHTML = newHTML + '<span id="stokeBtn'+postData.id+'"><a class="btn" href="javascript:void(0);" onclick="stoke('+postData.id+', '+postData.score+')">Stoke ('+postData.score+')</a></span>';
 			newHTML = newHTML + ' <a id="showCommentButton'+postData.id+'" class="btn" href="javascript:void(0);" onclick="showCommentForm('+postData.id+')">Load comments ('+postData.commentNum.split(" ")[0]+')</a>';
 			newHTML = newHTML + ' <a style="display: none;" id="hideCommentButton'+postData.id+'" class="btn" href="javascript:void(0);" onclick="hideCommentForm('+postData.id+')">Hide comments</a>';
+			newHTML = newHTML + ' <span id="subscribeBtn'+postData.id+'"><a class="btn" href="javascript:void(0);" onclick="subscribe('+postData.id+', true)">Subscribe to new comments</a></span>';
 			newHTML = newHTML + '<div style="display: none;" id="commentForm'+postData.id+'">';
 				newHTML = newHTML + '<br><br><form id="commentForm" method="post">';
 					newHTML = newHTML + '<input type="hidden" name="type" value="comment">';
@@ -514,3 +515,11 @@ window.setInterval(function(){
 	//Put a topic in the write a post button every 2 seconds
 	$('.submit_open').html('WRITE A POST about '+topics[Math.floor(Math.random() * topics.length)]);
 }, 2000);
+
+function subscribe(id, subscribe) {
+	//N.B. If subscribe is not true unsubscribe
+	ws.emit('subscribe', JSON.stringify({
+		id: id,
+		subscribe: subscribe
+	}));
+}

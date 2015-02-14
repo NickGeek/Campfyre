@@ -344,6 +344,15 @@ function getStokeCount(id, socket) {
 	});
 }
 
+function subscribe(id, subscribe, ip, socket) {
+	if (subscribe) {
+		//Subscribe to new comments
+	}
+	else {
+		//Unsubscribe to new comments
+	}
+}
+
 app.get('/', function(req, res) {
 	//TODO: emulate old API
 	res.send('<p>Server running</p>');
@@ -404,7 +413,14 @@ ws.on('connection', function(socket) {
 	socket.on('get total score', function(params) {
 		try {
 			params = JSON.parse(params);
-			getStokeCount(params.id, socket)
+			getStokeCount(params.id, socket);
+		}
+		catch(e) {}
+	});
+	socket.on('subscribe', function(params) {
+		try {
+			params = JSON.parse(params);
+			subscribe(params.id, params.subscribe, socket.campfyreIPAddress, socket);
 		}
 		catch(e) {}
 	});
