@@ -347,6 +347,34 @@ function getStokeCount(id, socket) {
 function subscribe(id, subscribe, ip, socket) {
 	if (subscribe) {
 		//Subscribe to new comments
+		con.query("SELECT `notifyList` FROM `posts` WHERE `id` = '"+addslashes(id)+"';", function(e, results) {
+				var notifyList = results[0].notifyList;
+				var update = false;
+				if (notifyList) {
+					notifyList = JSON.parse(notifyList);
+					if (notifyList.IPs.indexOf(ip) <= -1) {
+						notifyList.IPs.push(ip);
+						notifyList = JSON.stringify(notifyList);
+						var update = true;
+					}
+				}
+				else {
+					notifyList = JSON.stringify({IPs:[ip]});
+					var update = true;
+				}
+
+				if (update) {
+					//Update database with new array
+					con.query("UPDATE `posts` SET `notifyList` = '"+notifyList+"' WHERE `id` = '"+addslashes(id)+"';", function(e, results) {
+						if (e) socket.emit('error message', JSON.stringify({title: 'Subscription failed', body: 'Please try again later'}));
+
+						socket.emit('success message', JSON.stringify({title: 'Subscribed', body: ''}));
+					});
+				}
+				else {
+					socket.emit('error message', JSON.stringify({title: 'Subscription failed', body: 'You are already subscribed to this post'}));
+				}
+		});
 	}
 	else {
 		//Unsubscribe to new comments
