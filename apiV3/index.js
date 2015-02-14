@@ -19,10 +19,12 @@ var emailPassword = process.argv[6];
 var con = mysql.createConnection({
 	host: 'localhost',
 	user: dbUsername,
-	password: dbPassword,
 	database: dbName,
 	charset: 'utf8mb4'
 });
+if (dbPassword) {
+	con.password = dbPassword;
+}
 con.connect(function(e) {
 	if (e) throw e;
 });
