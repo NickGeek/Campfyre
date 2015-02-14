@@ -268,7 +268,19 @@ function submitComment(parent, text, catcher, ip, commentParent, socket) {
 					commentData.ip = 'http://robohash.org/'+md5(salt+commentData.ip)+'.png?set=set3&size=64x64'
 					ws.emit('new comment', JSON.stringify(commentData));
 				});
-			})	
+
+				//Notifications
+				con.query("SELECT `notifyList` FROM `posts` WHERE `id` = '"+addslashes(parent)+"';", function(e, results) {
+						var notifyList = results[0].notifyList;
+						var update = false;
+						if (notifyList) {
+							notifyList = JSON.parse(notifyList);
+							for (var i = notifyList.IPs.length - 1; i >= 0; i--) {
+								con.query("INSERT INTO `notifications` (ip, commentText, postID) VALUES ("+con.escape(notifyList.IPs[i])+", "+safeText+", "+con.escape(parent)+");");
+							}
+						}
+				});
+			});
 		}
 		else if (spamming) {
 			socket.emit('error message', JSON.stringify({title: 'Post not submitted', body: "You've posted too much recently"}));
@@ -365,7 +377,7 @@ function subscribe(id, subscribe, ip, socket) {
 
 				if (update) {
 					//Update database with new array
-					con.query("UPDATE `posts` SET `notifyList` = '"+notifyList+"' WHERE `id` = '"+addslashes(id)+"';", function(e, results) {
+					con.query("UPDATE `posts` SET `notifyList` = '"+notifyList+"' WHERE `id` = '"+addslashes(id)+"';", function(e) {
 						if (e) socket.emit('error message', JSON.stringify({title: 'Subscription failed', body: 'Please try again later'}));
 
 						socket.emit('success message', JSON.stringify({title: 'Subscribed', body: ''}));
@@ -375,9 +387,6 @@ function subscribe(id, subscribe, ip, socket) {
 					socket.emit('error message', JSON.stringify({title: 'Subscription failed', body: 'You are already subscribed to this post'}));
 				}
 		});
-	}
-	else {
-		//Unsubscribe to new comments
 	}
 }
 
