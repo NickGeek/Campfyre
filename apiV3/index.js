@@ -7,13 +7,10 @@ var http = require('http').Server(app);
 var ws = require('socket.io')(http);
 var mysql = require('mysql');
 var md5 = require('MD5');
-var nodemailer = require('nodemailer');
-var smtpPool = require('nodemailer-smtp-pool');
 var dbName = process.argv[2];
 var dbUsername = process.argv[3];
 var dbPassword = process.argv[4];
 var salt = process.argv[5];
-var emailPassword = process.argv[6];
 
 //Connect to the database
 var con = mysql.createConnection({
@@ -33,20 +30,6 @@ ws.use(function(socket, next) {
   socket.campfyreIPAddress = socket.conn.remoteAddress;
   next();
 });
-
-//Connect to the email server
-if (emailPassword) {
-	process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
-	var transporter = nodemailer.createTransport(smtpPool({
-		host: 'box710.bluehost.com',
-		port: 465,
-		auth: {
-			user: 'notify@campfyre.org',
-			pass: emailPassword
-		},
-		secure: true
-	}));
-}
 
 function getPosts(size, search, startingPost, loadBottom, socket, reverse, user, batch) {
 	//Get the posts from the database
@@ -175,7 +158,7 @@ function stoke(id, ip, socket) {
 	});
 }
 
-function submitPost(text, attachment, email, catcher, ip, isNsfw, socket) {
+function submitPost(text, attachment, catcher, ip, isNsfw, socket) {
 	//Get teh [sic] time
 	var time = Math.floor(Date.now() / 1000) - 5;
 	
@@ -188,7 +171,6 @@ function submitPost(text, attachment, email, catcher, ip, isNsfw, socket) {
 	else {
 		attachment = con.escape('n/a')
 	}
-	email = con.escape(email);
 	var spamming = false;
 
 	//Catch spammers
@@ -212,7 +194,7 @@ function submitPost(text, attachment, email, catcher, ip, isNsfw, socket) {
 				else {
 					var nsfw = 0;
 				}
-				con.query("INSERT INTO posts (post, ip, emails, nsfw, time, attachment) VALUES ("+safeText+", "+con.escape(ip)+", "+email+", "+nsfw+", "+time+", "+attachment+");", function (e) {
+				con.query("INSERT INTO posts (post, ip, nsfw, time, attachment) VALUES ("+safeText+", "+con.escape(ip)+", "+nsfw+", "+time+", "+attachment+");", function (e) {
 					if (e) throw e;
 
 					con.query("SELECT * FROM posts WHERE `post` = "+safeText+" AND `post` NOT LIKE '%#bonfyre%' AND `ip` = '"+ip+"' AND `time` = '"+time+"';", function (e, posts) {
@@ -267,19 +249,10 @@ function submitPost(text, attachment, email, catcher, ip, isNsfw, socket) {
 	});
 }
 
-function subscribe(parent, email) {
-	if (parent && email) {
-		con.query("UPDATE `posts` SET `emails` = IFNULL(CONCAT(`emails`, ',"+email+"'), '"+email+"') WHERE `id` = '"+parent+"';", function (e) {
-			if (e) throw e;
-		});
-	}
-}
-
-function submitComment(parent, text, email, catcher, ip, commentParent, socket) {
+function submitComment(parent, text, catcher, ip, commentParent, socket) {
 	var time = Math.floor(Date.now() / 1000) - 5;
 	text = text.replace(/(<([^>]+)>)/ig,"");
 	safeText = con.escape(text);
-	if (email) email = addslashes(email);
 	var spamming = false;
 	if (catcher.length > 0) spamming = true;
 	if (!commentParent) commentParent = null;
@@ -287,36 +260,6 @@ function submitComment(parent, text, email, catcher, ip, commentParent, socket) 
 	if (text && ip && parent) {
 		if (text.length <= 256 && !spamming) {
 			con.query("INSERT INTO comments (comment, ip, parent, parentComment, time) VALUES ("+safeText+", "+con.escape(ip)+", "+con.escape(parent)+", "+con.escape(commentParent)+", '"+time+"');", function (e) {
-				//Do emails if server is setup
-				if (emailPassword) {
-					con.query("SELECT `emails` FROM posts WHERE id = "+con.escape(parent)+";", function(e, addresses) {
-						try {
-							addresses = addresses[0].emails.split(",");
-						}
-						catch(e) {
-							if (addresses) {
-								addresses = [addresses[0].emails];
-							}
-							else {
-								addresses = [];
-							}
-						}
-
-						if (addresses.length > 0) {
-							for (var i = 0; i < addresses.length; ++i) {
-								transporter.sendMail({
-									from: 'notify@campfyre.org',
-									to: addresses[i],
-									subject: 'New comment on post - Campfyre',
-									html: "<img src='http://robohash.org/"+md5(salt+ip)+".png?set=set3&size=100x100' /> says:<br /><h3>"+text.replace(new RegExp('\r\n','g'))+"</h3><a href='http://campfyre.org/permalink.html?id="+parent+"'>View post on Campfyre.</a>",
-								});
-							}
-						}
-
-						if (email) subscribe(parent, email);
-					});
-				}
-
 				//Tell the user and show the comment
 				socket.emit('success message', JSON.stringify({title: 'Comment submitted', body: ''}));
 
@@ -426,14 +369,14 @@ ws.on('connection', function(socket) {
 		try {
 			params = JSON.parse(params);
 			var ip = socket.campfyreIPAddress;
-			submitPost(params.post, params.attachment, params.email, params.catcher, ip, params.nsfw, socket);
+			submitPost(params.post, params.attachment, params.catcher, ip, params.nsfw, socket);
 		} catch(e) { }
 	});
 	socket.on('submit comment', function(params) {
 		try {
 			params = JSON.parse(params);
 			var ip = socket.campfyreIPAddress;
-			submitComment(params.parent, params.comment, params.email, params.catcher, ip, params.commentParent, socket);
+			submitComment(params.parent, params.comment, params.catcher, ip, params.commentParent, socket);
 		} catch(e) { }
 	});
 	socket.on('get comment thread', function(params) {

@@ -113,8 +113,6 @@
 						<input name="nsfw" value="1" type="checkbox"> This post is Offensive/NSFW
 					</label>
 				  </div><br />
-				<b>Subscribe to comments:</b><br />
-				<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />
 				<input class="btn" type="submit" name="post" value="Post"> <button id="closeSubmitPopup" type="button" class="btn">Cancel</button> <a href="rules.html">Read the rules</a> | <a href="formatting.html">Formatting</a>
 			</form>
 		</section>
@@ -130,7 +128,6 @@
 				ws.emit('submit post', JSON.stringify({
 					post: $('#postForm').find('textarea[name="postText"]').val(),
 					attachment: $('#postForm').find('input[name="attachment"]').val(),
-					email: $('#postForm').find('input[name="email"]').val(),
 					nsfw: nsfwCheckbox,
 					catcher: $('#postForm').find('input[name="catcher"]').val()
 				}));

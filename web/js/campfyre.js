@@ -61,9 +61,7 @@ ws.on('new post', function(postData) {
 					newHTML = newHTML + '<input type="hidden" name="parent" value="'+postData.id+'">';
 					newHTML = newHTML + '<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, '+postData.id+')" onkeyup="countChar(this, '+postData.id+')" required></textarea>';
 					newHTML = newHTML + '<div style="font-family: "Lato", serif;" id="counter'+postData.id+'">256/256</div><br />';
-					newHTML = newHTML + '<b>Subscribe to comments:</b><br />';
 					newHTML = newHTML + '<input type="text" name="catcher" style="display: none;">';
-					newHTML = newHTML + '<input name="email" type="email" class="rounded" placeholder="E-Mail address (optional)"><br />';
 					newHTML = newHTML + '<input class="btn" type="submit" name="post" value="Post">';
 				newHTML = newHTML + '</form>';
 				newHTML = newHTML + '<a id="goBackCommentBtn'+postData.id+'" style="display: none;" href="javascript:void(0);" onclick="exitThread('+postData.id+');"><< Go Back</a>';
@@ -107,7 +105,6 @@ ws.on('new post', function(postData) {
 			
 			ws.emit('submit comment', JSON.stringify({
 				comment: $(this).find('textarea[name="postText"]').val(),
-				email: $(this).find('input[name="email"]').val(),
 				catcher: $(this).find('input[name="catcher"]').val(),
 				parent: $(this).find('input[name="parent"]').val()
 			}));
