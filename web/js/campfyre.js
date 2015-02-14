@@ -386,6 +386,11 @@ ws.on('score result', function(params) {
 	title.innerHTML = title.innerHTML + '<h2>Stokes: '+params.score+'</h2>';
 });
 
+ws.on('notification', function(params) {
+	params = JSON.parse(params);
+	console.log(params);
+});
+
 function stoke(postID) {
 	ws.emit('stoke', JSON.stringify({
 		id: postID
@@ -490,6 +495,9 @@ $(document).ready(function() {
 	});
 
 	$('.submit_open').html('WRITE A POST about '+topics[Math.floor(Math.random() * topics.length)]);
+
+	//Get notifications
+	ws.emit('get notifications');
 });
 
 function refresh(nsfw) {

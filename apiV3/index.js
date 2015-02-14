@@ -390,6 +390,12 @@ function subscribe(id, subscribe, ip, socket) {
 	}
 }
 
+function getNotifications(ip, socket) {
+	con.query("SELECT * FROM `notifications` WHERE `ip` = '"+addslashes(ip)+"';", function(e, notifications) {
+		socket.emit('notification', JSON.stringify(notifications));
+	});
+}
+
 app.get('/', function(req, res) {
 	//TODO: emulate old API
 	res.send('<p>Server running</p>');
@@ -458,6 +464,12 @@ ws.on('connection', function(socket) {
 		try {
 			params = JSON.parse(params);
 			subscribe(params.id, params.subscribe, socket.campfyreIPAddress, socket);
+		}
+		catch(e) {}
+	});
+	socket.on('get notifications', function(params) {
+		try {
+			getNotifications(socket.campfyreIPAddress, socket);
 		}
 		catch(e) {}
 	});
