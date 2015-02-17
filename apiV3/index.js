@@ -258,6 +258,7 @@ function submitComment(parent, text, catcher, ip, commentParent, socket) {
 						if (notifyList) {
 							notifyList = JSON.parse(notifyList);
 							for (var i = notifyList.IPs.length - 1; i >= 0; i--) {
+								if (notifyList.IPs[i] == ip) continue;
 								con.query("INSERT INTO `notifications` (ip, commentText, postID) VALUES ("+con.escape(notifyList.IPs[i])+", "+safeText+", "+con.escape(parent)+");");
 							}
 						}
