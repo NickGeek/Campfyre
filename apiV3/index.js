@@ -31,7 +31,7 @@ ws.use(function(socket, next) {
   next();
 });
 
-function getPosts(size, search, startingPost, loadBottom, socket, reverse, user, batch) {
+function getPosts(ip, size, search, startingPost, loadBottom, socket, reverse, user, batch) {
 	//Get the posts from the database
 	if (search) {
 		search = addslashes(search);
@@ -81,7 +81,24 @@ function getPosts(size, search, startingPost, loadBottom, socket, reverse, user,
 					post.loadBottom = false;
 				}
 
-				socket.emit('new post', JSON.stringify(post));
+				//Are we subscribed to this post?
+				con.query("SELECT `notifyList` FROM `posts` WHERE `id` = '"+addslashes(post.id)+"';", function(e, results) {
+					var notifyList = results[0].notifyList;
+					if (notifyList) {
+						notifyList = JSON.parse(notifyList);
+						if (notifyList.IPs.indexOf(ip) <= -1) {
+							post.subscribed = false;
+						}
+						else {
+							post.subscribed = true;
+						}
+					}
+					else {
+						post.subscribed = false;
+					}
+					socket.emit('new post', JSON.stringify(post));
+				});
+
 			}).bind(this, i, post));
 		}
 	});
@@ -306,7 +323,23 @@ function getPost(size, id, socket) {
 			post.ip = 'http://robohash.org/'+md5(salt+post.ip)+'.png?set=set3&size='+size;
 			post.loadBottom = false;
 
-			socket.emit('new post', JSON.stringify(post));
+			//Are we subscribed to this post?
+			con.query("SELECT `notifyList` FROM `posts` WHERE `id` = '"+addslashes(post.id)+"';", function(e, results) {
+				var notifyList = results[0].notifyList;
+				if (notifyList) {
+					notifyList = JSON.parse(notifyList);
+					if (notifyList.IPs.indexOf(ip) <= -1) {
+						post.subscribed = false;
+					}
+					else {
+						post.subscribed = true;
+					}
+				}
+				else {
+					post.subscribed = false;
+				}
+				socket.emit('new post', JSON.stringify(post));
+			});
 		}).bind(this, post));
 	});
 }
@@ -353,6 +386,23 @@ function subscribe(id, subscribe, ip, socket) {
 				}
 		});
 	}
+	else {
+		con.query("SELECT `notifyList` FROM `posts` WHERE `id` = '"+addslashes(id)+"';", function(e, results) {
+				var notifyList = results[0].notifyList;
+				if (notifyList) {
+					notifyList = JSON.parse(notifyList);
+					if (notifyList.IPs.indexOf(ip) > -1) {
+						notifyList.IPs.splice(notifyList.IPs.indexOf(ip), 1);
+						notifyList = JSON.stringify(notifyList);
+						con.query("UPDATE `posts` SET `notifyList` = '"+notifyList+"' WHERE `id` = '"+addslashes(id)+"';", function(e) {
+						if (e) socket.emit('error message', JSON.stringify({title: 'Unsubscription failed', body: 'Please try again later'}));
+
+						socket.emit('success message', JSON.stringify({title: 'Unsubscribed', body: ''}));
+					});
+					}
+				}
+		});
+	}
 }
 
 function getNotifications(ip, socket) {
@@ -370,7 +420,7 @@ ws.on('connection', function(socket) {
 	socket.on('get posts', function(params) {
 		try {
 			params = JSON.parse(params);
-			getPosts(params.size, params.search, params.startingPost, params.loadBottom, socket, params.reverse, params.user, params.batch);
+			getPosts(socket.campfyreIPAddress, params.size, params.search, params.startingPost, params.loadBottom, socket, params.reverse, params.user, params.batch);
 		}
 		catch(e) {
 		}

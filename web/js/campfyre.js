@@ -22,6 +22,15 @@ ws.on('new post', function(postData) {
 	if (currentPageFile != "permalink.html" || $("#posts > section").length < 1) {
 		loaded = false;
 		postData = JSON.parse(postData);
+		// if (tag.length > 0) {
+		// 	var tagRegex = new RegExp("((^|\s)("+tag+"+?)(?=[\s.,:,!,?,<>,]|$))", "gmi")
+		// 	if (postData.post.match(tagRegex) == null) {
+		// 		return;
+		// 	}
+		// 	else {
+		// 		console.log(postData.post.match(tagRegex));
+		// 	}
+		// }
 		var newHTML = '';
 
 		//Handle NSFW posts
@@ -55,7 +64,12 @@ ws.on('new post', function(postData) {
 			newHTML = newHTML + '<span id="stokeBtn'+postData.id+'"><a class="btn" href="javascript:void(0);" onclick="stoke('+postData.id+', '+postData.score+')">Stoke ('+postData.score+')</a></span>';
 			newHTML = newHTML + ' <a id="showCommentButton'+postData.id+'" class="btn" href="javascript:void(0);" onclick="showCommentForm('+postData.id+')">Load comments ('+postData.commentNum.split(" ")[0]+')</a>';
 			newHTML = newHTML + ' <a style="display: none;" id="hideCommentButton'+postData.id+'" class="btn" href="javascript:void(0);" onclick="hideCommentForm('+postData.id+')">Hide comments</a>';
-			newHTML = newHTML + ' <span id="subscribeBtn'+postData.id+'"><a class="btn" href="javascript:void(0);" onclick="subscribe('+postData.id+', true)">Subscribe to new comments</a></span>';
+			if (!postData.subscribed) {
+				newHTML = newHTML + ' <span id="subscribeBtn'+postData.id+'"><a class="btn" href="javascript:void(0);" onclick="subscribe('+postData.id+', true)">Subscribe to new comments</a></span>';
+			}
+			else {
+				newHTML = newHTML + ' <span id="subscribeBtn'+postData.id+'"><a class="btn" href="javascript:void(0);" onclick="subscribe('+postData.id+', false)">Unsubscribe to new comments</a></span>';
+			}
 			newHTML = newHTML + '<div style="display: none;" id="commentForm'+postData.id+'">';
 				newHTML = newHTML + '<br><br><form id="commentForm" method="post">';
 					newHTML = newHTML + '<input type="hidden" name="type" value="comment">';
@@ -335,7 +349,7 @@ findHashtags(id);
 
 //#YOLOSWAG - thanks to http://stackoverflow.com/questions/4913555/find-twitter-hashtags-using-jquery-and-apply-a-link
 // var hashtag_regexp = /(#\w+)/ug;
-var hashtag_regexp = /(#(.+?)(?=[\s.,:,!,?,<>,]|$))/g;
+var hashtag_regexp = /(#(.+?)(?=[\s.,:,!,?,<>,]|$))/gmi;
 
 function linkHashtags(text) {
 return text.replace(
@@ -526,6 +540,13 @@ window.setInterval(function(){
 
 function subscribe(id, subscribe) {
 	//N.B. If subscribe is not true unsubscribe
+	if (subscribe) {
+		$('#subscribeBtn'+id).html('<a class="btn" href="javascript:void(0);" onclick="subscribe('+id+', false)">Unsubscribe to new comments</a>')
+	}
+	else {
+		$('#subscribeBtn'+id).html('<a class="btn" href="javascript:void(0);" onclick="subscribe('+id+', true)">Subscribe to new comments</a>')
+	}
+
 	ws.emit('subscribe', JSON.stringify({
 		id: id,
 		subscribe: subscribe
