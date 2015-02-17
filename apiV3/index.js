@@ -54,70 +54,35 @@ function getPosts(size, search, startingPost, loadBottom, socket, reverse, user,
 		if (e) throw e;
 		
 		//Send the posts to the user
-		//Old get posts
-		if (!reverse) {
-			for (var i = posts.length-1; i > -1; --i) {
-				var post = posts[i];
-				con.query('SELECT * FROM comments WHERE `parent` = '+post.id+';', (function(i, post, e, comments) {
-					if (e) throw e;
+		for (var i = 0; i < posts.length; ++i) {
+			var post = posts[i];
+			con.query('SELECT * FROM comments WHERE `parent` = '+post.id+';', (function(i, post, e, comments) {
+				if (e) throw e;
 
-					if (comments.length === 1) {
-						post.commentNum = comments.length+' comment';
-					}
-					else {
-						post.commentNum = comments.length+' comments';
-					}
+				if (comments.length === 1) {
+					post.commentNum = comments.length+' comment';
+				}
+				else {
+					post.commentNum = comments.length+' comments';
+				}
 
-					for (var j = 0; j < comments.length; ++j) {
-						comments[j].ip = 'http://robohash.org/'+md5(salt+comments[j].ip)+'.png?set=set3&size='+size;
-					}
+				for (var j = 0; j < comments.length; ++j) {
+					comments[j].ip = 'http://robohash.org/'+md5(salt+comments[j].ip)+'.png?set=set3&size='+size;
+				}
 
-					post.comments = comments;
+				post.comments = comments;
 
-					post.ip = 'http://robohash.org/'+md5(salt+post.ip)+'.png?set=set3&size='+size;
+				post.ip = 'http://robohash.org/'+md5(salt+post.ip)+'.png?set=set3&size='+size;
 
-					if (loadBottom) {
-						post.loadBottom = true;
-					}
-					else {
-						post.loadBottom = false;
-					}
+				if (loadBottom) {
+					post.loadBottom = true;
+				}
+				else {
+					post.loadBottom = false;
+				}
 
-					socket.emit('new post', JSON.stringify(post));
-				}).bind(this, i, post));
-			}
-		}
-		else {
-			for (var i = 0; i < posts.length; ++i) {
-				var post = posts[i];
-				con.query('SELECT * FROM comments WHERE `parent` = '+post.id+';', (function(i, post, e, comments) {
-					if (e) throw e;
-
-					if (comments.length === 1) {
-						post.commentNum = comments.length+' comment';
-					}
-					else {
-						post.commentNum = comments.length+' comments';
-					}
-
-					for (var j = 0; j < comments.length; ++j) {
-						comments[j].ip = 'http://robohash.org/'+md5(salt+comments[j].ip)+'.png?set=set3&size='+size;
-					}
-
-					post.comments = comments;
-
-					post.ip = 'http://robohash.org/'+md5(salt+post.ip)+'.png?set=set3&size='+size;
-
-					if (loadBottom) {
-						post.loadBottom = true;
-					}
-					else {
-						post.loadBottom = false;
-					}
-
-					socket.emit('new post', JSON.stringify(post));
-				}).bind(this, i, post));
-			}
+				socket.emit('new post', JSON.stringify(post));
+			}).bind(this, i, post));
 		}
 	});
 }
