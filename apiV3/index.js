@@ -16,15 +16,16 @@ var salt = process.argv[5];
 var emailPassword = process.argv[6];
 
 //Connect to the database
-var con = mysql.createConnection({
+mysqlDetails = {
 	host: 'localhost',
 	user: dbUsername,
 	database: dbName,
 	charset: 'utf8mb4'
-});
-if (dbPassword) {
-	con.password = dbPassword;
 }
+if (dbPassword) {
+	mysqlDetails.password = dbPassword;
+}
+var con = mysql.createConnection(mysqlDetails);
 con.connect(function(e) {
 	if (e) throw e;
 });
