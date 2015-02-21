@@ -401,8 +401,11 @@ ws.on('score result', function(params) {
 });
 
 ws.on('notification', function(params) {
-	params = JSON.parse(params);
-	console.log(params);
+	notifications = JSON.parse(params);
+	for (var i = notifications.length - 1; i >= 0; i--) {
+		var notification = notifications[i];
+		$('#sidebar').append('<p>'+notification.commentText+'</p>');
+	};
 });
 
 function stoke(postID) {
