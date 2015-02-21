@@ -39,7 +39,6 @@ ws.on('new post', function(postData) {
 		}
 
 		newHTML = newHTML + "<section id="+postData.id+" class='card'>";
-		newHTML = newHTML + '<paper-shadow z="3"></paper-shadow>';
 			var submitterHash = postData.ip.split("g/")[1].split(".")[0];
 			newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+submitterHash+"\")'><img src='"+postData.ip+"' /></a> says...<br></i><a href='permalink.html?id="+postData.id+"'>Permalink</a> | <span data-livestamp="+postData.time+"></span>";
 				
@@ -404,7 +403,7 @@ ws.on('notification', function(params) {
 	notifications = JSON.parse(params);
 	for (var i = notifications.length - 1; i >= 0; i--) {
 		var notification = notifications[i];
-		$('#sidebar').append('<p>'+notification.commentText+'</p>');
+		$('#sidebarNotifications').append('<section style="padding: 0.5rem;" class="notification"> <p>'+notification.commentText+'</p> <button class="btn" onclick="replyToComment('+notification.postID+', '+notification.commentID+');">Reply</button> <a class="btn" href="permalink.html?id='+notification.postID+'">View post</a> <button class="btn" onclick="$(this).parent().remove();">Dismiss</button> </section>');
 	};
 });
 
@@ -539,6 +538,7 @@ function refresh(nsfw) {
 window.setInterval(function(){
 	//Put a topic in the write a post button every 2 seconds
 	$('.submit_open').html('WRITE A POST about '+topics[Math.floor(Math.random() * topics.length)]);
+	ws.emit('get notifications');
 }, 2000);
 
 function subscribe(id, subscribe) {

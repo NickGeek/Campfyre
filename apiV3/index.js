@@ -250,19 +250,19 @@ function submitComment(parent, text, catcher, ip, commentParent, socket) {
 					var commentData = commentData[commentData.length-1];
 					commentData.ip = 'http://robohash.org/'+md5(salt+commentData.ip)+'.png?set=set3&size=64x64'
 					ws.emit('new comment', JSON.stringify(commentData));
-				});
 
-				//Notifications
-				con.query("SELECT `notifyList` FROM `posts` WHERE `id` = '"+addslashes(parent)+"';", function(e, results) {
-						var notifyList = results[0].notifyList;
-						var update = false;
-						if (notifyList) {
-							notifyList = JSON.parse(notifyList);
-							for (var i = notifyList.IPs.length - 1; i >= 0; i--) {
-								if (notifyList.IPs[i] == ip) continue;
-								con.query("INSERT INTO `notifications` (ip, commentText, postID) VALUES ("+con.escape(notifyList.IPs[i])+", "+safeText+", "+con.escape(parent)+");");
+					//Notifications
+					con.query("SELECT `notifyList` FROM `posts` WHERE `id` = '"+addslashes(parent)+"';", function(e, results) {
+							var notifyList = results[0].notifyList;
+							var update = false;
+							if (notifyList) {
+								notifyList = JSON.parse(notifyList);
+								for (var i = notifyList.IPs.length - 1; i >= 0; i--) {
+									if (notifyList.IPs[i] == ip) continue;
+									con.query("INSERT INTO `notifications` (ip, commentText, postID, commentID) VALUES ("+con.escape(notifyList.IPs[i])+", "+safeText+", "+con.escape(parent)+", "+commentData.id+");");
+								}
 							}
-						}
+					});
 				});
 			});
 		}
@@ -303,7 +303,7 @@ function getBulkComments(parent, socket) {
 	});
 }
 
-function getPost(size, id, socket) {
+function getPost(size, id, socket, ip) {
 	con.query("SELECT * FROM `posts` WHERE `id` = "+con.escape(id)+";", function(e, post) {
 		post = post[0];
 		con.query('SELECT * FROM comments WHERE `parent` = '+post.id+';', (function(post, e, comments) {
@@ -410,6 +410,7 @@ function subscribe(id, subscribe, ip, socket) {
 function getNotifications(ip, socket) {
 	con.query("SELECT * FROM `notifications` WHERE `ip` = '"+addslashes(ip)+"';", function(e, notifications) {
 		socket.emit('notification', JSON.stringify(notifications));
+		con.query("DELETE FROM `notifications` WHERE `ip` = '"+addslashes(ip)+"';");
 	});
 }
 
@@ -465,7 +466,7 @@ ws.on('connection', function(socket) {
 	socket.on('get post', function(params) {
 		try {
 			params = JSON.parse(params);
-			getPost(params.size, params.id, socket);
+			getPost(params.size, params.id, socket, socket.campfyreIPAddress);
 		}
 		catch(e) {
 		}
