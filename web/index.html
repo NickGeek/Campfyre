@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta content="text/html; charset=utf-8">
+		<title>Campfyre</title>
+		<link rel="icon" type="image/x-icon" href="favicon.ico">
+		<meta name="description" content="256 characters. No Accounts. Have fun.">
+		<meta name="author" content="Nick Webster">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta name="theme-color" content="#ff6900">
+
+		<link href="img/ios-icon/60x60.png"   rel="apple-touch-icon"                 />
+		<link href="img/ios-icon/76x76.png"   rel="apple-touch-icon" sizes="76x76"   />
+		<link href="img/ios-icon/120x120.png" rel="apple-touch-icon" sizes="120x120" />
+		<link href="img/ios-icon/152x152.png" rel="apple-touch-icon" sizes="152x152" />
+
+		<link rel="stylesheet" type="text/css" href="lato.css">
+		<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/2.3.2/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+		<link rel="stylesheet" href="css/campfyre.css">
+
+		<script src="http://code.jquery.com/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+		<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+		<script src="js/moment.js"></script>
+		<script src="js/livestamp.min.js"></script>
+		<script src="js/popupoverlay.js"></script>
+		<script src="js/store.min.js"></script>
+		<script src="js/campfyre.js"></script>
+		<script>
+		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+		  ga('create', 'UA-8931238-13', 'auto');
+		  ga('send', 'pageview');
+		</script>
+	</head>
+	<body>
+		<div id="sidebar">
+			<div id="search">
+				<form id="searchForm" style="max-width: 234px;">
+					<input name="tag" type="text" class="rounded" placeholder="Search" required />
+				</form>
+				<script>
+					$('#searchForm').submit(function(event) {
+						event.preventDefault();
+						var searchQuery = $('#searchForm').find('input[name="tag"]').val();
+						//Clear the form
+						$('#searchForm')[0].reset();
+						runSearch(searchQuery);
+						return false;
+					});
+				</script>
+				</div>
+				<div id="stickyholder" style="width: 234px; height: 70px;"></div>
+			<script>
+				//Advertisment
+				var random = Math.floor(Math.random()*(6 - 1))+1;
+				if  (random === 1) {
+					$('#stickyholder').html('Advertisment:<br /><p class="adsbygoogle" id="stickyNote"><strong style="color: #5C5858;">Thanks for supporting Campfyre!</strong><br><span style="color: #333;">If you feel that our ads are intrusive please let us know :-)</span></p>');
+				}
+				else if (random > 1) {
+					$('#stickyholder').html('Advertisment:<br /><ins class="adsbygoogle" style="display:inline-block;width:234px;height:60px" data-ad-client="ca-pub-9765350019261709" data-ad-slot="8440394098"></ins>');
+					$.getScript('http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js', function() {
+					        $('.adsbygoogle').each(function() {
+					                (adsbygoogle = window.adsbygoogle || []).push({});
+					        });
+					});
+				}
+
+				$.ajax({
+					url: "js/advertisment.js",
+					dataType: "script"
+				}).fail(function() {
+					$('#stickyholder').html('<p id="stickyNote"><strong style="color: #5C5858;">Campfyre <3 you, but...</strong><br><span style="color: #333;">It\'d be really cool if you could whitelist us so one unobtrusive ad can be here.</span></p>');
+				});
+			</script>
+
+			<div id="desktopWritePost">
+				<br/><span id="submitFAB" class="submit_open">WRITE A POST about</span>
+			</div>
+
+			<div id="sidebarNotifications">
+				<h4>Notifications</h4>
+			</div>
+		</div>
+
+		<div id="pageBody">
+		<div id="pageHeader" class="centre">
+			<h1>Campfyre</h1>
+			<h2>256 characters.</h2>
+			<h2>No Accounts.</h2>
+			<h2>Have fun.</h2>
+		</div>
+
+		<div class="campaigns">
+		<a href="https://play.google.com/store/apps/details?id=nz.co.nickwebster.campfyre">
+		  <img style="height: 45px; width: auto;" alt="Android app on Google Play" src="http://developer.android.com/images/brand/en_app_rgb_wo_60.png" />
+		</a></div>
+
+		<section id="submit" class="card">
+			<h2 style="text-align: left;">Write a post</h2>
+			<form id='postForm' method="post">
+				<input type="hidden" name="type" value="post">
+				<textarea id="postText" name="postText" placeholder="Post text" class="rounded" rows="5" onkeydown="countChar(this, -1)" onkeyup="countChar(this, -1)" required></textarea>
+				<div style="font-family: 'Lato', serif;" id="counter-1">256/256</div>
+				<input type="url" name="attachment" class="rounded" placeholder="Link to image/video (optional)">
+				<input type="text" name="catcher" style="display: none;">
+				<div class="checkbox">
+					<label>
+						<input name="nsfw" value="1" type="checkbox"> This post is Offensive/NSFW
+					</label>
+				  </div><br />
+				<input class="btn" type="submit" name="post" value="Post"> <button id="closeSubmitPopup" type="button" class="btn">Cancel</button> <a href="rules.html">Read the rules</a> | <a href="formatting.html">Formatting</a>
+			</form>
+		</section>
+		<script>
+			$('#postForm').submit(function(event) {
+				if ($('#postForm').find('input[name="nsfw"]').is(':checked')) {
+					var nsfwCheckbox = 1;
+				}
+				else {
+					var nsfwCheckbox = '';
+				}
+
+				ws.emit('submit post', JSON.stringify({
+					post: $('#postForm').find('textarea[name="postText"]').val(),
+					attachment: $('#postForm').find('input[name="attachment"]').val(),
+					nsfw: nsfwCheckbox,
+					catcher: $('#postForm').find('input[name="catcher"]').val()
+				}));
+				$('#postForm')[0].reset();
+				$('#submit').popup('hide');
+				return false;
+			});
+		</script>
+
+		<section id="submitComment" class="card">
+			<h2 style="text-align: left;">Write a comment</h2>
+			<form id='commentForm' method="post">
+				<input type="hidden" name="type" value="comment">
+				<input type="hidden" name="parent">
+				<input type="hidden" name="commentParent">
+				<textarea id="postText" name="postText" placeholder="Post text" class="rounded" rows="5" onkeydown="countChar(this, -2)" onkeyup="countChar(this, -2)" required></textarea>
+				<div style="font-family: 'Lato', serif;" id="counter-2">256/256</div>
+				<input type="text" name="catcher" style="display: none;">
+				<input class="btn" type="submit" name="post" value="Post"> <button id="closeCommentPopup" type="button" class="btn">Cancel</button> <a href="rules.html">Read the rules</a>
+			</form>
+		</section>
+		<script>
+			$('#commentForm').submit(function(event) {
+				ws.emit('submit comment', JSON.stringify({
+					comment: $('#commentForm').find('textarea[name="postText"]').val(),
+					parent: $('#commentForm').find('input[name="parent"]').val(),
+					commentParent: $('#commentForm').find('input[name="commentParent"]').val(),
+					catcher: $('#commentForm').find('input[name="catcher"]').val()
+				}));
+
+				$('#commentForm')[0].reset();
+				$('#submitComment').popup('hide');
+				return false;
+			});
+		</script>
+
+		<div style="text-align: center;" id="options">
+			<h4>
+			<script>
+				document.write('<div style="display: inline;" id="goBack"><a href="javascript:void(0);" onclick="exitSearch()"><< Go Back</a> | </div>');
+				$('#goBack').hide();
+			</script>
+			<a href="javascript:void(0);" onclick="refresh()">Refresh</a> | 
+			<span id="nsfwOption"></span><br><a href="https://github.com/NickGeek/Campfyre">Fork Campfyre on GitHub</a> | Robofaces lovingly delivered by <a target="_blank" href="http://robohash.org">Robohash.org</a><br><a href="about.html">About Campfyre</a> | Written and run by <a href="http://nick.geek.nz">Nick Webster</a></h4>
+			<div id="phoneWritePost">
+				<span id="submitFAB" class="submit_open">WRITE A POST about</span><br/><br/>
+			</div>
+			<script>
+				function nsfwToggle() {
+					var verb = "";
+					var newOption = 0;
+					if (showNSFW === 0) {
+						verb = "Show ";
+						newOption = 1;
+					}
+					else {
+						verb = "Hide ";
+					}
+					$('#nsfwOption').html('<a href="javascript:void(0);" onclick="refresh('+newOption+')">'+verb+'Offensive/NSFW posts</a>');
+				}
+				nsfwToggle();
+			</script>
+		</div>
+
+		<div id="searchTitle" class="centre">
+		</div>
+
+		<div id="posts">
+		</div>
+
+		<script>
+			//User pages
+			var uid = $.urlParam('u');
+			if (uid) {
+				loadUserPage(uid)
+			}
+			else {
+				//Display the posts on page load
+				page = 1;
+				$('#loadingMessage').show();
+				ws.emit('get posts', JSON.stringify({
+					size: '64x64',
+					search: tag,
+					startingPost: page*50-50,
+					loadBottom: true,
+					user: userID,
+					reverse: true
+				}));
+			}
+		</script>
+
+		<img id="loadingMessage" src="img/loading.gif" alt="loading..." />
+
+		<a style="text-align: center; margin: 10px;" class="btn" href="javascript:void(0);" onclick="loadMore();">Load More...</a>
+		</div>
+	</body>
+</html>
