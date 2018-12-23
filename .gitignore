@@ -1,5 +1,9 @@
 # Created by https://www.gitignore.io
 
+# Docker
+db-data/
+*.env
+
 ### SublimeText ###
 # cache files for sublime text
 *.tmlanguage.cache

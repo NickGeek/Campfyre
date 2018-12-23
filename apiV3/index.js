@@ -7,10 +7,12 @@ var http = require('http').Server(app);
 var ws = require('socket.io')(http);
 var mysql = require('mysql');
 var md5 = require('MD5');
-var dbName = process.argv[2];
-var dbUsername = process.argv[3];
-var dbPassword = process.argv[4];
-var salt = process.argv[5];
+
+var dbHost = process.env['CAMPFYRE_HOST'];
+var dbName = process.env['CAMPFYRE_DB_NAME'];
+var dbUsername = process.env['CAMPFYRE_DB_USER'];
+var dbPassword = process.env['CAMPFYRE_DB_PASS'];
+var salt = process.env['CAMPFYRE_SALT'];
 
 //Connect to the database
 mysqlDetails = {
@@ -161,10 +163,14 @@ function submitPost(text, attachment, catcher, ip, isNsfw, socket) {
 	con.query("SELECT `ip` FROM posts ORDER BY `id` DESC LIMIT 3", function (e, results) {
 		if (e) throw e;
 
-		if (results[0].ip == ip && results[1].ip == ip && results[2].ip == ip) {
-			spamming = true;
-		}
-		else if (catcher.length > 0) {
+		// if (results[0].ip == ip && results[1].ip == ip && results[2].ip == ip) {
+		// 	spamming = true;
+		// }
+		// else if (catcher.length > 0) {
+		// 	spamming = true;
+		// }
+
+		if (catcher.length > 0) {
 			spamming = true;
 		}
 
@@ -410,7 +416,7 @@ function subscribe(id, subscribe, ip, socket) {
 
 function getNotifications(ip, socket) {
 	con.query("SELECT * FROM `notifications` WHERE `ip` = '"+addslashes(ip)+"';", function(e, notifications) {
-		socket.emit('notification', JSON.stringify(notifications));
+		socket.emit('notification', JSON.stringify(notifications || []));
 		con.query("DELETE FROM `notifications` WHERE `ip` = '"+addslashes(ip)+"';");
 	});
 }
