@@ -211,3 +211,17 @@ a:active {
 	margin-bottom: 8px;
 	width: 234px;
 }
+
+#this-is-a-bad-website-banner {
+	width: 100%;
+	background-color: #333;
+	padding: 5px;
+	margin-bottom: 50px;
+	color: #eee;
+	font-size: 1.1em;
+}
+
+#this-is-a-bad-website-banner .emoji {
+	width: 1.1em;
+	height: 1.1em;
+}

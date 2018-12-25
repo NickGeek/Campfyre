@@ -11,7 +11,7 @@ services:
       - "./db-data:/var/lib/mysql"
     ports:
       - 8925:3306
-    env_file: ./.env
+    env_file: ./db.env
 
   campfyre-api:
     build: .
@@ -21,4 +21,4 @@ services:
         condition: service_healthy
     ports:
       - 3973:3973
-    env_file: ./.env
+    env_file: ./api.env

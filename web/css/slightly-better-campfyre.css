@@ -1,0 +1,73 @@
+html, body {
+	height: 100%;
+}
+
+html {
+	font-family: 'Lato', serif;
+}
+
+body {
+	background: url(../img/bg.jpg) center center / cover no-repeat fixed
+}
+
+.centre {
+	text-align: center;
+}
+
+.title {
+	font-family: 'Lato', serif;
+	font-weight: 900;
+	font-size: 4em;
+	color: #ff6900;
+	margin: 10px 0;
+}
+
+.back-link {
+	margin-top: 0;
+}
+
+.info-list {
+	font-size: 17.5px;
+}
+
+.info-list li {
+	padding-bottom: 10px;
+}
+
+h2, h3, h4 {
+	margin-bottom: 0.1em;
+	font-weight: 100;
+}
+
+/* Links Start */
+a:link {
+	color: #5C5858;
+	text-decoration: none;
+}
+
+a:visited {
+	color: #5C5858;
+	text-decoration: none;
+}
+
+a:hover {
+	color: black;
+	text-decoration: underline;
+}
+
+a:active {
+	color: black;
+	text-decoration: underline;
+}
+/* Links End */
+
+.info-page {
+	width: 100%;
+	max-width: 700px;
+	margin: auto;
+}
+
+article {
+	text-align: justify;
+}
+

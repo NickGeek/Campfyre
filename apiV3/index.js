@@ -6,17 +6,18 @@ var app = require('express')();
 var http = require('http').Server(app);
 var ws = require('socket.io')(http);
 var mysql = require('mysql');
-var md5 = require('MD5');
+var crypto = require('crypto');
 
 var dbHost = process.env['CAMPFYRE_HOST'];
 var dbName = process.env['CAMPFYRE_DB_NAME'];
 var dbUsername = process.env['CAMPFYRE_DB_USER'];
 var dbPassword = process.env['CAMPFYRE_DB_PASS'];
 var salt = process.env['CAMPFYRE_SALT'];
+var adminId = process.env['CAMPFYRE_ADMIN_ID'];
 
 //Connect to the database
 mysqlDetails = {
-	host: 'localhost',
+	host: dbHost,
 	user: dbUsername,
 	database: dbName,
 	charset: 'utf8mb4'
@@ -29,10 +30,9 @@ con.connect(function(e) {
 	if (e) throw e;
 });
 
-ws.use(function(socket, next) {
-  socket.campfyreIPAddress = socket.conn.remoteAddress;
-  next();
-});
+// This is all horrific code, lets make it more horrific with some push notification stuff
+// campfyreId => socket
+const users = {};
 
 function getPosts(ip, size, search, startingPost, loadBottom, socket, reverse, user, batch) {
 	//Get the posts from the database
@@ -47,12 +47,13 @@ function getPosts(ip, size, search, startingPost, loadBottom, socket, reverse, u
 	}
 	else {
 		if (user) {
-			var query = "SELECT * FROM posts WHERE `post` NOT LIKE '%#bonfyre%' AND md5(CONCAT("+salt+", `ip`)) = "+con.escape(user)+" ORDER BY id DESC LIMIT "+con.escape(startingPost)+", 50;";
+			var query = "SELECT * FROM posts WHERE `post` NOT LIKE '%#bonfyre%' AND `hash_id` = "+con.escape(user)+" ORDER BY id DESC LIMIT "+con.escape(startingPost)+", 50;";
 		}
 		else {
 			var query = "SELECT * FROM posts WHERE `post` NOT LIKE '%#bonfyre%' ORDER BY id DESC LIMIT "+con.escape(startingPost)+", 50;";
 		}
 	}
+
 	con.query(query, function(e, posts) {
 		if (e) throw e;
 		
@@ -70,12 +71,12 @@ function getPosts(ip, size, search, startingPost, loadBottom, socket, reverse, u
 				}
 
 				for (var j = 0; j < comments.length; ++j) {
-					comments[j].ip = 'http://robohash.org/'+md5(salt+comments[j].ip)+'.png?set=set3&size='+size;
+					comments[j].ip = 'http://robohash.org/'+hash(salt+comments[j].ip)+'.png?set=set3&size='+size;
 				}
 
 				post.comments = comments;
 
-				post.ip = 'http://robohash.org/'+md5(salt+post.ip)+'.png?set=set3&size='+size;
+				post.ip = 'http://robohash.org/'+post.hash_id+'.png?set=set3&size='+size;
 
 				if (loadBottom) {
 					post.loadBottom = true;
@@ -99,6 +100,9 @@ function getPosts(ip, size, search, startingPost, loadBottom, socket, reverse, u
 					else {
 						post.subscribed = false;
 					}
+
+					delete post.notifyList;
+					delete post.voters;
 					socket.emit('new post', JSON.stringify(post));
 				});
 
@@ -184,7 +188,7 @@ function submitPost(text, attachment, catcher, ip, isNsfw, socket) {
 				else {
 					var nsfw = 0;
 				}
-				con.query("INSERT INTO posts (post, ip, nsfw, time, attachment) VALUES ("+safeText+", "+con.escape(ip)+", "+nsfw+", "+time+", "+attachment+");", function (e) {
+				con.query("INSERT INTO posts (post, ip, hash_id, nsfw, time, attachment) VALUES ("+safeText+", "+con.escape(ip)+", "+con.escape(hash(salt+ip))+", "+nsfw+", "+time+", "+attachment+");", function (e) {
 					if (e) throw e;
 
 					con.query("SELECT * FROM posts WHERE `post` = "+safeText+" AND `post` NOT LIKE '%#bonfyre%' AND `ip` = '"+ip+"' AND `time` = '"+time+"';", function (e, posts) {
@@ -204,13 +208,17 @@ function submitPost(text, attachment, catcher, ip, isNsfw, socket) {
 								}
 
 								for (var j = 0; j < comments.length; ++j) {
-									comments[j].ip = 'http://robohash.org/'+md5(salt+comments[j].ip)+'.png?set=set3&size=64x64';
+									comments[j].ip = 'http://robohash.org/'+hash(salt+comments[j].ip)+'.png?set=set3&size=64x64';
 								}
 
 								post.comments = comments;
 
-								post.ip = 'http://robohash.org/'+md5(salt+post.ip)+'.png?set=set3&size=64x64';
+								post.ip = 'http://robohash.org/'+hash(salt+post.ip)+'.png?set=set3&size=64x64';
 								post.loadBottom = false;
+
+								delete post.notifyList;
+								delete post.voters;
+
 								ws.emit('new post', JSON.stringify(post));
 								socket.emit('success message', JSON.stringify({title: 'Post submitted', body: ''}));
 
@@ -255,7 +263,7 @@ function submitComment(parent, text, catcher, ip, commentParent, socket) {
 
 				con.query("SELECT * FROM comments WHERE `comment` = "+safeText+" AND `ip` = '"+ip+"' AND `time` = '"+time+"';", function(e, commentData) {
 					var commentData = commentData[commentData.length-1];
-					commentData.ip = 'http://robohash.org/'+md5(salt+commentData.ip)+'.png?set=set3&size=64x64'
+					commentData.ip = 'http://robohash.org/'+hash(salt+commentData.ip)+'.png?set=set3&size=64x64'
 					ws.emit('new comment', JSON.stringify(commentData));
 
 					//Notifications
@@ -265,8 +273,13 @@ function submitComment(parent, text, catcher, ip, commentParent, socket) {
 							if (notifyList) {
 								notifyList = JSON.parse(notifyList);
 								for (var i = notifyList.IPs.length - 1; i >= 0; i--) {
-									if (notifyList.IPs[i] == ip) continue;
-									con.query("INSERT INTO `notifications` (ip, commentText, postID, commentID) VALUES ("+con.escape(notifyList.IPs[i])+", "+safeText+", "+con.escape(parent)+", "+commentData.id+");");
+									if (notifyList.IPs[i] === ip) continue;
+
+									const ipToNotify = notifyList.IPs[i];
+									con.query("INSERT INTO `notifications` (ip, commentText, postID, commentID) VALUES ("+con.escape(ipToNotify)+", "+safeText+", "+con.escape(parent)+", "+commentData.id+");", () => {
+										const socketToNotify = users[ipToNotify];
+										if (!!socketToNotify) getNotifications(ipToNotify, socketToNotify);
+									});
 								}
 							}
 					});
@@ -290,7 +303,7 @@ function getCommentThread(parent, socket) {
 		if (e) throw e;
 
 		for (var i = 0; i < comments.length; ++i) {
-			comments[i].ip = 'http://robohash.org/'+md5(salt+comments[i].ip)+'.png?set=set3&size=64x64';
+			comments[i].ip = 'http://robohash.org/'+hash(salt+comments[i].ip)+'.png?set=set3&size=64x64';
 			comments[i].getChildren = true;
 			comments[i].dontCount = true;
 			socket.emit('new comment', JSON.stringify(comments[i]));
@@ -303,7 +316,7 @@ function getBulkComments(parent, socket) {
 		if (e) throw e;
 
 		for (var i = 0; i < comments.length; ++i) {
-			comments[i].ip = 'http://robohash.org/'+md5(salt+comments[i].ip)+'.png?set=set3&size=64x64';
+			comments[i].ip = 'http://robohash.org/'+hash(salt+comments[i].ip)+'.png?set=set3&size=64x64';
 			comments[i].dontCount = true;
 			socket.emit('new comment', JSON.stringify(comments[i]));
 		}
@@ -324,12 +337,12 @@ function getPost(size, id, socket, ip) {
 			}
 
 			for (var j = 0; j < comments.length; ++j) {
-				comments[j].ip = 'http://robohash.org/'+md5(salt+comments[j].ip)+'.png?set=set3&size='+size;
+				comments[j].ip = 'http://robohash.org/'+hash(salt+comments[j].ip)+'.png?set=set3&size='+size;
 			}
 
 			post.comments = comments;
 
-			post.ip = 'http://robohash.org/'+md5(salt+post.ip)+'.png?set=set3&size='+size;
+			post.ip = 'http://robohash.org/'+hash(salt+post.ip)+'.png?set=set3&size='+size;
 			post.loadBottom = false;
 
 			//Are we subscribed to this post?
@@ -347,6 +360,12 @@ function getPost(size, id, socket, ip) {
 				else {
 					post.subscribed = false;
 				}
+
+				// Clear out data. This is not how you should do this.
+				post = { ...post };
+				delete post.voters;
+				delete post.notifyList;
+
 				socket.emit('new post', JSON.stringify(post));
 			});
 		}).bind(this, post));
@@ -354,7 +373,9 @@ function getPost(size, id, socket, ip) {
 }
 
 function getStokeCount(id, socket) {
-	con.query("SELECT `score` FROM `posts` WHERE md5(CONCAT("+salt+",`ip`)) = "+con.escape(id)+";", function(e, results) {
+	con.query("SELECT `score` FROM `posts` WHERE `hash_id` = "+con.escape(id)+";", function(e, results) {
+		if (!results) return;
+
 		totalScore = 0;
 		for (var l = 0; l < results.length; ++l) {
 			totalScore += results[l].score;
@@ -415,22 +436,28 @@ function subscribe(id, subscribe, ip, socket) {
 }
 
 function getNotifications(ip, socket) {
-	con.query("SELECT * FROM `notifications` WHERE `ip` = '"+addslashes(ip)+"';", function(e, notifications) {
-		socket.emit('notification', JSON.stringify(notifications || []));
+	con.query("SELECT * FROM `notifications` WHERE `ip` = "+con.escape(ip)+";", function(e, notifications) {
+		const message = (notifications || [])
+			.map(n => {
+				let tmp = { ...n };
+				delete tmp.ip;
+				return tmp;
+			})
+
+		socket.emit('notification', JSON.stringify(message));
 		con.query("DELETE FROM `notifications` WHERE `ip` = '"+addslashes(ip)+"';");
 	});
 }
 
 app.get('/', function(req, res) {
-	//TODO: emulate old API
-	res.send('<p>Server running</p>');
+	res.send("We didn't start the fire. It was always turning. Since the world's been burning.");
 });
 
 ws.on('connection', function(socket) {
 	socket.on('get posts', function(params) {
 		try {
 			params = JSON.parse(params);
-			getPosts(socket.campfyreIPAddress, params.size, params.search, params.startingPost, params.loadBottom, socket, params.reverse, params.user, params.batch);
+			getPosts(getCampfyreId(params), params.size, params.search, params.startingPost, params.loadBottom, socket, params.reverse, params.user, params.batch);
 		}
 		catch(e) {
 		}
@@ -438,21 +465,21 @@ ws.on('connection', function(socket) {
 	socket.on('stoke', function(params) {
 		try {
 			params = JSON.parse(params);
-			var ip = socket.campfyreIPAddress;
+			var ip = getCampfyreId(params);
 			stoke(params.id, ip, socket)
 		} catch(e) { }
 	});
 	socket.on('submit post', function(params) {
 		try {
 			params = JSON.parse(params);
-			var ip = socket.campfyreIPAddress;
+			var ip = getCampfyreId(params);
 			submitPost(params.post, params.attachment, params.catcher, ip, params.nsfw, socket);
 		} catch(e) { }
 	});
 	socket.on('submit comment', function(params) {
 		try {
 			params = JSON.parse(params);
-			var ip = socket.campfyreIPAddress;
+			var ip = getCampfyreId(params);
 			submitComment(params.parent, params.comment, params.catcher, ip, params.commentParent, socket);
 		} catch(e) { }
 	});
@@ -473,7 +500,7 @@ ws.on('connection', function(socket) {
 	socket.on('get post', function(params) {
 		try {
 			params = JSON.parse(params);
-			getPost(params.size, params.id, socket, socket.campfyreIPAddress);
+			getPost(params.size, params.id, socket, getCampfyreId(params));
 		}
 		catch(e) {
 		}
@@ -488,17 +515,41 @@ ws.on('connection', function(socket) {
 	socket.on('subscribe', function(params) {
 		try {
 			params = JSON.parse(params);
-			subscribe(params.id, params.subscribe, socket.campfyreIPAddress, socket);
+			subscribe(params.id, params.subscribe, getCampfyreId(params), socket);
 		}
 		catch(e) {}
 	});
 	socket.on('get notifications', function(params) {
 		try {
-			getNotifications(socket.campfyreIPAddress, socket);
+			params = JSON.parse(params);
+			users[getCampfyreId(params)] = socket;
+			getNotifications(getCampfyreId(params), socket);
 		}
 		catch(e) {}
 	});
 });
+
+function getCampfyreId(params) {
+	return params.campfyreId || generateGuid();
+}
+
+// Thanks https://stackoverflow.com/a/105074
+function generateGuid() {
+	function s4() {
+		return Math.floor((1 + Math.random()) * 0x10000)
+			.toString(16)
+			.substring(1);
+	}
+	return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+}
+
+function hash(input) {
+	if (input === salt + adminId) {
+		return 'admin';
+	}
+
+	return crypto.createHash('sha256').update(input).digest('hex');
+}
 
 http.listen(3973, function(){
 	console.log('listening on *:'+3973);

@@ -6,7 +6,7 @@ var lastPost = 0;
 var ws = io('ws://'+window.location.hostname+':3973');
 var userID = '';
 var currentPageFile = location.pathname.substring(1);
-var topics = ['clamminess', 'Nick', 'Bitcoin', 'your mum', 'homework', 'procrastination', 'tautology', 'anything', 'spiderman', 'The Doctor', '&#26085;&#26412;', 'a = &Delta;v/&Delta;t', 'The Sims', 'CHIM', 'life', 'stuff', 'the weather', 'python', 'COBOL', 'campfires', 'Google Buzz', 'emoji', 'Totoro', 'Constantine', 'ideas', 'GitHub', 'Android', 'iOS', 'GNU/Linux', 'Arch Linux', 'Ubuntu', 'xkcd', 'tents', 'creeps', 'corn crisps', '#rebellion', 'Briggleybear', 'Dragonborns', 'wabbajacks', '&#3232;_&#3232;', 'ISIL/ISIS', 'women', 'men', 'Google', 'Apple', 'apples', 'kiwifruit'];
+var topics = ['MicroPad', 'Nick', 'Bitcoin', 'your mum', 'homework', 'procrastination', 'tautology', 'anything', 'spiderman', 'The Doctor', '&#26085;&#26412;', 'a = &Delta;v/&Delta;t', 'The Sims', 'CHIM', 'life', 'stuff', 'the weather', 'python', 'COBOL', 'campfires', 'Google Buzz', 'emoji', 'Totoro', 'Constantine', 'ideas', 'GitHub', 'Android', 'iOS', 'GNU/Linux', 'Arch Linux', 'Ubuntu', 'xkcd', 'tents', 'creeps', 'corn crisps', '#rebellion', 'Briggleybear', 'Dragonborns', 'wabbajacks', '&#3232;_&#3232;', 'Google', 'Apple', 'apples', 'kiwifruit'];
 
 //NSFW posts
 if (store.get('showNSFW')) {
@@ -22,15 +22,6 @@ ws.on('new post', function(postData) {
 	if (currentPageFile != "permalink.html" || $("#posts > section").length < 1) {
 		loaded = false;
 		postData = JSON.parse(postData);
-		// if (tag.length > 0) {
-		// 	var tagRegex = new RegExp("((^|\s)("+tag+"+?)(?=[\s.,:,!,?,<>,]|$))", "gmi")
-		// 	if (postData.post.match(tagRegex) == null) {
-		// 		return;
-		// 	}
-		// 	else {
-		// 		console.log(postData.post.match(tagRegex));
-		// 	}
-		// }
 		var newHTML = '';
 
 		//Handle NSFW posts
@@ -44,7 +35,7 @@ ws.on('new post', function(postData) {
 				
 				//Tags
 				switch (submitterHash) {
-					case "324411d31d789ba374008ab7960dfa2f":
+					case "admin":
 						newHTML = newHTML + " [admin]";
 						break;
 				}
@@ -117,7 +108,7 @@ ws.on('new post', function(postData) {
 		$('#posts').on('submit','#commentForm',function(e) {
 			e.preventDefault();
 			
-			ws.emit('submit comment', JSON.stringify({
+			sendToAPI('submit comment', JSON.stringify({
 				comment: $(this).find('textarea[name="postText"]').val(),
 				catcher: $(this).find('input[name="catcher"]').val(),
 				parent: $(this).find('input[name="parent"]').val()
@@ -207,7 +198,7 @@ ws.on('new comment', function(commentData) {
 	}
 
 	if (commentData.getChildren) {
-		ws.emit('get comment thread', JSON.stringify({
+		sendToAPI('get comment thread', JSON.stringify({
 			parent: commentData.id
 		}));
 	}
@@ -229,7 +220,7 @@ function loadCommentThread(parent, post) {
 	$('#goBackCommentBtn'+post).show();
 
 	//API call to get all comments with our parent
-	ws.emit('get comment thread', JSON.stringify({
+	sendToAPI('get comment thread', JSON.stringify({
 		parent: parent
 	}));
 }
@@ -238,7 +229,7 @@ function exitThread(parent) {
 	$('#comments'+parent).empty();
 	$('#goBackCommentBtn'+parent).hide();
 
-	ws.emit('get bulk comments', JSON.stringify({
+	sendToAPI('get bulk comments', JSON.stringify({
 		parent: parent
 	}));
 }
@@ -408,7 +399,7 @@ ws.on('notification', function(params) {
 });
 
 function stoke(postID) {
-	ws.emit('stoke', JSON.stringify({
+	sendToAPI('stoke', JSON.stringify({
 		id: postID
 	}));
 }
@@ -424,7 +415,7 @@ function runSearch(searchQuery) {
 	$('#submitFAB').hide();
 
 	page = 1;
-	ws.emit('get posts', JSON.stringify({
+	sendToAPI('get posts', JSON.stringify({
 		size: '64x64',
 		search: tag,
 		startingPost: page*50-50,
@@ -445,7 +436,7 @@ function exitSearch() {
 
 	$('#posts').html('');
 	page = 1;
-	ws.emit('get posts', JSON.stringify({
+	sendToAPI('get posts', JSON.stringify({
 		size: '64x64',
 		search: tag,
 		startingPost: page*50-50,
@@ -465,12 +456,12 @@ function loadUserPage(id) {
 	$('#loadingMessage').show();
 	$('#submitFAB').hide();
 
-	ws.emit('get total score', JSON.stringify({
+	sendToAPI('get total score', JSON.stringify({
 		id: userID
 	}));
 
 	page = 1;
-	ws.emit('get posts', JSON.stringify({
+	sendToAPI('get posts', JSON.stringify({
 		size: '64x64',
 		search: tag,
 		startingPost: page*50-50,
@@ -483,7 +474,7 @@ function loadUserPage(id) {
 function loadMore() {
 	$('#loadingMessage').show();
 	page += 1;
-	ws.emit('get posts', JSON.stringify({
+	sendToAPI('get posts', JSON.stringify({
 		size: '64x64',
 		search: tag,
 		startingPost: page*50-50,
@@ -513,7 +504,7 @@ $(document).ready(function() {
 	$('.submit_open').html('WRITE A POST about '+topics[Math.floor(Math.random() * topics.length)]);
 
 	//Get notifications
-	ws.emit('get notifications');
+	sendToAPI('get notifications');
 });
 
 function refresh(nsfw) {
@@ -524,7 +515,7 @@ function refresh(nsfw) {
 	page = 1;
 	$('#posts').html('');
 	$('#loadingMessage').show();
-	ws.emit('get posts', JSON.stringify({
+	sendToAPI('get posts', JSON.stringify({
 		size: '64x64',
 		search: tag,
 		startingPost: page*50-50,
@@ -538,7 +529,7 @@ function refresh(nsfw) {
 window.setInterval(function(){
 	//Put a topic in the write a post button every 2 seconds
 	$('.submit_open').html('WRITE A POST about '+topics[Math.floor(Math.random() * topics.length)]);
-	ws.emit('get notifications');
+	// sendToAPI('get notifications');
 }, 2000);
 
 function subscribe(id, subscribe) {
@@ -550,8 +541,39 @@ function subscribe(id, subscribe) {
 		$('#subscribeBtn'+id).html('<a class="btn" href="javascript:void(0);" onclick="subscribe('+id+', true)">Subscribe to new comments</a>')
 	}
 
-	ws.emit('subscribe', JSON.stringify({
+	sendToAPI('subscribe', JSON.stringify({
 		id: id,
 		subscribe: subscribe
 	}));
+}
+
+function cleanInput(input) {
+	const element = document.createElement('div');
+	element.innerHTML = input;
+	return element.innerText;
+}
+
+// This is a quick hack because all this code is going soon
+function sendToAPI(event, params) {
+	let campfyreId = store.get('campfyreId');
+
+	if (!campfyreId) {
+		campfyreId = generateGuid();
+		store.set('campfyreId', campfyreId);
+	}
+
+	ws.emit(event, JSON.stringify({
+		...params ? JSON.parse(params) : {},
+		campfyreId
+	}));
+}
+
+// Thanks https://stackoverflow.com/a/105074
+function generateGuid() {
+	function s4() {
+		return Math.floor((1 + Math.random()) * 0x10000)
+			.toString(16)
+			.substring(1);
+	}
+	return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
 }

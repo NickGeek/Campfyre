@@ -18,9 +18,8 @@
   },
   "homepage": "https://github.com/NickGeek/Campfyre",
   "dependencies": {
-    "MD5": "^1.2.1",
     "express": "^4.10.1",
-    "mysql": "~2.5.2",
+    "mysql": "^2.16.0",
     "socket.io": "^1.2.0"
   }
 }
