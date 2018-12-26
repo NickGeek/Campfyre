@@ -30,20 +30,20 @@ ws.on('new post', function(postData) {
 		}
 
 		newHTML = newHTML + "<section id="+postData.id+" class='card'>";
-			var submitterHash = postData.ip.split("g/")[1].split(".")[0];
-			newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+submitterHash+"\")'><img src='"+postData.ip+"' /></a> says...<br></i><a href='permalink.html?id="+postData.id+"'>Permalink</a> | <span data-livestamp="+postData.time+"></span>";
-				
+		var submitterHash = postData.ip.split("g/")[1].split(".")[0];
+		newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+submitterHash+"\")'><img src='"+postData.ip+"' /></a> says...<br></i><a href='permalink.html?id="+postData.id+"'>Permalink</a> | <span data-livestamp="+postData.time+"></span>";
+
 				//Tags
 				switch (submitterHash) {
 					case "admin":
-						newHTML = newHTML + " [admin]";
-						break;
+					newHTML = newHTML + " [admin]";
+					break;
 				}
 				if (postData.nsfw == 1) {
 					newHTML = newHTML + " [nsfw]";
 				}
-			newHTML = newHTML + "</p>";
-			newHTML = newHTML + '<h3 id="postText'+postData.id+'" style="text-align: left;">'+postData.post.replace(new RegExp('\n','g'), '<br />')+'</h3>';
+				newHTML = newHTML + "</p>";
+				newHTML = newHTML + '<h3 id="postText'+postData.id+'" style="text-align: left;">'+postData.post.replace(new RegExp('\n','g'), '<br />')+'</h3>';
 
 			//Attachments
 			if (postData.attachment != "n/a") {
@@ -61,27 +61,27 @@ ws.on('new post', function(postData) {
 				newHTML = newHTML + ' <span id="subscribeBtn'+postData.id+'"><a class="btn" href="javascript:void(0);" onclick="subscribe('+postData.id+', false)">Unsubscribe to new comments</a></span>';
 			}
 			newHTML = newHTML + '<div style="display: none;" id="commentForm'+postData.id+'">';
-				newHTML = newHTML + '<br><br><form id="commentForm" method="post">';
-					newHTML = newHTML + '<input type="hidden" name="type" value="comment">';
-					newHTML = newHTML + '<input type="hidden" name="parent" value="'+postData.id+'">';
-					newHTML = newHTML + '<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, '+postData.id+')" onkeyup="countChar(this, '+postData.id+')" required></textarea>';
-					newHTML = newHTML + '<div style="font-family: "Lato", serif;" id="counter'+postData.id+'">256/256</div><br />';
-					newHTML = newHTML + '<input type="text" name="catcher" style="display: none;">';
-					newHTML = newHTML + '<input class="btn" type="submit" name="post" value="Post">';
-				newHTML = newHTML + '</form>';
-				newHTML = newHTML + '<a id="goBackCommentBtn'+postData.id+'" style="display: none;" href="javascript:void(0);" onclick="exitThread('+postData.id+');"><< Go Back</a>';
+			newHTML = newHTML + '<br><br><form id="commentForm" method="post">';
+			newHTML = newHTML + '<input type="hidden" name="type" value="comment">';
+			newHTML = newHTML + '<input type="hidden" name="parent" value="'+postData.id+'">';
+			newHTML = newHTML + '<textarea id="postText" name="postText" placeholder="Comment text" class="rounded" rows="5" onkeydown="countChar(this, '+postData.id+')" onkeyup="countChar(this, '+postData.id+')" required></textarea>';
+			newHTML = newHTML + '<div style="font-family: "Lato", serif;" id="counter'+postData.id+'">256/256</div><br />';
+			newHTML = newHTML + '<input type="text" name="catcher" style="display: none;">';
+			newHTML = newHTML + '<input class="btn" type="submit" name="post" value="Post">';
+			newHTML = newHTML + '</form>';
+			newHTML = newHTML + '<a id="goBackCommentBtn'+postData.id+'" style="display: none;" href="javascript:void(0);" onclick="exitThread('+postData.id+');"><< Go Back</a>';
 				//Comments have been posted lets show them
 				newHTML = newHTML + '<div id="comments'+postData.id+'">';
-					for (var i = 0; i < postData.comments.length; ++i) {
-						var commenterHash = postData.comments[i].ip.split("g/")[1].split(".")[0];
-						newHTML = newHTML + '<div style="padding-left: 0px;" id="comment'+postData.comments[i].id+'">';
-						newHTML = newHTML + '<hr />';
-						newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+postData.comments[i].ip+"' /></a> says...<br></i><span data-livestamp="+postData.comments[i].time+" />";
+				for (var i = 0; i < postData.comments.length; ++i) {
+					var commenterHash = postData.comments[i].ip.split("g/")[1].split(".")[0];
+					newHTML = newHTML + '<div style="padding-left: 0px;" id="comment'+postData.comments[i].id+'">';
+					newHTML = newHTML + '<hr />';
+					newHTML = newHTML + "<p><i id='ip'><a href='javascript:void(0);' onclick='loadUserPage(\""+commenterHash+"\")'><img src='"+postData.comments[i].ip+"' /></a> says...<br></i><span data-livestamp="+postData.comments[i].time+" />";
 						//Tags
 						switch (commenterHash) {
 							case "324411d31d789ba374008ab7960dfa2f":
-								newHTML = newHTML + " [admin]";
-								break;
+							newHTML = newHTML + " [admin]";
+							break;
 						}
 						newHTML = newHTML + "</p>";
 						newHTML = newHTML + '<h4 id="commentText">'+postData.comments[i].comment.replace(new RegExp('\r?\n','g'), '<br />')+'</h4>';
@@ -91,17 +91,17 @@ ws.on('new post', function(postData) {
 						newHTML = newHTML + '</div>';
 						newHTML = newHTML + '</div>';
 					}
-				newHTML = newHTML + '</div>';
-			newHTML = newHTML + '</div>';
-		newHTML = newHTML + "</section>";
+					newHTML = newHTML + '</div>';
+					newHTML = newHTML + '</div>';
+					newHTML = newHTML + "</section>";
 
-		var posts = document.getElementById('posts');
-		if (postData.loadBottom) {
-			posts.innerHTML = posts.innerHTML + newHTML;
-		}
-		else {
-			posts.innerHTML = newHTML + posts.innerHTML;
-		}
+					var posts = document.getElementById('posts');
+					if (postData.loadBottom) {
+						posts.innerHTML = posts.innerHTML + newHTML;
+					}
+					else {
+						posts.innerHTML = newHTML + posts.innerHTML;
+					}
 
 		//Submit a comment
 		$('#posts').off('submit');
@@ -138,7 +138,7 @@ ws.on('new post', function(postData) {
 
 		loaded = true;
 		$('#loadingMessage').hide();
-}
+	}
 });
 
 ws.on('new comment', function(commentData) {
@@ -158,8 +158,8 @@ ws.on('new comment', function(commentData) {
 	//Tags
 	switch (commenterHash) {
 		case "324411d31d789ba374008ab7960dfa2f":
-			newHTML = newHTML + " [admin]";
-			break;
+		newHTML = newHTML + " [admin]";
+		break;
 	}
 	newHTML = newHTML + "</p>";
 	if ($('#comment'+commentData.parentComment).parents().length >= 13) {
@@ -236,52 +236,96 @@ function exitThread(parent) {
 
 //Attachments
 function attach(url) {
-var attachCode = '';
-var URLbits = document.createElement('a');
-URLbits.href = url;
+	url = cleanInput(url);
+	var attachCode = '';
+	var URLbits = document.createElement('a');
+	URLbits.href = url;
 
-//Get hostname
-var hostname = URLbits.hostname;
-var sitename = hostname.match(/(youtube|youtu.be|imgur.com|sharepic.tk|puu.sh)/i);
+	//Get hostname
+	var hostname = URLbits.hostname;
+	var sitename = hostname.match(/(youtube|youtu.be|imgur.com|sharepic.tk|puu.sh)/i);
 
-//Create attachement code depending on site
-if (sitename != null) {
-	switch (sitename[0]) {
-		case "youtu.be":
-		case "youtube":
-			//Thanks to http://stackoverflow.com/questions/3452546/javascript-regex-how-to-get-youtube-video-id-from-url
-			var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-			var match = url.match(regExp);
-			var videoid = match[2];
+	//Create attachement code depending on site
+	if (sitename != null) {
+		switch (sitename[0]) {
+			case "youtu.be":
+			case "youtube":
+				//Thanks to http://stackoverflow.com/questions/3452546/javascript-regex-how-to-get-youtube-video-id-from-url
+				var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+				var match = url.match(regExp);
+				var videoid = match[2];
 
-			var width = '95%';
-			var height = '420';
-			attachCode = '<br /><iframe width="'+width+'" height="'+height+'" src="http://youtube.com/embed/'+videoid+'" frameborder="0" allowfullscreen></iframe>';
-			break;
-		case "imgur.com":
-			var imgid = url.split("/");
-			imgid = imgid[imgid.length-1];
-			imgid = imgid.split(".");
-			imgid = imgid[0];
-			attachCode = '<a class="imgContainer" target="_blank" href="http://i.imgur.com/'+imgid+'.png"><img src="http://i.imgur.com/'+imgid+'.png" /></a>';
-			break;
-		case "sharepic.tk":
-			attachCode = '<a class="imgContainer" target="_blank" href="'+url+'"><img src="'+url+'" /></a>';
-			break;
-		case "puu.sh":
-			var imgid = url.split("http://puu.sh/")[1].split(".")[0];
-			attachCode = '<a class="imgContainer" target="_blank" href="http://puu.sh/'+imgid+'.png"><img src="http://puu.sh/'+imgid+'.png" /></a>';
-			break;
-		default:
-			attachCode = 'Attached URL: <a target="_blank" href="'+url+'">'+url+'</a>';
-			break;
+				var width = '100%';
+				var height = '420';
+
+				var iframe = document.createElement('iframe');
+				iframe.width = width;
+				iframe.height = height;
+				iframe.src = `http://youtube.com/embed/${videoid}`;
+				iframe.frameBorder = 0;
+				iframe.allowFullscreen = true;
+
+				attachCode = '<br />' + iframe.outerHTML;
+				break;
+
+			case "imgur.com":
+				var imgid = url.split("/");
+				imgid = imgid[imgid.length-1];
+				imgid = imgid.split(".");
+				imgid = imgid[0];
+
+				var imageLink = document.createElement('a');
+				imageLink.classList.add('imgContainer');
+				imageLink.target = '_blank';
+				imageLink.rel = 'noopener'
+				imageLink.href = `https://i.imgur.com/${imgid}.png`;
+
+				var image = document.createElement('img');
+				image.src = imageLink.href;
+
+				imageLink.appendChild(image);
+
+				attachCode = imageLink.outerHTML;
+				break;
+
+			case "puu.sh":
+				var imgid = url.split("http://puu.sh/")[1].split(".")[0];
+
+				var imageLink = document.createElement('a');
+				imageLink.classList.add('imgContainer');
+				imageLink.target = '_blank';
+				imageLink.rel = 'noopener'
+				imageLink.href = `http://puu.sh/${imgid}.png`;
+
+				var image = document.createElement('img');
+				image.src = imageLink.href;
+
+				imageLink.appendChild(image);
+
+				attachCode = imageLink.outerHTML;
+				break;
+
+			default:
+				var link = document.createElement('a');
+				link.target = '_blank';
+				link.rel = 'noopener';
+				link.href = url;
+				link.innerHTML = url;
+
+				attachCode = 'Attached URL: ' + link.outerHTML;
+				break;
+		}
+	} else {
+		var link = document.createElement('a');
+		link.target = '_blank';
+		link.rel = 'noopener';
+		link.href = url;
+		link.innerHTML = url;
+
+		attachCode = 'Attached URL: ' + link.outerHTML;
 	}
-}
-else {
-	attachCode = 'Attached URL: <a target="_blank" href="'+url+'">'+url+'</a>';
-}
 
-return attachCode;
+	return attachCode;
 }
 
 //Character counter
@@ -298,7 +342,7 @@ function countChar(val, id) {
 
 //Comment form
 function showCommentForm(id) {
-divToShow = "commentForm"+id;
+	divToShow = "commentForm"+id;
 //Show the comments div
 document.getElementById(divToShow).style.display = 'inline';
 //Hide the show button
@@ -308,7 +352,7 @@ document.getElementById("hideCommentButton"+id).style.display = "";
 
 //Hide the comments
 function hideCommentForm(id) {
-divToHide = "commentForm"+id;
+	divToHide = "commentForm"+id;
 //Hide the comments div
 document.getElementById(divToShow).style.display = 'none';
 
@@ -320,21 +364,21 @@ document.getElementById("hideCommentButton"+id).style.display = "none";
 //Auto links
 var url_regex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
 function linkURLs(text) {
-return text.replace(
-	url_regex,
-	'<a target="_blank" href="$1">$1</a>'
-);
+	return text.replace(
+		url_regex,
+		'<a target="_blank" href="$1">$1</a>'
+		);
 }
 
 function findLinks(id) {
-$('#postText'+id).each(function() {
-	$(this).html(linkURLs($(this).html()));
-});
+	$('#postText'+id).each(function() {
+		$(this).html(linkURLs($(this).html()));
+	});
 };
 
 function highlighter(id) {
-findLinks(id);
-findHashtags(id);
+	findLinks(id);
+	findHashtags(id);
 }
 
 //#YOLOSWAG - thanks to http://stackoverflow.com/questions/4913555/find-twitter-hashtags-using-jquery-and-apply-a-link
@@ -342,21 +386,21 @@ findHashtags(id);
 var hashtag_regexp = /(#(.+?)(?=[\s.,:,!,?,<>,]|$))/gmi;
 
 function linkHashtags(text) {
-return text.replace(
-	hashtag_regexp,
-	'<a href="javascript:void(0);" onclick="runSearch(\'$1\')">$1</a>'
-);
+	return text.replace(
+		hashtag_regexp,
+		'<a href="javascript:void(0);" onclick="runSearch(\'$1\')">$1</a>'
+		);
 }
 
 function findHashtags(id) {
-$('#postText'+id).each(function() {
-	$(this).html(linkHashtags($(this).html()));
-});
+	$('#postText'+id).each(function() {
+		$(this).html(linkHashtags($(this).html()));
+	});
 };
 
 $.urlParam = function(name, url) {
 	if (!url) {
-	 url = window.location.href;
+		url = window.location.href;
 	}
 	var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(url);
 	if (!results) { 
@@ -572,8 +616,8 @@ function sendToAPI(event, params) {
 function generateGuid() {
 	function s4() {
 		return Math.floor((1 + Math.random()) * 0x10000)
-			.toString(16)
-			.substring(1);
+		.toString(16)
+		.substring(1);
 	}
 	return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
 }
