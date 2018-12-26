@@ -450,7 +450,7 @@ function getNotifications(ip, socket) {
 }
 
 app.get('/', function(req, res) {
-	res.send("We didn't start the fire. It was always turning. Since the world's been burning.");
+	res.send("We didn't start the fire. It was always burning. Since the world's been turning.");
 });
 
 ws.on('connection', function(socket) {

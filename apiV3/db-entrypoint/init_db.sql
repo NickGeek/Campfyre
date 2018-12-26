@@ -2,6 +2,7 @@ CREATE DATABASE IF NOT EXISTS campfyre DEFAULT CHARSET utf8mb4;
 CREATE TABLE IF NOT EXISTS posts (
   id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
   ip VARCHAR(64) NOT NULL,
+  hash_id VARCHAR(64) NOT NULL,
   post VARCHAR(500) NOT NULL,
 
   # This will also be its own table in the future
