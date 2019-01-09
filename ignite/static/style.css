@@ -1,0 +1,80 @@
+html {
+    font-family: 'Lato', serif;
+    color: #fff;
+}
+
+body {
+    background: url(./img/bg1.jpg) center center / cover no-repeat fixed
+}
+
+.centre {
+    text-align: center;
+}
+
+.title {
+    font-family: 'Lato', serif;
+    font-weight: 900;
+    font-size: 4em;
+    color: #ff6900;
+    margin: 10px 0;
+}
+
+.back-link {
+    margin-top: 0;
+}
+
+.info-list {
+    font-size: 17.5px;
+}
+
+.info-list li {
+    padding-bottom: 10px;
+}
+
+h2, h3, h4 {
+    margin-bottom: 0.1em;
+    font-weight: 100;
+}
+
+.page-header h2 {
+    font-size: 2em;
+    margin-top: 5px;
+}
+
+/* Links Start */
+a:link {
+    color: #ccc;
+    text-decoration: none;
+}
+
+a:visited {
+    color: #ccc;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+a:active {
+    color: #fff;
+    text-decoration: underline;
+}
+/* Links End */
+
+.info-page {
+    width: 100%;
+    max-width: 700px;
+    margin: auto;
+}
+
+article {
+    text-align: justify;
+}
+
+/* BEM Stuff from here on out */
+.page-title__subtitle {
+    font-weight: 100;
+    font-size: 1rem;
+}
