@@ -24,7 +24,6 @@ let app;
 	(function startApp() {
 		const campfyreId = safeStorage.getItem(CAMPFYRE_ID_STORAGE_KEY);
 		app = Elm.Main.init({
-			node: document.getElementById('app'),
 			flags: {
 				campfyreId,
 				postId: 1

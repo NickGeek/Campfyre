@@ -21,6 +21,7 @@ body {
 
 .back-link {
     margin-top: 0;
+    margin-bottom: 50px;
 }
 
 .info-list {
@@ -69,8 +70,62 @@ a:active {
     margin: auto;
 }
 
+.avatar > span {
+    font-style: italic;
+}
+
 article {
     text-align: justify;
+}
+
+article.post {
+    /* Centre */
+    margin-left: auto;
+    margin-right: auto;
+
+    /* Sizing */
+    max-width: 800px;
+    min-height: 300px;
+    overflow: hidden;
+
+    /* Colours */
+    background-color: white;
+    color: #333;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
+
+article.post.with-attachment {
+    display: flex;
+}
+
+article.post > p {
+    width: 100%;
+    padding: 10px;
+}
+
+article.post.with-attachment > p {
+    width: 120%;
+}
+
+article.post.with-attachment > a {
+    width: 100%;
+    overflow: hidden;
+}
+
+article.post.with-attachment .attachment {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    transition: all 0.7s ease;
+
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+article.post.with-attachment .attachment:hover {
+    transform: scale(1.05);
 }
 
 /* BEM Stuff from here on out */
