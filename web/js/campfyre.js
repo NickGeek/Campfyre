@@ -3,8 +3,8 @@ var tag = "";
 var loaded = false;
 var page = 1;
 var lastPost = 0;
-// var ws = io('ws://'+window.location.hostname+':3973');
-var ws = io('wss://api.campfyre.memes.nz:443');
+var ws = io('ws://'+window.location.hostname+':3973');
+// var ws = io('wss://api.campfyre.memes.nz:443');
 var userID = '';
 var currentPageFile = location.pathname.substring(1);
 var topics = ['MicroPad', 'Nick', 'Bitcoin', 'your mum', 'homework', 'procrastination', 'tautology', 'anything', 'spiderman', 'The Doctor', '&#26085;&#26412;', 'a = &Delta;v/&Delta;t', 'The Sims', 'CHIM', 'life', 'stuff', 'the weather', 'python', 'COBOL', 'campfires', 'Google Buzz', 'emoji', 'Totoro', 'Constantine', 'ideas', 'GitHub', 'Android', 'iOS', 'GNU/Linux', 'Arch Linux', 'Ubuntu', 'xkcd', 'tents', 'creeps', 'corn crisps', '#rebellion', 'Briggleybear', 'Dragonborns', 'wabbajacks', '&#3232;_&#3232;', 'Google', 'Apple', 'apples', 'kiwifruit'];
@@ -495,7 +495,7 @@ function loadUserPage(id) {
 	tag = ''
 	userID = id.split("/")[0];
 	$('#submit').hide();
-	$('#searchTitle').html('<h2>Viewing posts from <img src="http://robohash.org/'+userID+'.png?set=set3&size=64x64"/></h2>');
+	$('#searchTitle').html('<h2>Viewing posts from <img src="http://robohash.org/'+userID+'.png?set=set4&size=64x64"/></h2>');
 	$('#goBack').show();
 	$('#posts').html('');
 	$('#loadingMessage').show();

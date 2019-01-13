@@ -1,8 +1,13 @@
 module Main exposing (main)
 
 import Browser
-import Html exposing (Html, a, article, div, h1, h2, img, p, span, text)
+import Html exposing (Html, a, article, button, div, h1, h2, header, img, p, span, text)
 import Html.Attributes exposing (classList, href, id, rel, src, style, target)
+import Http exposing (get)
+import Json.Decode as Decode exposing (Decoder, int, string)
+import Json.Decode.Pipeline exposing (required)
+import Svgs exposing (stokeSvg)
+import Time exposing (millisToPosix)
 
 
 
@@ -24,7 +29,8 @@ main =
 
 type alias Model =
     { campfyreId : String
-    , postId : Maybe Int
+    , postId : Int
+    , post : Maybe (Result Http.Error Post)
     }
 
 
@@ -37,33 +43,84 @@ type alias JSModel =
 type alias Post =
     { id : Int
     , campfyreId : String
-    , time : Int
+    , time : Time.Posix
     , score : Int
+    , commentCount : Int
     , content : String
     , attachment : Maybe String
     }
 
 
-defaultModel : Model
-defaultModel =
-    { campfyreId = "test_id", postId = Nothing }
-
-
-init : Maybe JSModel -> ( Model, Cmd Msg )
+init : JSModel -> ( Model, Cmd Msg )
 init modelFromJs =
-    ( Maybe.withDefault defaultModel (Maybe.map convertJsModel modelFromJs), Cmd.none )
+    let
+        model =
+            convertJsModel modelFromJs
+
+        initCmd : Model -> Cmd Msg
+        initCmd m =
+            get { url = "http://localhost:3973/tmp-api/post/" ++ String.fromInt m.postId, expect = Http.expectJson GotPostJson postDecoder }
+
+        initPage : Model -> Cmd Msg -> ( Model, Cmd Msg )
+        initPage m cmd =
+            ( m, cmd )
+    in
+    initPage model (initCmd model)
 
 
 convertJsModel : JSModel -> Model
 convertJsModel jsModel =
-    { campfyreId = Maybe.withDefault "test_id" jsModel.campfyreId
-    , postId = Just jsModel.postId
+    { campfyreId = Maybe.withDefault "G6P" jsModel.campfyreId
+    , postId = jsModel.postId
+    , post = Nothing
     }
 
 
 getMetaPageTitle : Model -> String
 getMetaPageTitle model =
-    "Post #" ++ Maybe.withDefault "loading" (Maybe.map String.fromInt model.postId) ++ " | Campfyre Ignite"
+    "Post #" ++ String.fromInt model.postId ++ " | Campfyre Ignite"
+
+
+type alias ApiPost =
+    { id : Int
+    , commentNum : String
+    , hash_id : String
+    , time : Int
+    , score : Int
+    , nsfw : Int
+    , attachment : String
+    , post : String
+    }
+
+
+postDecoder : Decoder ApiPost
+postDecoder =
+    Decode.succeed ApiPost
+        |> required "id" int
+        |> required "commentNum" string
+        |> required "hash_id" string
+        |> required "time" int
+        |> required "score" int
+        |> required "nsfw" int
+        |> required "attachment" string
+        |> required "post" string
+
+
+toPost : ApiPost -> Post
+toPost apiPost =
+    { id = apiPost.id
+    , campfyreId = apiPost.hash_id
+    , time = millisToPosix apiPost.time
+    , score = apiPost.score
+    , commentCount = apiPost.commentNum |> String.left 1 |> String.toInt |> Maybe.withDefault 0
+    , content = apiPost.post
+    , attachment =
+        if apiPost.attachment /= "n/a" then
+            Just apiPost.attachment
+
+        else
+            Nothing
+    }
 
 
 
@@ -72,6 +129,7 @@ getMetaPageTitle model =
 
 type Msg
     = UpdateCampfyreId String
+    | GotPostJson (Result Http.Error ApiPost)
 
 
 update : Msg -> Model -> ( Model, Cmd msg )
@@ -79,6 +137,14 @@ update msg model =
     case msg of
         UpdateCampfyreId newId ->
             ( { model | campfyreId = newId }, Cmd.none )
+
+        GotPostJson res ->
+            case res of
+                Ok p ->
+                    ( { model | post = Just <| (Ok <| (p |> toPost)) }, Cmd.none )
+
+                Err e ->
+                    ( { model | post = Just (Err e) }, Cmd.none )
 
 
 
@@ -88,8 +154,22 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div [ classList [ ( "centre", True ) ] ]
-        [ pageHeader pageTitle True
-        , postCard { id = 1, campfyreId = "G6P", time = 123, score = 0, content = "Look how pretty this new post element looks!", attachment = Just "https://i.imgur.com/SzLOUfI.jpg" }
+        [ pageHeader pageTitle model.campfyreId True
+        , case
+            model.post
+          of
+            Just postResult ->
+                case postResult of
+                    Ok post ->
+                        postCard post
+
+                    Err code ->
+                        code
+                            |> Debug.toString
+                            |> text
+
+            Nothing ->
+                loadingIndicator
         ]
 
 
@@ -101,9 +181,9 @@ pageTitle =
         ]
 
 
-pageHeader : Html Msg -> Bool -> Html Msg
-pageHeader content isSubPage =
-    div [ classList [ ( "centre", True ) ] ]
+pageHeader : Html Msg -> String -> Bool -> Html Msg
+pageHeader content campfyreId isSubPage =
+    header [ classList [ ( "centre", True ) ] ]
         ([ content ]
             ++ (if isSubPage then
                     [ backLink ]
@@ -111,7 +191,17 @@ pageHeader content isSubPage =
                 else
                     []
                )
+            ++ [ postingAs campfyreId ]
         )
+
+
+postingAs : String -> Html Msg
+postingAs campfyreId =
+    h2 [ classList [ ( "page-header__posting-as", True ) ] ]
+        [ text "Posting as "
+        , avatar campfyreId False
+        , a [ href "#!" ] [ text " (change)" ]
+        ]
 
 
 backLink : Html Msg
@@ -121,13 +211,24 @@ backLink =
 
 postCard : Post -> Html Msg
 postCard post =
+    let
+        attachmentClass : ( String, Bool )
+        attachmentClass =
+            case post.attachment of
+                Just _ ->
+                    ( "with-attachment", True )
+
+                Nothing ->
+                    ( "only-text", True )
+    in
     article
         [ id ("post" ++ String.fromInt post.id)
-        , classList [ ( "post", True ), ( "with-attachment", hasValue post.attachment ) ]
+        , classList [ ( "post", True ), attachmentClass ]
         ]
-        [ p []
-            [ avatar post.campfyreId
-            , text post.content
+        [ div [ classList [ ( "post__body", True ) ] ]
+            [ avatar post.campfyreId True
+            , p [] [ text post.content ]
+            , postCardFooter post.id post.score 0
             ]
         , case post.attachment of
             Just url ->
@@ -135,6 +236,17 @@ postCard post =
 
             Nothing ->
                 text ""
+        ]
+
+
+postCardFooter : Int -> Int -> Int -> Html Msg
+postCardFooter id score commentCount =
+    div [ classList [ ( "post__footer", True ) ] ]
+        [ button []
+            [ stokeSvg "stoke-icon"
+            , text ("Stoke (" ++ String.fromInt score ++ ")")
+            ]
+        , a [ href ("https://campfyre.memes.nz/permalink.html?id=" ++ String.fromInt id) ] [ text ("Comments (" ++ String.fromInt commentCount ++ ")") ]
         ]
 
 
@@ -153,12 +265,40 @@ attachment url =
         ]
 
 
-avatar : String -> Html Msg
-avatar campfyreId =
+avatar : String -> Bool -> Html Msg
+avatar campfyreId isQuoting =
     div [ classList [ ( "avatar", True ) ] ]
-        [ img [ src ("https://robohash.org/" ++ campfyreId ++ ".png?set=set4&size=64x64") ] []
-        , span [] [ text "says" ]
+        [ img
+            [ src
+                ("https://robohash.org/"
+                    ++ campfyreId
+                    ++ ".png?set=set4&size="
+                    ++ (if isQuoting then
+                            "64x64"
+
+                        else
+                            "42x42"
+                       )
+                )
+            ]
+            []
+        , if isQuoting then
+            span [] [ text "says…" ]
+
+          else
+            text ""
+        , if campfyreId == "admin" then
+            span [ classList [ ( "poster-label", True ) ] ] [ text "[admin]" ]
+
+          else
+            text ""
         ]
+
+
+loadingIndicator : Html Msg
+loadingIndicator =
+    p []
+        [ text "Loading..." ]
 
 
 

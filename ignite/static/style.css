@@ -7,6 +7,44 @@ body {
     background: url(./img/bg1.jpg) center center / cover no-repeat fixed
 }
 
+header {
+    margin-bottom: 50px;
+}
+
+button {
+    /* Get rid of default styles */
+    border: none;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.2;
+    margin: 0;
+    overflow: visible;
+    text-transform: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    /* Ignite Button styles */
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    transition: background 250ms ease-in-out, color 150ms ease, transform 150ms ease;
+
+    background-color: #eee;
+    color: #000;
+}
+
+button:hover {
+    background: #ff6900;
+    color: #fff;
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+button svg, button svg {
+    fill: currentColor;
+}
+
 .centre {
     text-align: center;
 }
@@ -21,7 +59,6 @@ body {
 
 .back-link {
     margin-top: 0;
-    margin-bottom: 50px;
 }
 
 .info-list {
@@ -74,6 +111,19 @@ a:active {
     font-style: italic;
 }
 
+.page-header__posting-as > .avatar {
+    display: inline;
+}
+
+.avatar > .poster-label {
+    margin-left: 0.5rem;
+    font-style: normal;
+}
+
+.page-header__posting-as img {
+    display: inline;
+}
+
 article {
     text-align: justify;
 }
@@ -82,6 +132,7 @@ article.post {
     /* Centre */
     margin-left: auto;
     margin-right: auto;
+    margin-bottom: 1rem;
 
     /* Sizing */
     max-width: 800px;
@@ -99,13 +150,24 @@ article.post.with-attachment {
     display: flex;
 }
 
-article.post > p {
+article.post > .post__body {
+    position: relative;
     width: 100%;
+    height: 100%;
+    min-height: 300px;
     padding: 10px;
 }
 
-article.post.with-attachment > p {
+article.post > .post__body > p {
+    height: 100%;
+}
+
+article.post.with-attachment > .post__body {
     width: 120%;
+}
+
+article.post.only-text > .post__body > p {
+    font-size: 1.5rem;
 }
 
 article.post.with-attachment > a {
@@ -115,7 +177,7 @@ article.post.with-attachment > a {
 
 article.post.with-attachment .attachment {
     flex: 1;
-    width: 100%;
+    width: calc(100% + 1px);
     height: 100%;
     transition: all 0.7s ease;
 
@@ -126,6 +188,29 @@ article.post.with-attachment .attachment {
 
 article.post.with-attachment .attachment:hover {
     transform: scale(1.05);
+}
+
+.post__footer {
+    position: absolute;
+    bottom: 10px;
+}
+
+.post__footer > * {
+    margin-right: 1rem;
+}
+
+.post a {
+    color: #333;
+}
+
+.post a:hover {
+    color: #000;
+}
+
+.stoke-icon {
+    width: 32px;
+    height: 32px;
+    vertical-align:middle
 }
 
 /* BEM Stuff from here on out */

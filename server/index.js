@@ -71,12 +71,12 @@ function getPosts(ip, size, search, startingPost, loadBottom, socket, reverse, u
 				}
 
 				for (var j = 0; j < comments.length; ++j) {
-					comments[j].ip = 'http://robohash.org/'+hash(salt+comments[j].ip)+'.png?set=set3&size='+size;
+					comments[j].ip = 'http://robohash.org/'+hash(salt+comments[j].ip)+'.png?set=set4&size='+size;
 				}
 
 				post.comments = comments;
 
-				post.ip = 'http://robohash.org/'+post.hash_id+'.png?set=set3&size='+size;
+				post.ip = 'http://robohash.org/'+post.hash_id+'.png?set=set4&size='+size;
 
 				if (loadBottom) {
 					post.loadBottom = true;
@@ -208,12 +208,12 @@ function submitPost(text, attachment, catcher, ip, isNsfw, socket) {
 								}
 
 								for (var j = 0; j < comments.length; ++j) {
-									comments[j].ip = 'http://robohash.org/'+hash(salt+comments[j].ip)+'.png?set=set3&size=64x64';
+									comments[j].ip = 'http://robohash.org/'+hash(salt+comments[j].ip)+'.png?set=set4&size=64x64';
 								}
 
 								post.comments = comments;
 
-								post.ip = 'http://robohash.org/'+hash(salt+post.ip)+'.png?set=set3&size=64x64';
+								post.ip = 'http://robohash.org/'+hash(salt+post.ip)+'.png?set=set4&size=64x64';
 								post.loadBottom = false;
 
 								delete post.notifyList;
@@ -263,7 +263,7 @@ function submitComment(parent, text, catcher, ip, commentParent, socket) {
 
 				con.query("SELECT * FROM comments WHERE `comment` = "+safeText+" AND `ip` = '"+ip+"' AND `time` = '"+time+"';", function(e, commentData) {
 					var commentData = commentData[commentData.length-1];
-					commentData.ip = 'http://robohash.org/'+hash(salt+commentData.ip)+'.png?set=set3&size=64x64'
+					commentData.ip = 'http://robohash.org/'+hash(salt+commentData.ip)+'.png?set=set4&size=64x64'
 					ws.emit('new comment', JSON.stringify(commentData));
 
 					//Notifications
@@ -303,7 +303,7 @@ function getCommentThread(parent, socket) {
 		if (e) throw e;
 
 		for (var i = 0; i < comments.length; ++i) {
-			comments[i].ip = 'http://robohash.org/'+hash(salt+comments[i].ip)+'.png?set=set3&size=64x64';
+			comments[i].ip = 'http://robohash.org/'+hash(salt+comments[i].ip)+'.png?set=set4&size=64x64';
 			comments[i].getChildren = true;
 			comments[i].dontCount = true;
 			socket.emit('new comment', JSON.stringify(comments[i]));
@@ -316,16 +316,24 @@ function getBulkComments(parent, socket) {
 		if (e) throw e;
 
 		for (var i = 0; i < comments.length; ++i) {
-			comments[i].ip = 'http://robohash.org/'+hash(salt+comments[i].ip)+'.png?set=set3&size=64x64';
+			comments[i].ip = 'http://robohash.org/'+hash(salt+comments[i].ip)+'.png?set=set4&size=64x64';
 			comments[i].dontCount = true;
 			socket.emit('new comment', JSON.stringify(comments[i]));
 		}
 	});
 }
 
-function getPost(size, id, socket, ip) {
+function getPostInternal(size, id, ip, callback) {
 	con.query("SELECT * FROM `posts` WHERE `id` = "+con.escape(id)+";", function(e, post) {
+		if (!post) {
+			callback({});
+			return;
+		}
 		post = post[0];
+		if (!post) {
+			callback({});
+			return;
+		}
 		con.query('SELECT * FROM comments WHERE `parent` = '+post.id+';', (function(post, e, comments) {
 			if (e) throw e;
 
@@ -337,12 +345,12 @@ function getPost(size, id, socket, ip) {
 			}
 
 			for (var j = 0; j < comments.length; ++j) {
-				comments[j].ip = 'http://robohash.org/'+hash(salt+comments[j].ip)+'.png?set=set3&size='+size;
+				comments[j].ip = 'http://robohash.org/'+hash(salt+comments[j].ip)+'.png?set=set4&size='+size;
 			}
 
 			post.comments = comments;
 
-			post.ip = 'http://robohash.org/'+hash(salt+post.ip)+'.png?set=set3&size='+size;
+			post.ip = 'http://robohash.org/'+hash(salt+post.ip)+'.png?set=set4&size='+size;
 			post.loadBottom = false;
 
 			//Are we subscribed to this post?
@@ -365,11 +373,14 @@ function getPost(size, id, socket, ip) {
 				post = { ...post };
 				delete post.voters;
 				delete post.notifyList;
-
-				socket.emit('new post', JSON.stringify(post));
+				callback(post);
 			});
 		}).bind(this, post));
 	});
+}
+
+function getPost(size, id, socket, ip) {
+	getPostInternal(size, id, ip, post => socket.emit('new post', JSON.stringify(post)));
 }
 
 function getStokeCount(id, socket) {
@@ -451,6 +462,21 @@ function getNotifications(ip, socket) {
 
 app.get('/', function(req, res) {
 	res.send("We didn't start the fire. It was always burning. Since the world's been turning.");
+});
+
+app.get('/tmp-api/post/:id', function(req, res) {
+	res.header("Access-Control-Allow-Origin", "*");
+
+	const postId = req.params.id;
+	try {
+		getPostInternal(64, postId, req.connection.remoteAddress, post => {
+			console.log(post);
+			res.send(JSON.stringify(post));
+		});
+	} catch (e) {
+		res.statusCode = 400;
+		res.send('Invalid Request');
+	}
 });
 
 ws.on('connection', function(socket) {
