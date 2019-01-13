@@ -1,4 +1,6 @@
 // Globals
+const queryParams = new URLSearchParams(window.location.search);
+
 let mockStorage = {};
 let safeStorage = window.localStorage;
 let app;
@@ -26,7 +28,7 @@ let app;
 		app = Elm.Main.init({
 			flags: {
 				campfyreId,
-				postId: 1
+				postId: +queryParams.get('id') || -1
 			}
 		});
 

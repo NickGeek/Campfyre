@@ -163,10 +163,8 @@ view model =
                     Ok post ->
                         postCard post
 
-                    Err code ->
-                        code
-                            |> Debug.toString
-                            |> text
+                    Err _ ->
+                        text "Error"
 
             Nothing ->
                 loadingIndicator
@@ -299,17 +297,3 @@ loadingIndicator : Html Msg
 loadingIndicator =
     p []
         [ text "Loading..." ]
-
-
-
--- Util
-
-
-hasValue : Maybe a -> Bool
-hasValue option =
-    case option of
-        Just _ ->
-            True
-
-        Nothing ->
-            False

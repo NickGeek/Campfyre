@@ -160,6 +160,7 @@ article.post > .post__body {
 
 article.post > .post__body > p {
     height: 100%;
+    white-space: pre-line;
 }
 
 article.post.with-attachment > .post__body {
