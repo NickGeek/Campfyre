@@ -30,6 +30,47 @@ con.connect(function(e) {
 	if (e) throw e;
 });
 
+// Real websocket interface because I don't have time to write a better server yet
+const WebSocket = require('ws');
+const wss = new WebSocket.Server({
+	port: 3974
+});
+
+// Socket.IO compat
+wss.broadcast = (action, payload) => {
+	ws.emit(action, payload);
+
+	wss.clients.forEach(client => {
+		try {
+			if (client.readyState === WebSocket.OPEN) client.send(JSON.stringify({
+				action,
+				data: JSON.parse(payload)
+			}));
+		} catch (e) {
+			console.error(e);
+		}
+	});
+}
+
+function wrapSocket(realWebSocketSocket) {
+	realWebSocketSocket._emit = (action, data) => {
+		realWebSocketSocket.send(JSON.stringify({
+			action,
+			data: JSON.parse(data)
+		}));
+	};
+
+	return realWebSocketSocket;
+}
+
+function wrapSocketIO(socketIOSocket) {
+	socketIOSocket._emit = (action, data) => {
+		socketIOSocket.emit(action, data);
+	};
+
+	return socketIOSocket;
+}
+
 // This is all horrific code, lets make it more horrific with some push notification stuff
 // campfyreId => socket
 const users = {};
@@ -103,7 +144,7 @@ function getPosts(ip, size, search, startingPost, loadBottom, socket, reverse, u
 
 					delete post.notifyList;
 					delete post.voters;
-					socket.emit('new post', JSON.stringify(post));
+					socket._emit('new post', JSON.stringify(post));
 				});
 
 			}).bind(this, i, post));
@@ -113,7 +154,8 @@ function getPosts(ip, size, search, startingPost, loadBottom, socket, reverse, u
 
 function stoke(id, ip, socket) {
 	//Check the user hasn't already voted
-	con.query("SELECT `voters` FROM posts WHERE `id` = '"+id+"'", function(e, voters) {
+	id = con.escape(parseInt(id));
+	con.query("SELECT `voters` FROM posts WHERE `id` = "+id, function(e, voters) {
 		if (e) throw e;
 
 		if (voters[0].voters){
@@ -124,16 +166,16 @@ function stoke(id, ip, socket) {
 		}
 		if (voters.indexOf(ip) == -1) {
 			//Stoke the post
-			con.query("UPDATE `posts` SET `voters` = IFNULL(CONCAT(`voters`, ',"+ip+"'), '"+ip+"') WHERE `id` = '"+con.escape(id)+"';", function (e) {
+			con.query("UPDATE `posts` SET `voters` = IFNULL(CONCAT(`voters`, ',"+ip+"'), '"+ip+"') WHERE `id` = "+id+";", function (e) {
 				if (e) throw e;
 				con.query("UPDATE `posts` SET `score` = `score` + 1 WHERE `id` = '"+con.escape(id)+"';");
-				socket.emit('success message', JSON.stringify({title: 'Post stoked', body: ''}));
+				socket._emit('success message', JSON.stringify({title: 'Post stoked', body: ''}));
 
 				//Tell everyone about the stoke
 				con.query("SELECT `score` FROM posts WHERE `id` = '"+con.escape(id)+"';", function (e, posts) {
 					if (e) throw e;
 
-					ws.emit('post stoked', JSON.stringify({
+					wss.broadcast('post stoked', JSON.stringify({
 						id: con.escape(id),
 						score: posts[0].score
 					}));
@@ -142,7 +184,7 @@ function stoke(id, ip, socket) {
 		}
 		else {
 			//Don't stoke and return an error
-			socket.emit('error message', JSON.stringify({title: 'Post not stoked', body: 'You can only stoke once'}));
+			socket._emit('error message', JSON.stringify({title: 'Post not stoked', body: 'You can only stoke once'}));
 		}
 	});
 }
@@ -219,30 +261,30 @@ function submitPost(text, attachment, catcher, ip, isNsfw, socket) {
 								delete post.notifyList;
 								delete post.voters;
 
-								ws.emit('new post', JSON.stringify(post));
-								socket.emit('success message', JSON.stringify({title: 'Post submitted', body: ''}));
+								wss.broadcast('new post', JSON.stringify(post));
+								socket._emit('success message', JSON.stringify({title: 'Post submitted', body: ''}));
 
 								//If the user isn't showing NSFW posts, and this post is NSFW show them
 								if (nsfw === 1) {
-									socket.emit('show nsfw');
+									socket._emit('show nsfw');
 								}
 							}).bind(this, post));
 						}
 						else {
-							socket.emit('success message', JSON.stringify({title: 'Post submitted', body: ''}));
+							socket._emit('success message', JSON.stringify({title: 'Post submitted', body: ''}));
 						}
 					});
 				});
 			}
 			else if (spamming) {
-				socket.emit('error message', JSON.stringify({title: 'Post not submitted', body: "You've posted too much recently"}));
+				socket._emit('error message', JSON.stringify({title: 'Post not submitted', body: "You've posted too much recently"}));
 			}
 			else {
-				socket.emit('error message', JSON.stringify({title: 'Post not submitted', body: 'Your post is too long'}));
+				socket._emit('error message', JSON.stringify({title: 'Post not submitted', body: 'Your post is too long'}));
 			}
 		}
 		else {
-			socket.emit('error message', JSON.stringify({title: 'Post not submitted', body: 'No data was received'}));
+			socket._emit('error message', JSON.stringify({title: 'Post not submitted', body: 'No data was received'}));
 		}
 	});
 }
@@ -259,12 +301,12 @@ function submitComment(parent, text, catcher, ip, commentParent, socket) {
 		if (text.length <= 256 && !spamming) {
 			con.query("INSERT INTO comments (comment, ip, parent, parentComment, time) VALUES ("+safeText+", "+con.escape(ip)+", "+con.escape(parent)+", "+con.escape(commentParent)+", '"+time+"');", function (e) {
 				//Tell the user and show the comment
-				socket.emit('success message', JSON.stringify({title: 'Comment submitted', body: ''}));
+				socket._emit('success message', JSON.stringify({title: 'Comment submitted', body: ''}));
 
 				con.query("SELECT * FROM comments WHERE `comment` = "+safeText+" AND `ip` = '"+ip+"' AND `time` = '"+time+"';", function(e, commentData) {
 					var commentData = commentData[commentData.length-1];
 					commentData.ip = 'http://robohash.org/'+hash(salt+commentData.ip)+'.png?set=set4&size=64x64'
-					ws.emit('new comment', JSON.stringify(commentData));
+					wss.broadcast('new comment', JSON.stringify(commentData));
 
 					//Notifications
 					con.query("SELECT `notifyList` FROM `posts` WHERE `id` = '"+addslashes(parent)+"';", function(e, results) {
@@ -287,14 +329,14 @@ function submitComment(parent, text, catcher, ip, commentParent, socket) {
 			});
 		}
 		else if (spamming) {
-			socket.emit('error message', JSON.stringify({title: 'Post not submitted', body: "You've posted too much recently"}));
+			socket._emit('error message', JSON.stringify({title: 'Post not submitted', body: "You've posted too much recently"}));
 		}
 		else {
-			socket.emit('error message', JSON.stringify({title: 'Post not submitted', body: 'Your post is too long'}));
+			socket._emit('error message', JSON.stringify({title: 'Post not submitted', body: 'Your post is too long'}));
 		}
 	}
 	else {
-		socket.emit('error message', JSON.stringify({title: 'Post not submitted', body: 'No data was received'}));
+		socket._emit('error message', JSON.stringify({title: 'Post not submitted', body: 'No data was received'}));
 	}
 }
 
@@ -306,7 +348,7 @@ function getCommentThread(parent, socket) {
 			comments[i].ip = 'http://robohash.org/'+hash(salt+comments[i].ip)+'.png?set=set4&size=64x64';
 			comments[i].getChildren = true;
 			comments[i].dontCount = true;
-			socket.emit('new comment', JSON.stringify(comments[i]));
+			socket._emit('new comment', JSON.stringify(comments[i]));
 		}
 	});
 }
@@ -318,7 +360,7 @@ function getBulkComments(parent, socket) {
 		for (var i = 0; i < comments.length; ++i) {
 			comments[i].ip = 'http://robohash.org/'+hash(salt+comments[i].ip)+'.png?set=set4&size=64x64';
 			comments[i].dontCount = true;
-			socket.emit('new comment', JSON.stringify(comments[i]));
+			socket._emit('new comment', JSON.stringify(comments[i]));
 		}
 	});
 }
@@ -380,7 +422,7 @@ function getPostInternal(size, id, ip, callback) {
 }
 
 function getPost(size, id, socket, ip) {
-	getPostInternal(size, id, ip, post => socket.emit('new post', JSON.stringify(post)));
+	getPostInternal(size, id, ip, post => socket._emit('new post', JSON.stringify(post)));
 }
 
 function getStokeCount(id, socket) {
@@ -391,7 +433,7 @@ function getStokeCount(id, socket) {
 		for (var l = 0; l < results.length; ++l) {
 			totalScore += results[l].score;
 		}
-		socket.emit('score result', JSON.stringify({score: totalScore}));
+		socket._emit('score result', JSON.stringify({score: totalScore}));
 	});
 }
 
@@ -417,13 +459,13 @@ function subscribe(id, subscribe, ip, socket) {
 				if (update) {
 					//Update database with new array
 					con.query("UPDATE `posts` SET `notifyList` = '"+notifyList+"' WHERE `id` = '"+addslashes(id)+"';", function(e) {
-						if (e) socket.emit('error message', JSON.stringify({title: 'Subscription failed', body: 'Please try again later'}));
+						if (e) socket._emit('error message', JSON.stringify({title: 'Subscription failed', body: 'Please try again later'}));
 
-						socket.emit('success message', JSON.stringify({title: 'Subscribed', body: ''}));
+						socket._emit('success message', JSON.stringify({title: 'Subscribed', body: ''}));
 					});
 				}
 				else {
-					socket.emit('error message', JSON.stringify({title: 'Subscription failed', body: 'You are already subscribed to this post'}));
+					socket._emit('error message', JSON.stringify({title: 'Subscription failed', body: 'You are already subscribed to this post'}));
 				}
 		});
 	}
@@ -436,9 +478,9 @@ function subscribe(id, subscribe, ip, socket) {
 						notifyList.IPs.splice(notifyList.IPs.indexOf(ip), 1);
 						notifyList = JSON.stringify(notifyList);
 						con.query("UPDATE `posts` SET `notifyList` = '"+notifyList+"' WHERE `id` = '"+addslashes(id)+"';", function(e) {
-						if (e) socket.emit('error message', JSON.stringify({title: 'Unsubscription failed', body: 'Please try again later'}));
+						if (e) socket._emit('error message', JSON.stringify({title: 'Unsubscription failed', body: 'Please try again later'}));
 
-						socket.emit('success message', JSON.stringify({title: 'Unsubscribed', body: ''}));
+						socket._emit('success message', JSON.stringify({title: 'Unsubscribed', body: ''}));
 					});
 					}
 				}
@@ -455,7 +497,7 @@ function getNotifications(ip, socket) {
 				return tmp;
 			})
 
-		socket.emit('notification', JSON.stringify(message));
+		socket._emit('notification', JSON.stringify(message));
 		con.query("DELETE FROM `notifications` WHERE `ip` = '"+addslashes(ip)+"';");
 	});
 }
@@ -470,7 +512,6 @@ app.get('/tmp-api/post/:id', function(req, res) {
 	const postId = req.params.id;
 	try {
 		getPostInternal(64, postId, req.connection.remoteAddress, post => {
-			console.log(post);
 			res.send(JSON.stringify(post));
 		});
 	} catch (e) {
@@ -480,6 +521,8 @@ app.get('/tmp-api/post/:id', function(req, res) {
 });
 
 ws.on('connection', function(socket) {
+	socket = wrapSocketIO(socket);
+
 	socket.on('get posts', function(params) {
 		try {
 			params = JSON.parse(params);
@@ -552,6 +595,86 @@ ws.on('connection', function(socket) {
 			getNotifications(getCampfyreId(params), socket);
 		}
 		catch(e) {}
+	});
+});
+
+wss.on('connection', s => {
+	s = wrapSocket(s);
+	s.on('message', data => {
+		let payload;
+		try {
+			payload = JSON.parse(data);
+		} catch (e) {
+			console.error(e);
+			return;
+		}
+
+		const {action} = payload;
+		const params = payload.data;
+
+		if (action === 'get posts') {
+			try {
+				getPosts(getCampfyreId(params), params.size, params.search, params.startingPost, params.loadBottom, s, params.reverse, params.user, params.batch);
+			}
+			catch(e) {
+			}
+		}
+		if (action === 'stoke') {
+			try {
+				var ip = getCampfyreId(params);
+				stoke(params.id, ip, s);
+			} catch(e) { console.error(e); }
+		}
+		if (action === 'submit post') {
+			try {
+				var ip = getCampfyreId(params);
+				submitPost(params.post, params.attachment, params.catcher, ip, params.nsfw, s);
+			} catch(e) { }
+		}
+		if (action === 'submit comment') {
+			try {
+				var ip = getCampfyreId(params);
+				submitComment(params.parent, params.comment, params.catcher, ip, params.commentParent, s);
+			} catch(e) { }
+		}
+		if (action === 'get comment thread') {
+			try {
+				getCommentThread(params.parent, s);
+			}
+			catch (e) {}
+		}
+		if (action === 'get bulk comment') {
+			try {
+				getBulkComments(params.parent, s);
+			}
+			catch (e) {}
+		}
+		if (action === 'get post') {
+			try {
+				getPost(params.size, params.id, s, getCampfyreId(params));
+			}
+			catch(e) {
+			}
+		}
+		if (action === 'get total score') {
+			try {
+				getStokeCount(params.id, s);
+			}
+			catch(e) {}
+		}
+		if (action === 'subscribe') {
+			try {
+				subscribe(params.id, params.subscribe, getCampfyreId(params), s);
+			}
+			catch(e) {}
+		}
+		if (action === 'get notifications') {
+			try {
+				users[getCampfyreId(params)] = s;
+				getNotifications(getCampfyreId(params), s);
+			}
+			catch(e) {}
+		}
 	});
 });
 

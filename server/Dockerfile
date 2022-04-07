@@ -13,3 +13,4 @@ ADD index.js /www/campfyre-api
 CMD ["node", "index.js"]
 
 EXPOSE 3973
+EXPOSE 3974

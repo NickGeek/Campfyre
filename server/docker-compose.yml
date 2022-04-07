@@ -21,4 +21,5 @@ services:
         condition: service_healthy
     ports:
       - 3973:3973
+      - 3974:3974
     env_file: ./api.env

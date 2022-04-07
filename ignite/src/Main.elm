@@ -7,7 +7,7 @@ import Http exposing (get)
 import Json.Decode as Decode exposing (Decoder, int, string)
 import Json.Decode.Pipeline exposing (required)
 import Svgs exposing (stokeSvg)
-import Time exposing (millisToPosix)
+import Time exposing (millisToPosix, now)
 
 
 
@@ -164,7 +164,18 @@ view model =
                         postCard post
 
                     Err _ ->
-                        text "Error"
+                        postCard
+                            (toPost
+                                { id = 123
+                                , hash_id = "1234"
+                                , time = 1572691392389
+                                , score = 2
+                                , commentNum = "3 comments"
+                                , nsfw = 0
+                                , post = "Test"
+                                , attachment = "https://images.unsplash.com/photo-1572606848633-e5cbf647b121?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1277&q=80"
+                                }
+                            )
 
             Nothing ->
                 loadingIndicator
