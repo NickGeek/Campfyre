@@ -53,7 +53,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
     String imageID;
     Socket ws;
 //    String serverURI = "http://192.168.1.54:3973"; // Comment this out
-    String serverURI = "http://campfyre.org:3973"; // Uncomment this
+    String serverURI = "https://campfyre-memes-nz.herokuapp.com:443"; // Uncomment this
     Integer id;
     Gson gson = new Gson();
 
@@ -128,7 +128,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
                                 StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
                                 StrictMode.setThreadPolicy(policy);
                                 try {
-                                    url = new URL("http://i.imgur.com/" + imageID + "l.png");
+                                    url = new URL("https://i.imgur.com/" + imageID + "l.png");
                                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                                     connection.setDoInput(true);
                                     connection.connect();
@@ -214,7 +214,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
                     StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
                     StrictMode.setThreadPolicy(policy);
                     try {
-                        url = new URL(imageId.get(position));
+                        url = new URL(imageId.get(position).replace("http://", "https://"));
                         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                         connection.setDoInput(true);
                         connection.connect();
@@ -271,7 +271,7 @@ public class StreamAdapter extends BaseExpandableListAdapter {
                     Intent intent = new Intent(Intent.ACTION_SEND);
                     intent.setType("text/plain");
                     intent.putExtra(Intent.EXTRA_SUBJECT, list.get(position));
-                    intent.putExtra(Intent.EXTRA_TEXT, "http://campfyre.org/permalink.html?id=" + serverID.get(position));
+                    intent.putExtra(Intent.EXTRA_TEXT, "https://campfyre.memes.nz/permalink.html?id=" + serverID.get(position));
                     context.startActivity(intent);
                 }
             });

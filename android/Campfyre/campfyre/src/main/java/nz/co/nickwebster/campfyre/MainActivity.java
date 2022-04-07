@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -21,7 +20,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.CheckBox;
@@ -48,14 +46,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -89,7 +80,7 @@ public class MainActivity extends Activity {
 
     Socket ws;
 //    String serverURI = "http://192.168.1.54:3973"; // Comment this out
-    String serverURI = "http://campfyre.org:3973"; // Uncomment this
+    String serverURI = "https://campfyre-memes-nz.herokuapp.com:443"; // Uncomment this
     boolean showNSFW;
     String tag = "";
     int page = 1;
@@ -154,7 +145,7 @@ public class MainActivity extends Activity {
             final String commentNum = postData.getString("commentNum");
             final String imageURL = postData.getString("ip");
             final boolean loadBottom = postData.getBoolean("loadBottom");
-            final int isNSFW = postData.getInt("nsfw");
+            final boolean isNSFW = postData.getBoolean("nsfw");
             final String postScore = postData.getString("score");
             final String attachment = postData.getString("attachment");
             final JSONArray commentArr = postData.getJSONArray("comments");
@@ -192,7 +183,7 @@ public class MainActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (isNSFW == 1 && !showNSFW) {
+                    if (isNSFW && !showNSFW) {
                         return;
                     }
 
